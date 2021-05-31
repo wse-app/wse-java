@@ -18,16 +18,21 @@ import wse.utils.log.WseFileHandler;
 
 public final class WSE extends WSEUtils {
 	
+	private WSE() {
+	}
+	
 	public static final String NS = "https://wse.app/ns/wse";
+	public static final String LOG_FAMILY = "wse";
+	public static final boolean runningAndroid;
+
+	private static String applicationName = "WebServiceEngine Application";
 	public static final String VERSION = "21.5";
 
 	public static String getVersion() {
 		return VERSION;
 	};
 
-	public static final boolean runningAndroid;
-
-	public static final String LOG_FAMILY = "wse";
+	
 	static {
 		String val = System.getProperty("java.runtime.name");
 		if ("android runtime".equalsIgnoreCase(val)) {
@@ -80,11 +85,6 @@ public final class WSE extends WSEUtils {
 	public static void setLogLevel(Level lvl) {
 		getLogger().setLevel(lvl);
 	}
-
-	private WSE() {
-	}
-
-	private static String applicationName = "WebServiceEngine Application";
 
 	public static void declareApplicationName(String name) {
 		WSE.applicationName = name;
