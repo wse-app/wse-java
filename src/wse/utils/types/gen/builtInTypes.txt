@@ -1,0 +1,19 @@
+base64Binary		byte[]		WSE.parseBase64Binary	WSE.printBase64Binary
+hexBinary			byte[]		WSE.parseHexBinary		WSE.printHexBinary
+boolean				Boolean		WSE.parseBool
+float				Float		Float.valueOf
+double				Double		Double.valueOf
+decimal				BigDecimal	new BigDecimal
+integer				BigInteger	new BigInteger
+nonPositiveInteger	BigInteger	new BigInteger
+negativeInteger		BigInteger	new BigInteger
+nonNegativeInteger	BigInteger	new BigInteger
+positiveInteger		BigInteger	new BigInteger
+long				Long		Long.valueOf
+int					Integer		Integer.valueOf
+short				Short		Short.valueOf
+byte				Byte		Byte.valueOf
+unsignedLong		BigInteger	new BigInteger
+unsignedInt			Long		Long.valueOf
+unsignedShort		Integer		Integer.valueOf
+unsignedByte		Short		Short.valueOf
