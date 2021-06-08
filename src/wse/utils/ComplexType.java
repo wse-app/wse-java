@@ -288,13 +288,21 @@ public abstract class ComplexType implements AnyType, Serializable {
 		AnySimpleType<T> simpleType = AnySimpleType.getInstance(clazz);
 		if (value == null) {
 			if (default_ != null) {
-				return simpleType.parse(default_);
+				try {
+					return simpleType.parse(default_);
+				} catch(Exception e) {
+					throw new WseParsingException(String.format("Failed to parse '%s' default value: %s", name, e.getMessage()), e);
+				}
 			} else if (mandatory) {
 				throw new WseParsingException(String.format("Field '%s' is mandatory but was null", name));
 			}
 		}
 
-		return simpleType.validateInput(value);
+		try {
+			return simpleType.validateInput(value);
+		} catch(Exception e) {
+			throw new WseParsingException(String.format("Failed to parse '%s': %s", name, e.getMessage()), e);
+		}
 	}
 
 	public static <T, F extends AnySimpleType<T>> void print(XMLElement parent, String name, String namespace,

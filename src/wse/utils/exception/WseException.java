@@ -29,6 +29,11 @@ public class WseException extends RuntimeException implements Iterable<Throwable
 		return getRootCause(this);
 	}
 
+	/**
+	 * Returns the last throwable in the getCause() chain.
+	 * @param t the parent throwable
+	 * @return the first throwable that was thrown in this exception chain.
+	 */
 	public static Throwable getRootCause(Throwable t) {
 		Throwable c = t.getCause();
 		if (c == null)
@@ -43,19 +48,29 @@ public class WseException extends RuntimeException implements Iterable<Throwable
 	public static boolean isCausedBy(Throwable first, Class<? extends Throwable> cause) {
 		if (cause == null)
 			return false;
-		for (Throwable t : iterator(first)) {
+		for (Throwable t : iterable(first)) {
 			if (cause.isAssignableFrom(t.getClass()))
 				return true;
 		}
 		return false;
 	}
 
+	/**
+	 * Returns an iterator over elements of type Throwable, iterating over all throwables in the exception chain.
+	 * 
+	 * @return An iterator for each throwable in the getCause() chain.
+	 */
 	@Override
 	public Iterator<Throwable> iterator() {
-		return iterator(this).iterator();
+		return iterable(this).iterator();
 	}
 
-	public static Iterable<Throwable> iterator(final Throwable first_) {
+	/**
+	 * Returns an iterable for elements of type Throwable, iterating over all throwables in the exception chain.
+	 * 
+	 * @return An iterable for each throwable in the getCause() chain.
+	 */
+	public static Iterable<Throwable> iterable(final Throwable first_) {
 		return new Iterable<Throwable>() {
 			@Override
 			public Iterator<Throwable> iterator() {
@@ -66,6 +81,7 @@ public class WseException extends RuntimeException implements Iterable<Throwable
 
 					@Override
 					public void remove() {
+						throw new UnsupportedOperationException();
 					}
 
 					@Override
@@ -92,7 +108,7 @@ public class WseException extends RuntimeException implements Iterable<Throwable
 		StringBuilder b = new StringBuilder();
 		
 		int i = 0;
-		for (Throwable t : iterator(first)) {
+		for (Throwable t : iterable(first)) {
 			if (i != 0)
 				b.append(layers[i]);
 			b.append(t.getClass().getName());

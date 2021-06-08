@@ -140,7 +140,7 @@ public final class HttpUtils extends HttpCodes {
 				try {
 					responseMessage.load(soap_body);
 				} catch (Exception e) {
-					throw new WseXMLParsingException("Failed to create request XML: " + e.getMessage(), e);
+					throw new WseXMLParsingException("Failed to load response XML: " + e.getMessage(), e);
 				}
 			}
 
