@@ -143,10 +143,14 @@ public class MimeType {
 		}
 
 		public static final application x_www_form_urlencoded = b("x-www-form-urlencoded").application("*");
-		/** HTML application */
+		/** HTML executable */
 		public static final application hta = b("hta").application("hta");
 		/** JSON */
 		public static final application json = b("json").application("json");
+		/** Android Package Archive */
+		public static final application apk = b("vnd.android.package-archive").application("apk");
+		/** iOS Package Archive */
+		public static final application ipa = b("x-ios-app").application("ipa");
 		/** fractal image file */
 		public static final application fractals = b("fractals").application("fif");
 		/** Photoshop custom shapes file */
