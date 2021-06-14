@@ -14,7 +14,7 @@ public class WS13OutputStream extends BufferedOutputStream implements WebSocketC
 	Random random = new Random();
 
 	public WS13OutputStream(OutputStream writeTo, boolean masked) {
-		super(new RecordingOutputStream(writeTo, WSE.getLogger(), Level.FINEST, 1024, "WS13 out"), 8192, 14, 0);
+		super(new RecordingOutputStream(writeTo, WSE.getLogger(), Level.FINEST, "WS13 out"), 8192, 14, 0);
 //		super(writeTo, 5, 14, 0);
 		forceBufferSize(true);
 		this.masked = masked;

@@ -74,7 +74,7 @@ public class LayeredOutputStream extends WseOutputStream {
 	}
 	
 	public void record(Logger log, Level level, String title, boolean hex) {
-		this.then(new RecordingOutputStream(log, level, 8192, title, hex));
+		this.then(new RecordingOutputStream(log, level, title, hex));
 	}
 	
 	public void sHttpEncrypt(SKey skey) {

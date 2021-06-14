@@ -60,7 +60,7 @@ public class HttpResult {
 	}
 	
 	protected void wrapLogger(String title, Logger logger, Level level) {
-		this.content = new RecordingInputStream(this.content, logger, level, 4096, title);
+		this.content = new RecordingInputStream(this.content, logger, level, title);
 	}
 
 	public HttpHeader getHeader() {

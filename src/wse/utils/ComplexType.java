@@ -296,6 +296,8 @@ public abstract class ComplexType implements AnyType, Serializable {
 			} else if (mandatory) {
 				throw new WseParsingException(String.format("Field '%s' is mandatory but was null", name));
 			}
+			
+			return null;
 		}
 
 		try {

@@ -80,14 +80,14 @@ public class ServiceReceiverSHttp extends ServiceReceiverHttp {
 		
 		InputStream input = request.getContent();
 		if (SHttp.LOG_ENCRYPTED_DATA) 
-			input = new RecordingInputStream(input, log, Level.FINEST, 8192, "SHttp-Encrypted Input Content:", true);
+			input = new RecordingInputStream(input, log, Level.FINEST, "SHttp-Encrypted Input Content:", true);
 		
 		WseInputStream decryptedInput = SHttp.sHttpDecryptData(input, key);
 		input.close();
 		if (decryptedInput == null)
 			throw new WseSHttpException("Failed to decrypt message");
 		
-		decryptedInput = new RecordingInputStream(decryptedInput, log, Level.FINEST, 8192, "Request Content:");
+		decryptedInput = new RecordingInputStream(decryptedInput, log, Level.FINEST, "Request Content:");
 		
 		HttpResult decrypted = HttpBuilder.read(decryptedInput, true);
 		decryptedInput.close();
@@ -97,7 +97,7 @@ public class ServiceReceiverSHttp extends ServiceReceiverHttp {
 		// Create new response
 		StreamCatcher catcher = new StreamCatcher();
 		LayeredOutputStream output = new LayeredOutputStream(catcher);
-		output.then(new RecordingOutputStream(log, Level.FINEST, 8192, "Response Content:"));
+		output.then(new RecordingOutputStream(log, Level.FINEST, "Response Content:"));
 		output.sHttpEncrypt(key);
 		if (SHttp.LOG_ENCRYPTED_DATA)
 			output.record(log, Level.FINEST, "SHttp-Encrypted Response Content:", true);

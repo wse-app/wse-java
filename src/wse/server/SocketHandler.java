@@ -65,7 +65,7 @@ public final class SocketHandler implements Runnable {
 
 			OutputStream output = new ProtectedOutputStream(socket.getOutputStream());
 			if (file.getHeader().getMethod() != HttpMethod.SECURE) {
-				output = new RecordingOutputStream(output, logger, Level.FINEST, 2048, "Response:");				
+				output = new RecordingOutputStream(output, logger, Level.FINEST, "Response:");				
 			}
 			HttpServletResponse response = new HttpServletResponse(output);
 
@@ -79,7 +79,7 @@ public final class SocketHandler implements Runnable {
 					long len = file.getHeader().getContentLength();
 
 					if (len >= 0 && len <= 40000)
-						content = new RecordingInputStream(content, logger, Level.FINEST, 2048, "Request Body: ");
+						content = new RecordingInputStream(content, logger, Level.FINEST, "Request Body: ");
 				}
 
 				request = HttpServletRequest.make(file.getHeader(), info, new ProtectedInputStream(content));
