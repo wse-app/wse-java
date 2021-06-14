@@ -11,6 +11,7 @@ import java.util.List;
 import wse.utils.HttpCodes;
 import wse.utils.MimeType;
 import wse.utils.exception.WseException;
+import wse.utils.http.ContentDisposition;
 import wse.utils.http.Credentials;
 import wse.utils.http.HttpHeader;
 import wse.utils.http.HttpMethod;
@@ -135,17 +136,25 @@ public class PublicFolderServlet extends AuthenticationServlet {
 			response.sendError(HttpCodes.NOT_FOUND, "File not found: (" + f.getAbsolutePath() + "): " + f.exists() + " / " + f.canRead() + " / " + !f.isHidden() + " / " + f.isFile() );
 			return;
 		}
+		
+		
 
 		String path = f.getAbsolutePath();
 		String extension = path.substring(path.lastIndexOf('.') + 1);
+		
 		MimeType mt = MimeType.getByExtension(extension);
+		
 
 		response.setContentLength((int) f.length());
 		
-		if (mt != null) {
-			response.setContentType(mt);			
+		if (mt == null) {
+			response.setContentType(getMimeType(extension));
 		}else {
-			response.setContentType(this.getMimeType(request.getRequestPath()));
+			response.setContentType(mt);
+		}
+		
+		if (mt == null || isAttachment(mt)) {
+			response.setContentDisposition(ContentDisposition.attachment(f.getName()));
 		}
 
 		response.writeHeader();
@@ -165,8 +174,12 @@ public class PublicFolderServlet extends AuthenticationServlet {
 		}
 	}
 	
-	public String getMimeType(String requestedPath) {
+	public String getMimeType(String extension) {
 		return null;
+	}
+	
+	public boolean isAttachment(MimeType type) {
+		return false;
 	}
 
 	@Override
