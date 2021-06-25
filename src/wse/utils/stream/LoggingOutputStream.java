@@ -17,6 +17,8 @@ public class LoggingOutputStream extends WseOutputStream {
 	 */
 	public static int BUFFER_SIZE = 8192;
 	
+	private static final int MIN_BUFFER_SIZE = 16;
+	
 	private final Logger logger;
 	private byte[] data;
 	private int counter = 0;
@@ -36,11 +38,10 @@ public class LoggingOutputStream extends WseOutputStream {
 	public LoggingOutputStream(Logger logger, Level level, String title, boolean hex) {
 		super(null);
 		this.logger = logger;
-		this.data = new byte[MAX_PARTS];
+		this.data = new byte[Math.max(MIN_BUFFER_SIZE, BUFFER_SIZE)];
 		this.level = level;
 		this.title = title;
 		this.asHex = hex;
-		this.maxParts = 4;
 	}
 
 	public LoggingOutputStream printHex(boolean printHex) {
