@@ -90,10 +90,16 @@ public class JSONUtils {
 	}
 
 	private static Object parseValue(String text) {
+		
+		System.out.println("Parsing: '" + text + "'");
+		
 //		int a = (text.charAt(0) - text.charAt(text.length() - 1));
 //		if (a != -2 && a != 0) {
 //			throw new JSONSyntaxException("Invalid JSON syntax, expected closing of '" + text.charAt(0) + "'");
 //		}
+		if (text == null || text.isEmpty())
+			return null;
+
 		switch (text.charAt(0)) {
 		case '{': {
 			JSONObject object = new JSONObject();

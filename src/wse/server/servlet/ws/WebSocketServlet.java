@@ -99,6 +99,7 @@ public abstract class WebSocketServlet extends HttpServlet implements WebSocketC
 		response.setStatusCode(101);
 		response.writeHeader();
 		response.flush();
+		
 		this.endpoint = new WebSocketEndpointImpl(false);
 		this.endpoint.setInputStream(new ProtectedInputStream(request.getContent()));
 		this.endpoint.setOutputStream(new ProtectedOutputStream(response));
