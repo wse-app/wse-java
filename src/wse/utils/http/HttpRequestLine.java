@@ -1,9 +1,7 @@
 package wse.utils.http;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 import wse.utils.exception.WseHttpException;
+import wse.utils.json.StringGatherer;
 
 public class HttpRequestLine extends HttpDescriptionLine {
 	private HttpMethod method;
@@ -77,19 +75,21 @@ public class HttpRequestLine extends HttpDescriptionLine {
 		setUri(HttpURI.fromURI(uri));
 	}
 
-	@Override
-	public void writeToStream(OutputStream stream) throws IOException {
-		method.writeToStream(stream);
-		stream.write(' ');
-		uri.writeToStream(stream);
-		stream.write(' ');
-		stream.write(httpVersion.getBytes());
+	
+	
+	public void prettyPrint(StringGatherer builder, int level) {
+		builder.add(method.toString());
+		builder.add(" ");
+		uri.prettyPrint(builder, level);
+		builder.add(" ");
+		builder.add(httpVersion);
 	}
 
 	public int length() {
 		return method.length() + uri.length() + httpVersion.length() + 2;
 	}
 
+	
 	public byte[] toByteArray() {
 		byte[] b = new byte[length()];
 		write(b, 0);

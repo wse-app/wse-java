@@ -1,8 +1,9 @@
-package wse.utils.json2;
+package wse.utils.json;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -17,10 +18,13 @@ public class JArray extends LinkedList<Object> implements JValue {
 		this(Arrays.asList(elements));
 	}
 	
-	public JArray(Collection<Object> elements) {
-		super(elements);
+	public JArray(Iterable<Object> elements) {
+		super();
+		for (Object o : elements) {
+			add(o);
+		}
 	}
-	
+
 	@Override
 	public byte[] toByteArray(Charset cs) {
 		return toString().getBytes(cs);
@@ -32,19 +36,19 @@ public class JArray extends LinkedList<Object> implements JValue {
 	}
 
 	@Override
-	public JStringBuilder prettyPrint() {
+	public StringGatherer prettyPrint() {
 		return prettyPrint(0);
 	}
 
 	@Override
-	public JStringBuilder prettyPrint(int level) {
-		JStringBuilder builder = new JStringBuilder();
+	public StringGatherer prettyPrint(int level) {
+		StringGatherer builder = new StringGatherer();
 		prettyPrint(builder, level);
 		return builder;
 	}
 
 	@Override
-	public void prettyPrint(JStringBuilder builder, int level) {
+	public void prettyPrint(StringGatherer builder, int level) {
 
 		if (isEmpty()) {
 			builder.add("[]");
@@ -75,4 +79,8 @@ public class JArray extends LinkedList<Object> implements JValue {
 
 	}
 
+	@Override
+	public void writeToStream(OutputStream stream, Charset charset) throws IOException {
+		prettyPrint().writeToStream(stream, charset);
+	}
 }

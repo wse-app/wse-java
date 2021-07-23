@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,7 +40,8 @@ import wse.utils.writable.StreamCatcher;
 
 public class CallHandler {
 
-	private static Logger log = WSE.getLogger();
+	private static final Logger LOG = WSE.getLogger();
+	private static final Charset UTF8 = Charset.forName("UTF-8");
 
 	private CallTimer timer;
 
@@ -79,7 +81,7 @@ public class CallHandler {
 	}
 
 	public CallHandler(HttpMethod method, URI uri, HttpWriter writer, SSLAuth auth) {
-		timer = new CallTimer(log);
+		timer = new CallTimer(LOG);
 		this.writer = writer;
 		this.uri = uri;
 		this.method = method;
@@ -138,7 +140,7 @@ public class CallHandler {
 		if (protocol == null) {
 			throw new WseInitException("Got invalid protocol: " + uri.getScheme());
 		}
-		log.fine("Protocol: " + protocol);
+		LOG.fine("Protocol: " + protocol);
 
 		host = uri.getHost();
 
@@ -153,13 +155,13 @@ public class CallHandler {
 				port = 80;
 		}
 
-		log.fine("Target: " + String.valueOf(withHiddenPassword(uri)));
+		LOG.fine("Target: " + String.valueOf(withHiddenPassword(uri)));
 	}
 
 	private void connect() {
 
 		if (protocol == Protocol.SHTTP) {
-			Loggers.trace(log, "shttpSetup()", new Runnable() {
+			Loggers.trace(LOG, "shttpSetup()", new Runnable() {
 				@Override
 				public void run() {
 					shttpSetup();
@@ -181,14 +183,14 @@ public class CallHandler {
 		}
 
 		timer.begin("Connect");
-		connection.connect(log);
+		connection.connect(LOG);
 		timer.end();
 	}
 
 	private void shttpSetup() {
 
 		timer.begin("getSHttpKey()");
-		skey = SHttpManager.getKey(auth, host, port, log);
+		skey = SHttpManager.getKey(auth, host, port, LOG);
 		timer.end();
 
 		if (skey == null) {
@@ -197,7 +199,7 @@ public class CallHandler {
 
 		this.usePort = skey.getReachPort();
 
-		log.fine("New target: " + this.host + ":" + usePort);
+		LOG.fine("New target: " + this.host + ":" + usePort);
 	}
 
 	private void write() {
@@ -212,17 +214,20 @@ public class CallHandler {
 
 				LayeredOutputStream contentStream = new LayeredOutputStream(content);
 
-				contentStream.record(log, Level.FINEST, "Request:");
+				contentStream.record(LOG, Level.FINEST, "Request:");
 				contentStream.sHttpEncrypt(skey);
 
 				buildHttpHeader(http_header = new HttpHeader());
-				http_header.writeToStream(contentStream);
+
+				http_header.writeToStream(contentStream, UTF8);
 
 				if (sendChunked)
 					contentStream.addChunked(8192);
-
-				if (writer != null)
-					writer.writeToStream(contentStream);
+				
+				if (writer != null) {					
+					Charset cs = http_header.getContentCharset();
+					writer.writeToStream(contentStream, cs);
+				}
 
 				contentStream.flush();
 				content.flush();
@@ -231,10 +236,10 @@ public class CallHandler {
 				shttp_header.setContentLength(content.getSize());
 
 				if (SHttp.LOG_ENCRYPTED_DATA)
-					output.record(log, Level.FINEST, "SHttp-Encrypted Request:", true);
+					output.record(LOG, Level.FINEST, "SHttp-Encrypted Request:", true);
 
-				shttp_header.writeToStream(output);
-				content.writeToStream(output);
+				shttp_header.writeToStream(output, UTF8);
+				content.writeToStream(output, UTF8);
 				output.flush();
 
 				this.output = output;
@@ -243,15 +248,17 @@ public class CallHandler {
 
 				LayeredOutputStream output = new LayeredOutputStream(new ProtectedOutputStream(connection.getOutputStream()));
 
-				output.record(log, Level.FINEST, "Request: ");
+				output.record(LOG, Level.FINEST, "Request: ");
 				buildHttpHeader(http_header = new HttpHeader());
-				http_header.writeToStream(output);
+				http_header.writeToStream(output, UTF8);
 
 				if (sendChunked)
 					output.addChunked(8192);
 
-				if (writer != null)
-					writer.writeToStream(output);
+				if (writer != null) {
+					Charset cs = http_header.getContentCharset();
+					writer.writeToStream(output, cs);
+				}
 				output.flush();
 
 				this.output = output;
@@ -277,7 +284,7 @@ public class CallHandler {
 		if (protocol == Protocol.SHTTP && this.result.getHeader() != null) {
 			responseSHttp = this.result;
 
-			log.finest("SHttp Response Header:\n" + responseSHttp.getHeader().toPrettyString());
+			LOG.finest("SHttp Response Header:\n" + responseSHttp.getHeader().toPrettyString());
 
 			if (SHttp.SECURE_HTTP14.equals(this.result.getHeader().getStatusLine().getHttpVersion())) {
 				InputStream httpMessage;
@@ -286,7 +293,7 @@ public class CallHandler {
 				} catch (Exception e) {
 					throw new WseSHttpException("Failed to decrypt data: " + e.getMessage(), e);
 				} finally {
-					log.finest("InputStream Image:\n" + String.valueOf(responseSHttp.getContent()));
+					LOG.finest("InputStream Image:\n" + String.valueOf(responseSHttp.getContent()));
 				}
 
 				try {
@@ -295,25 +302,25 @@ public class CallHandler {
 					throw new WseSHttpException("Failed to read http: " + e.getMessage(), e);
 				}
 			} else {
-				log.fine("SHTTP response was not " + SHttp.SECURE_HTTP14);
+				LOG.fine("SHTTP response was not " + SHttp.SECURE_HTTP14);
 				responseHttp = responseSHttp;
 			}
 		} else {
 			responseHttp = this.result;
 		}
 
-		if (log.isLoggable(Level.FINE)) {
+		if (LOG.isLoggable(Level.FINE)) {
 			HttpHeader header = responseHttp.getHeader();
 			if (header != null) {
-				log.fine("Response Header:\n" + header.toPrettyString());
+				LOG.fine("Response Header:\n" + header.toPrettyString());
 			} else {
-				log.fine("Response Header: null");
+				LOG.fine("Response Header: null");
 			}
 		}
 
-		if (log.isLoggable(Level.FINEST)) {
+		if (LOG.isLoggable(Level.FINEST)) {
 			if (!protocol.isWebSocket()) {
-				responseHttp.wrapLogger("Response: ", log, Level.FINEST);
+				responseHttp.wrapLogger("Response: ", LOG, Level.FINEST);
 			}
 		}
 
@@ -338,7 +345,7 @@ public class CallHandler {
 
 		if ((this.protocol.isWebSocket() && line.getStatusCode() == 101)) {
 
-			log.fine("Upgrading to websocket v13");
+			LOG.fine("Upgrading to websocket v13");
 
 		} else if (!line.isSuccessCode()) {
 
@@ -349,7 +356,7 @@ public class CallHandler {
 
 			if (!header.getContentType().is(MimeType.text.xml)) {
 				String errMsg = null;
-				if (log.isLoggable(Level.SEVERE)) {
+				if (LOG.isLoggable(Level.SEVERE)) {
 					if (responseHttp != null) {
 						if (responseHttp.getContent() != null) {
 							try {
@@ -382,7 +389,7 @@ public class CallHandler {
 		if (uri.getUserInfo() != null) {
 
 			if (!this.protocol.isSecure()) {
-				log.warning("Sending credentials in non-secure http is prohibited");
+				LOG.warning("Sending credentials in non-secure http is prohibited");
 			}
 			header.setAttribute(HttpUtils.AUTHORIZATION,
 					"Basic " + WSE.printBase64Binary(uri.getUserInfo().getBytes()));

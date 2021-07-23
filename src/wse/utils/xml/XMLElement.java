@@ -2,6 +2,8 @@ package wse.utils.xml;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,16 +12,19 @@ import java.util.Objects;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+import wse.utils.exception.WseXMLBuildingException;
+import wse.utils.internal.IElement;
+import wse.utils.json.StringGatherer;
 import wse.utils.writable.StreamCatcher;
 
-public class XMLElement extends XMLNode {
+public class XMLElement extends XMLNode implements IElement {
 
 	public byte[] value;
 	protected boolean cdata;
 
 	protected final XChildList children = new XChildList();
 	protected final XAttributeList attributes = new XAttributeList();
-	
+
 	protected LocationData parsedLocation;
 
 	public XMLElement() {
@@ -37,19 +42,21 @@ public class XMLElement extends XMLNode {
 	public XMLElement(String prefix, String name, String namespace) {
 		super(prefix, name, namespace);
 	}
-	
-	
+
 	public LocationData getLocationData() {
 		return parsedLocation;
 	}
 
-	/** returns this xml elements index in its parent's element list or -1 if this element has no parent */
+	/**
+	 * returns this xml elements index in its parent's element list or -1 if this
+	 * element has no parent
+	 */
 	public int index() {
 		if (parent != null)
 			return -1;
 		return parent.getChildren().indexOf(this);
 	}
-	
+
 	public String getValue() {
 		return new String(value, tree.getCharset());
 	}
@@ -61,11 +68,11 @@ public class XMLElement extends XMLNode {
 	public XMLElement setValue(String value) {
 		return setValue(value, false);
 	}
-	
+
 	public <T> XMLElement setValue(T value) {
 		return setValue(String.valueOf(value), false);
 	}
-	
+
 	public <T> XMLElement setValue(T value, boolean cdata) {
 		return setValue(String.valueOf(value), cdata);
 	}
@@ -122,22 +129,22 @@ public class XMLElement extends XMLNode {
 		return children.getFirst(name, namespace);
 	}
 
-	public List<XMLElement> getChildren(String name) {
+	public Collection<XMLElement> getChildren(String name) {
 		return children.getAll(name);
 	}
 
-	public List<XMLElement> getChildren(String name, String namespace) {
+	public Collection<XMLElement> getChildren(String name, String namespace) {
 		return children.getAll(name, namespace);
 	}
 
 	public XMLAttribute getAttribute(String name) {
 		return attributes.getFirst(name);
 	}
-	
+
 	public List<XMLAttribute> getNamespaceDeclarations() {
 		return getAttributesNS(XMLUtils.XMLNS);
 	}
-	
+
 	public List<XMLAttribute> getAttributesNS(String namespace) {
 		return attributes.getAllNS(namespace);
 	}
@@ -162,24 +169,21 @@ public class XMLElement extends XMLNode {
 		return attributes.size() != 0;
 	}
 
+	@Deprecated
 	public byte[] toByteArray() {
-		return StreamCatcher.from(this).toByteArray();
-	}
-	
-	public String toString() {
-		return new String(toByteArray(), tree.getCharset());
+		return StreamCatcher.from(this, getTree().getCharset()).toByteArray();
 	}
 
-	public void writeToStream(OutputStream stream) throws IOException {
-		tree.write(stream, 0);
-		write(stream, 0);
+	public void writeToStream(OutputStream stream, Charset charset) throws IOException {
+		tree.write(stream, charset, 0);
+		write(stream, charset, 0);
 	}
 
-	public void write(OutputStream stream, int level) throws IOException {
+	public void write(OutputStream stream, Charset charset, int level) throws IOException {
 		byte[] tabs = XMLUtils.level(level);
 		stream.write(tabs);
 		stream.write('<');
-		byte[] qname = getQualifiedName().getBytes(tree.getCharset());
+		byte[] qname = getQualifiedName().getBytes(charset);
 		stream.write(qname);
 
 		if (hasAttributes()) {
@@ -189,13 +193,13 @@ public class XMLElement extends XMLNode {
 			XMLAttribute att;
 			while (it.hasNext() && len < 30 && (att = it.next()) != null) {
 				stream.write(' ');
-				att.write(stream, 0);
+				att.write(stream, charset, 0);
 				len += att.length();
 			}
 
 			while (it.hasNext() && (att = it.next()) != null) {
 				stream.write('\n');
-				att.write(stream, level + 2);
+				att.write(stream, charset, level + 2);
 			}
 		}
 
@@ -204,7 +208,7 @@ public class XMLElement extends XMLNode {
 			stream.write('\n');
 
 			for (XMLElement child : children) {
-				child.write(stream, level + 1);
+				child.write(stream, charset, level + 1);
 			}
 
 			stream.write(tabs);
@@ -217,7 +221,7 @@ public class XMLElement extends XMLNode {
 			if (cdata) {
 				stream.write(XMLUtils.convertToCDATA(value));
 			} else {
-				stream.write(XMLUtils.escape(getValue()).getBytes(tree.getCharset()));
+				stream.write(XMLUtils.escape(getValue()).getBytes(charset));
 			}
 			stream.write('<');
 			stream.write('/');
@@ -227,6 +231,61 @@ public class XMLElement extends XMLNode {
 		}
 		stream.write('>');
 		stream.write('\n');
+	}
+
+	@Deprecated
+	@Override
+	public void prettyPrint(StringGatherer builder, int level) {
+
+		String tabs = XMLUtils.level_str(level);
+
+		builder.add(tabs);
+		builder.add("<");
+		String qname = getQualifiedName();
+
+		builder.add(qname);
+
+		if (hasAttributes()) {
+			Iterator<XMLAttribute> it = attributes.iterator();
+			int len = 0;
+
+			XMLAttribute att;
+			while (it.hasNext() && len < 30 && (att = it.next()) != null) {
+				builder.add(" ");
+				att.prettyPrint(builder, level);
+				len += att.length();
+			}
+
+			while (it.hasNext() && (att = it.next()) != null) {
+				builder.add("\n");
+				att.prettyPrint(builder, level + 2);
+			}
+		}
+
+		if (hasChildren()) {
+			builder.add(">\n");
+
+			for (XMLElement child : children) {
+				child.prettyPrint(builder, level + 1);
+			}
+
+			builder.add(tabs);
+			builder.add("</");
+			builder.add(qname);
+		} else if (hasValue()) {
+			builder.add(">");
+
+			if (cdata) {
+				builder.add(new String(XMLUtils.convertToCDATA(value), tree.getCharset()));
+			} else {
+				builder.add(XMLUtils.escape(getValue()));
+			}
+			builder.add("</");
+			builder.add(qname);
+		} else {
+			builder.add("/");
+		}
+		builder.add(">\n");
 	}
 
 	public XMLElement addChild(XMLElement node) {
@@ -276,29 +335,29 @@ public class XMLElement extends XMLNode {
 			return child.getValue();
 		return null;
 	}
-	
+
 	public String getChildValue(String name, String namespace) {
 		XMLElement child = getChild(name, namespace);
 		if (child != null)
 			return child.getValue();
 		return null;
 	}
-	
+
 	public String getChildValueDef(String name, String defValue) {
 		String result = getChildValue(name);
 		return result == null ? defValue : result;
 	}
-	
+
 	public String getChildValueDef(String name, String namespace, String defValue) {
 		String result = getChildValue(name, namespace);
 		return result == null ? defValue : result;
 	}
-	
-	public Iterable<String> getChildValues(String name) {
+
+	public Collection<String> getChildValues(String name) {
 		return XMLUtils.values(getChildren(name));
 	}
 
-	public Iterable<String> getChildValues(String name, String namespace) {
+	public Collection<String> getChildValues(String name, String namespace) {
 		return XMLUtils.values(getChildren(name, namespace));
 	}
 
@@ -317,28 +376,32 @@ public class XMLElement extends XMLNode {
 
 	public String getAttributeValue(String name) {
 		XMLAttribute a = getAttribute(name);
-		if (a != null) return a.getValue();
+		if (a != null)
+			return a.getValue();
 		return null;
 	}
-	
+
 	public String getAttributeValueDef(String name, String defaultValue) {
 		XMLAttribute a = getAttribute(name);
-		if (a != null) return a.getValue();
+		if (a != null)
+			return a.getValue();
 		return defaultValue;
 	}
-	
+
 	public String getAttributeValue(String name, String namespace) {
 		XMLAttribute a = getAttribute(name, namespace);
-		if (a != null) return a.getValue();
+		if (a != null)
+			return a.getValue();
 		return null;
 	}
-	
+
 	public String getAttributeValueDef(String name, String namespace, String defaultValue) {
 		XMLAttribute a = getAttribute(name, namespace);
-		if (a != null) return a.getValue();
+		if (a != null)
+			return a.getValue();
 		return defaultValue;
 	}
-	
+
 	public XMLAttribute declareNamespace(String name, String namespace) {
 		return addAttribute(XMLAttribute.namespace(name, namespace));
 	}
@@ -353,7 +416,7 @@ public class XMLElement extends XMLNode {
 		}
 		return null;
 	}
-	
+
 	public List<XMLElement> getChildrenOfNames(String namespace, String... names) {
 		List<XMLElement> result = new LinkedList<>();
 		for (XMLElement c : getChildren()) {
@@ -365,7 +428,7 @@ public class XMLElement extends XMLNode {
 		}
 		return result;
 	}
-	
+
 	public XMLElement getFirstParent(String name) {
 		if (Objects.equals(this.name, name))
 			return this;
@@ -373,7 +436,7 @@ public class XMLElement extends XMLNode {
 			return parent.getFirstParent(name);
 		return null;
 	}
-	
+
 	public XMLElement getFirstParent(String name, String namespace) {
 		if (Objects.equals(this.name, name) && Objects.equals(this.namespace, namespace))
 			return this;
@@ -381,11 +444,11 @@ public class XMLElement extends XMLNode {
 			return parent.getFirstParent(name, namespace);
 		return null;
 	}
-	
+
 	public String findDefaultNamespace() {
 		return findNamespaceURI(null);
 	}
-	
+
 	public String findNamespaceURI(String prefix) {
 		for (XMLAttribute attrib : this.attributes) {
 			if (attrib.isNamespaceDeclaration()
@@ -412,7 +475,7 @@ public class XMLElement extends XMLNode {
 			return parent.findPrefix(namespaceURI);
 		return null;
 	}
-	
+
 	public class XChildList extends XMLNodeList<XMLElement> {
 		protected XChildList() {
 			super(XMLElement.this);
@@ -437,7 +500,7 @@ public class XMLElement extends XMLNode {
 		res.namespace = node.getNamespaceURI();
 		res.name = nodeName[nodeName.length - 1];
 		res.parsedLocation = (LocationData) node.getUserData(LocationData.LOCATION_DATA_KEY);
-		
+
 		boolean cdata = false;
 
 		for (Node e = node.getFirstChild(); e != null; e = e.getNextSibling()) {
@@ -463,4 +526,132 @@ public class XMLElement extends XMLNode {
 	public void resetHierarchyNamespaces() {
 		XMLUtils.resetNamespaces(this);
 	}
+
+	@Override
+	public int getRow() {
+		return 0;
+	}
+
+	@Override
+	public int getColumn() {
+		return 0;
+	}
+
+	@Override
+	public String getValue(String key) {
+		return getValue(key, null);
+	}
+
+	@Override
+	public String getValue(String key, String namespace) {
+		XMLElement child = getChild(key, namespace);
+		if (child == null) {
+			XMLAttribute a = getAttribute(key, namespace);
+			if (a == null)
+				return null;
+			return a.getValue();
+		}
+		return child.getValue();
+	}
+
+	@Override
+	public Collection<String> getValueArray(String key) {
+		return getChildValues(key);
+	}
+
+	@Override
+	public Collection<String> getValueArray(String key, String namespace) {
+		return getChildValues(key, namespace);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Collection<XMLElement> getChildArray(String key) {
+		return getChildren(key);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Collection<XMLElement> getChildArray(String key, String namespace) {
+		return getChildren(key, namespace);
+	}
+
+	@Override
+	public IElement createEmptyChild() {
+		return new XMLElement();
+	}
+
+	@Override
+	public void setValue(String key, Object value) {
+		setValue(key, null, value);
+	}
+
+	@Override
+	public void setValue(String key, String namespace, Object value) {
+		addChildValue(key, namespace, value);
+	}
+
+	@Override
+	public void setValueArray(String key, Iterable<Object> value) {
+		setValueArray(key, null, value);
+	}
+
+	@Override
+	public void setValueArray(String key, String namespace, Iterable<Object> value) {
+		addChildValues(key, namespace, value);
+	}
+
+	@Override
+	public void setAttributeValue(String key, Object value) {
+		setAttributeValue(key, null, value);
+	}
+
+	@Override
+	public void setAttributeValue(String key, String namespace, Object value) {
+		addAttribute(key, String.valueOf(value), namespace);
+	}
+
+	@Override
+	public void setAttributeValueArray(String key, Iterable<Object> value) {
+		setAttributeValueArray(key, null, value);
+	}
+
+	@Override
+	public void setAttributeValueArray(String key, String namespace, Iterable<Object> value) {
+		setValueArray(key, namespace, value);
+	}
+
+	@Override
+	public void setChild(String key, IElement child) {
+		setChild(key, null, child);
+	}
+
+	@Override
+	public void setChild(String key, String namespace, IElement child) {
+		if (!(child instanceof XMLElement))
+			throw new WseXMLBuildingException(
+					String.format("Tried to add invalid child element type '%s', expected '%s'",
+							child.getClass().getName(), XMLElement.class.getName()));
+
+		XMLElement xmlChild = (XMLElement) child;
+		xmlChild.setName(key);
+		xmlChild.setNamespaceURI(namespace, false);
+
+		addChild(xmlChild);
+	}
+	
+
+	@Override
+	public void setChildArray(String key, Iterable<IElement> children) {
+		setChildArray(key, null, children);
+	}
+	
+
+	@Override
+	public void setChildArray(String key, String namespace, Iterable<IElement> children) {
+		for (IElement child : children) {
+			setChild(key, namespace, child);
+		}
+	}
+
 }

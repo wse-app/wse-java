@@ -6,6 +6,8 @@ import java.nio.charset.Charset;
 
 import org.w3c.dom.Node;
 
+import wse.utils.json.StringGatherer;
+
 public class XMLAttribute extends XMLNode {
 
 	public XMLAttribute() {
@@ -98,24 +100,39 @@ public class XMLAttribute extends XMLNode {
 		return len;
 	}
 
-	@Override
-	public void write(OutputStream stream, int level) throws IOException {
-		Charset c = tree.getCharset();
+	public void write(OutputStream stream, Charset charset, int level) throws IOException {
 		stream.write(XMLUtils.level(level));
-		writeQualifiedName(stream);
+		writeQualifiedName(stream, charset);
 		stream.write('=');
 		stream.write('"');
 		if (value != null)
-			stream.write(value.getBytes(c));
+			stream.write(value.getBytes(charset));
 		stream.write('"');
 	}
-
-	public void writeQualifiedName(OutputStream stream) throws IOException {
-		Charset c = tree.getCharset();
+	
+	@Override
+	public void prettyPrint(StringGatherer builder, int level) {
+		builder.add(XMLUtils.level_str(level));
+		
 		if (isDefaultNamespace()) {
-			stream.write("xmlns".getBytes(c));
+			builder.add("xmlns");
 		} else {
-			stream.write(getQualifiedName().getBytes(c));
+			builder.add(getQualifiedName());
+		}
+		
+		builder.add("=\"");
+		if (value != null) {
+			builder.add(value);
+		}
+		builder.add("\"");
+		
+	}
+
+	public void writeQualifiedName(OutputStream stream, Charset charset) throws IOException {
+		if (isDefaultNamespace()) {
+			stream.write("xmlns".getBytes(charset));
+		} else {
+			stream.write(getQualifiedName().getBytes(charset));
 		}
 	}
 
@@ -146,4 +163,6 @@ public class XMLAttribute extends XMLNode {
 	protected String[] ns() {
 		return new String[] { isDefaultNamespace() ? null : name, value };
 	}
+
+	
 }

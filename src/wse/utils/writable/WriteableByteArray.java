@@ -2,6 +2,7 @@ package wse.utils.writable;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 public class WriteableByteArray implements StreamWriter
 {
@@ -14,7 +15,7 @@ public class WriteableByteArray implements StreamWriter
 	}
 
 	@Override
-	public void writeToStream(OutputStream stream)
+	public void writeToStream(OutputStream stream, Charset charset)
 	{
 		if (value == null)
 			return;

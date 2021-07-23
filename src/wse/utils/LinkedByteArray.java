@@ -3,6 +3,7 @@ package wse.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 
 import wse.utils.LinkedByteArray.LBAE;
@@ -218,10 +219,10 @@ public class LinkedByteArray implements Iterable<LBAE>, StreamWriter{
 	}
 	
 	@Override
-	public void writeToStream(OutputStream stream) throws IOException {
+	public void writeToStream(OutputStream stream, Charset charset) throws IOException {
 		for (LBAE n : this)
 		{
-			n.writeToStream(stream);
+			n.writeToStream(stream, charset);
 		}
 	}
 	
@@ -294,7 +295,7 @@ public class LinkedByteArray implements Iterable<LBAE>, StreamWriter{
 		}
 
 		@Override
-		public void writeToStream(OutputStream stream) throws IOException {
+		public void writeToStream(OutputStream stream, Charset charset) throws IOException {
 			stream.write(data, start_index, end_index + 1 - start_index);
 		}
 	}

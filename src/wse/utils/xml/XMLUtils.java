@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -36,6 +39,8 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import wse.utils.collections.Occurances;
+import wse.utils.exception.WseXMLParsingException;
+import wse.utils.internal.IParser;
 import wse.utils.writable.StreamCatcher;
 import wse.utils.writable.StreamWriter;
 import wse.utils.xml.XMLHierarchyIterator.Receiver;
@@ -173,31 +178,11 @@ public class XMLUtils {
 		return parseDOM(parseDOMsimple(input));
 	}
 
-	public static Iterable<String> values(Iterable<XMLElement> elements) {
-		final Iterator<XMLElement> children = elements.iterator();
-		return new Iterable<String>() {
-
-			@Override
-			public Iterator<String> iterator() {
-				return new Iterator<String>() {
-
-					@Override
-					public void remove() {
-						children.remove();
-					}
-
-					@Override
-					public String next() {
-						return children.next().getValue();
-					}
-
-					@Override
-					public boolean hasNext() {
-						return children.hasNext();
-					}
-				};
-			}
-		};
+	public static Collection<String> values(Iterable<XMLElement> elements) {
+		Collection<String> result = new LinkedList<>();
+		for (XMLElement e : elements)
+			result.add(e.getValue());
+		return result;
 	}
 
 	public static String escape(String value) {
@@ -302,6 +287,23 @@ public class XMLUtils {
 			{ '\t', '\t', '\t', '\t', '\t', '\t', '\t' }, { '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t' },
 			{ '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t' },
 			{ '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t' } };
+	
+	public static final IParser<XMLElement> XML_PARSER = new IParser<XMLElement>() {
+
+		@Override
+		public XMLElement parse(InputStream input, Charset cs) throws IOException {
+			try {
+				return XMLUtils.parse(input);
+			} catch (ParserConfigurationException | SAXException | TransformerException e) {
+				throw new WseXMLParsingException(e.getMessage(), e);
+			}
+		}
+		
+		public XMLElement createEmpty() {
+			return new XMLElement();
+		};
+		
+	};
 
 	protected static byte[] level(int i) {
 		return levels[i];
@@ -449,20 +451,21 @@ public class XMLUtils {
 	}
 	
 	public static String printOverview(final XMLElement element) {
+		Charset charset = element.getTree().getCharset();
 		byte[] data = StreamCatcher.from(new StreamWriter() {
 			@Override
-			public void writeToStream(OutputStream stream) throws IOException {
-				writeElementOverview(element, stream, 0);
+			public void writeToStream(OutputStream stream, Charset charset) throws IOException {
+				writeElementOverview(element, stream, charset, 0);
 			}
-		}).toByteArray();
-		return new String(data, element.tree.getCharset());
+		}, charset).toByteArray();
+		return new String(data, charset);
 	}
 	
-	public static void writeElementOverview(XMLElement element, OutputStream stream, int level) throws IOException {
+	public static void writeElementOverview(XMLElement element, OutputStream stream, Charset charset, int level) throws IOException {
 		byte[] tabs = XMLUtils.level(level);
 		stream.write(tabs);
 		stream.write('<');
-		byte[] qname = element.getQualifiedName().getBytes(element.tree.getCharset());
+		byte[] qname = element.getQualifiedName().getBytes(charset);
 		stream.write(qname);
 
 		if (element.hasAttributes()) {
@@ -472,13 +475,13 @@ public class XMLUtils {
 			XMLAttribute att;
 			while (it.hasNext() && len < 30 && (att = it.next()) != null) {
 				stream.write(' ');
-				att.write(stream, 0);
+				att.write(stream, charset, 0);
 				len += att.length();
 			}
 
 			while (it.hasNext() && (att = it.next()) != null) {
 				stream.write('\n');
-				att.write(stream, level + 2);
+				att.write(stream, charset, level + 2);
 			}
 		}
 
@@ -487,7 +490,7 @@ public class XMLUtils {
 			stream.write('\n');
 
 			for (XMLElement child : element.children) {
-				writeElementOverview(child, stream, level + 1);
+				writeElementOverview(child, stream, charset, level + 1);
 			}
 
 			stream.write(tabs);
@@ -504,12 +507,12 @@ public class XMLUtils {
 			} else {
 				String d = XMLUtils.escape(element.getValue());
 				d = d.replaceAll("\r", "\\r").replaceAll("\n", "\\n");
-				data = d.getBytes(element.tree.getCharset());
+				data = d.getBytes(charset);
 			}
 			
 			if (data.length > 50) {
 				stream.write(data, 0, Math.min(data.length, 50));
-				stream.write(("[+" + (data.length - 50) + "b]").getBytes());
+				stream.write(("[+" + (data.length - 50) + "b]").getBytes(charset));
 			}else {
 				stream.write(data);
 			}

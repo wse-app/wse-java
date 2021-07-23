@@ -1,4 +1,4 @@
-package wse.utils.json2;
+package wse.utils.json;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,7 +46,7 @@ public class JTokenizer {
 			return beginObject();
 		}
 		case APOS:
-		case QUOTE: 
+		case QUOTE:
 			return beginString(c);
 		default: {
 			reader.push(c);
@@ -158,13 +158,14 @@ public class JTokenizer {
 
 		char next;
 		JObject obj = new JObject();
+		obj.setPos(getRow(), getColumn());
 
 		while (true) {
 
 			next = nextSkipWS();
 
 			switch (next) {
-			case END_OBJECT: 
+			case END_OBJECT:
 				return obj;
 			case QUOTE: // fall through
 			case APOS:

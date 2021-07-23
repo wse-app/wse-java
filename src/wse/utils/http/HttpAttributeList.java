@@ -441,7 +441,7 @@ public class HttpAttributeList implements Map<String, String>, StreamWriter {
 	}
 
 	@Override
-	public void writeToStream(OutputStream stream) throws IOException {
+	public void writeToStream(OutputStream stream, Charset cs) throws IOException {
 		stream.write(toByteArray());
 	}
 

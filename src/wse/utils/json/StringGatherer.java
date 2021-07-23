@@ -1,9 +1,14 @@
-package wse.utils.json2;
+package wse.utils.json;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.LinkedList;
 
-public class JStringBuilder extends LinkedList<String> {
+import wse.utils.writable.StreamWriter;
+
+public class StringGatherer extends LinkedList<String> implements StreamWriter {
 	private static final long serialVersionUID = 9192745881498526157L;
 	
 	private int length = 0;
@@ -61,6 +66,13 @@ public class JStringBuilder extends LinkedList<String> {
 		}
 		
 		return builder.toString();
+	}
+
+	@Override
+	public void writeToStream(OutputStream stream, Charset charset) throws IOException {
+		for (String s : this) {
+			stream.write(s.getBytes(charset));
+		}
 	}
 	
 	

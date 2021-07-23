@@ -2,6 +2,7 @@ package wse.utils.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 import wse.utils.writable.StreamWriter;
 
@@ -92,8 +93,8 @@ public enum HttpMethod implements StreamWriter{
 	}
 
 	@Override
-	public void writeToStream(OutputStream stream) throws IOException {
-		stream.write(name.getBytes());
+	public void writeToStream(OutputStream stream, Charset cs) throws IOException {
+		stream.write(name.getBytes(cs));
 	}
 	@Override
 	public String toString() {

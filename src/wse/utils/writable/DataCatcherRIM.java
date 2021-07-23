@@ -2,6 +2,7 @@ package wse.utils.writable;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.Random;
 
 /**
@@ -52,19 +53,19 @@ public class DataCatcherRIM extends OutputStream
 		buffer = new byte[finalSize];
 	}
 
-	public DataCatcherRIM(StreamWriter... wa)
+	public DataCatcherRIM(Charset charset, StreamWriter... wa)
 	{
-		this(-1, 0, wa);
+		this(-1, 0, charset, wa);
 	}
 
-	public DataCatcherRIM(int blockSize, int injectionIndex, StreamWriter... wa)
+	public DataCatcherRIM(int blockSize, int injectionIndex, Charset charset, StreamWriter... wa)
 	{
-		this(blockSize, injectionIndex, SizeCatcher.getSize(wa));
+		this(blockSize, injectionIndex, SizeCatcher.getSize(charset, wa));
 
 		for (StreamWriter w : wa)
 			try
 			{
-				w.writeToStream(this);
+				w.writeToStream(this, charset);
 			} catch (IOException e)
 			{
 				e.printStackTrace();
@@ -143,9 +144,9 @@ public class DataCatcherRIM extends OutputStream
 
 	}
 
-	public static byte[] getValue(int blockSize, int injectionIndex, StreamWriter... wa)
+	public static byte[] getValue(int blockSize, int injectionIndex, Charset charset, StreamWriter... wa)
 	{
-		DataCatcherRIM c = new DataCatcherRIM(blockSize, injectionIndex, wa);
+		DataCatcherRIM c = new DataCatcherRIM(blockSize, injectionIndex, charset, wa);
 		try
 		{
 			c.close();

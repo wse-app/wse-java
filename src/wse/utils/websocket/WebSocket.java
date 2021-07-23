@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -367,8 +368,8 @@ public class WebSocket implements WebSocketCodes {
 	public void sendMessage(final String line) throws IOException {
 		sendMessage(OP_TEXT, new StreamWriter() {
 			@Override
-			public void writeToStream(OutputStream output) throws IOException {
-				output.write(line.getBytes());
+			public void writeToStream(OutputStream output, Charset charset) throws IOException {
+				output.write(line.getBytes(charset));
 				output.flush();
 			}
 		});

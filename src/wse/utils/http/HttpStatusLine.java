@@ -1,9 +1,7 @@
 package wse.utils.http;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 import wse.utils.HttpCodes;
+import wse.utils.json.StringGatherer;
 
 public class HttpStatusLine extends HttpDescriptionLine{
 	
@@ -50,12 +48,12 @@ public class HttpStatusLine extends HttpDescriptionLine{
 	}
 	
 	@Override
-	public void writeToStream(OutputStream stream) throws IOException {
-		stream.write(httpVersion.getBytes());
-		stream.write(' ');
-		stream.write(s_code.getBytes());
-		stream.write(' ');
-		stream.write(statusMessage.getBytes());
+	public void prettyPrint(StringGatherer builder, int level) {
+		builder.add(httpVersion);
+		builder.add(" ");
+		builder.add(s_code);
+		builder.add(" ");
+		builder.add(statusMessage);
 	}
 	
 	@Override

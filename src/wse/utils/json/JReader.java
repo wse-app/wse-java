@@ -1,4 +1,4 @@
-package wse.utils.json2;
+package wse.utils.json;
 
 import java.io.IOException;
 import java.io.Reader;

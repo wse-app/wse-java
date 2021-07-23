@@ -2,6 +2,7 @@ package wse.utils.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -188,10 +189,10 @@ public class HttpHeader extends HttpAttributeList implements StreamWriter {
 	 * Contains double newline
 	 */
 	public byte[] toByteArray() {
-		byte[] b = new byte[length()];			
+		byte[] b = new byte[length()];
 		try {
 			write(b, 0);
-		}catch(Exception e) {
+		} catch (Exception e) {
 			System.out.println(new String(b));
 			throw e;
 		}
@@ -215,7 +216,7 @@ public class HttpHeader extends HttpAttributeList implements StreamWriter {
 	 * Contains double newline
 	 */
 	@Override
-	public void writeToStream(OutputStream stream) throws IOException {
+	public void writeToStream(OutputStream stream, Charset cs) throws IOException {
 		stream.write(toByteArray());
 	}
 
@@ -244,5 +245,11 @@ public class HttpHeader extends HttpAttributeList implements StreamWriter {
 			return false;
 
 		return descLine.isResponse();
+	}
+
+	public Charset getContentCharset() {
+		ContentType ct = getContentType();
+		if (ct == null) return null;
+		return ct.getCharsetParsed();
 	}
 }

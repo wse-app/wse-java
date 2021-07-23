@@ -4,15 +4,18 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import wse.WSE;
+import wse.utils.json.PrettyPrinter;
+import wse.utils.json.StringGatherer;
 import wse.utils.writable.StreamWriter;
 
-public class HttpURI implements StreamWriter {
+public class HttpURI implements StreamWriter, PrettyPrinter {
 
 	private String path;
 	private Map<String, String> query = new HashMap<String, String>();
@@ -90,7 +93,7 @@ public class HttpURI implements StreamWriter {
 	}
 
 	@Override
-	public void writeToStream(OutputStream stream) throws IOException {
+	public void writeToStream(OutputStream stream, Charset charset) throws IOException {
 		if (path != null) {
 			stream.write(path.getBytes());
 		}
@@ -113,6 +116,8 @@ public class HttpURI implements StreamWriter {
 			stream.write(fragment.getBytes());
 		}
 	}
+	
+	
 
 	@Override
 	public String toString() {
@@ -198,5 +203,23 @@ public class HttpURI implements StreamWriter {
 		} catch (URISyntaxException e) {
 			return null;
 		}
+	}
+
+	@Override
+	public StringGatherer prettyPrint() {
+		return prettyPrint(0);
+	}
+
+	@Override
+	public StringGatherer prettyPrint(int level) {
+		StringGatherer builder = new StringGatherer();
+		prettyPrint(builder, level);
+		return builder;
+	}
+
+	@Override
+	public void prettyPrint(StringGatherer builder, int level) {
+		// TODO Auto-generated method stub
+		
 	}
 }

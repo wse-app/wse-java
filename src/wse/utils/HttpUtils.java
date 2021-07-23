@@ -66,7 +66,7 @@ public final class HttpUtils extends HttpCodes {
 			}
 
 			@Override
-			public void writeToStream(OutputStream output) throws IOException {
+			public void writeToStream(OutputStream output, Charset charset) throws IOException {
 				getData();
 				if (data == null)
 					return;

@@ -2,12 +2,13 @@ package wse.utils.xml;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 import wse.utils.ArrayUtils;
-import wse.utils.writable.StreamCatcher;
-import wse.utils.writable.StreamWriter;
+import wse.utils.json.PrettyPrinter;
+import wse.utils.json.StringGatherer;
 
-public abstract class XMLNode implements StreamWriter {
+public abstract class XMLNode implements PrettyPrinter {
 
 	protected XMLTree tree = new XMLTree();
 	protected XMLElement parent;
@@ -117,11 +118,12 @@ public abstract class XMLNode implements StreamWriter {
 		return this.namespace;
 	}
 
-	public void writeToStream(OutputStream stream) throws IOException {
-		write(stream, 0);
+	public void writeToStream(OutputStream stream, Charset charset) throws IOException {
+		prettyPrint().writeToStream(stream, charset);
 	}
 
-	public abstract void write(OutputStream stream, int level) throws IOException;
+	@Deprecated
+	public abstract void write(OutputStream stream, Charset charset, int level) throws IOException;
 
 	public void writeQualifiedName(OutputStream stream) throws IOException {
 		stream.write(getQualifiedName().getBytes(tree.getCharset()));
@@ -153,6 +155,18 @@ public abstract class XMLNode implements StreamWriter {
 	
 	@Override
 	public String toString() {
-		return new String(StreamCatcher.from(this).toByteArray(), getTree().getCharset());
+		return prettyPrint().toString();
+	}
+	
+	@Override
+	public StringGatherer prettyPrint() {
+		return prettyPrint(0);
+	}
+	
+	@Override
+	public StringGatherer prettyPrint(int level) {
+		StringGatherer gs = new StringGatherer();
+		prettyPrint(gs, level);
+		return gs;
 	}
 }

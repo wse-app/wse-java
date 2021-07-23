@@ -2,6 +2,7 @@ package wse.utils.writable;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 public class SizeCatcher extends OutputStream
 {
@@ -40,13 +41,13 @@ public class SizeCatcher extends OutputStream
 		return s;
 	}
 
-	public static int getSize(StreamWriter... wa)
+	public static int getSize(Charset charset, StreamWriter... wa)
 	{
 		SizeCatcher catcher = new SizeCatcher();
 		try
 		{
 			for (StreamWriter w : wa)
-				w.writeToStream(catcher);
+				w.writeToStream(catcher, charset);
 		} catch (IOException e)
 		{
 			e.printStackTrace();

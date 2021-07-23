@@ -1,13 +1,18 @@
 package wse.utils.http;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.regex.Pattern;
 
+import wse.utils.json.PrettyPrinter;
+import wse.utils.json.StringGatherer;
 import wse.utils.writable.StreamWriter;
 
 /**
  * Two subclassed: HttpStatusLine and HttpRequestLine
  */
-public abstract class HttpDescriptionLine implements StreamWriter {
+public abstract class HttpDescriptionLine implements StreamWriter, PrettyPrinter {
 
 	private static final Pattern ResponsePattern = Pattern.compile("(Secure-)?HTTP/1.([0-2]|4) [1-9][0-9][0-9]( .*)?", Pattern.DOTALL);
 //	private static final Pattern RequestPattern = Pattern.compile("(" + HttpMethod.toPattern("|") + ") [^ ]* (Secure-)?HTTP/1.([0-2]|4)");
@@ -43,6 +48,7 @@ public abstract class HttpDescriptionLine implements StreamWriter {
 
 	public abstract int write(byte[] dest, int off);
 
+	@Deprecated
 	public abstract byte[] toByteArray();
 
 	public static HttpDescriptionLine fromString(String line) {
@@ -72,7 +78,22 @@ public abstract class HttpDescriptionLine implements StreamWriter {
 	public boolean isResponse() {
 		return (this instanceof HttpStatusLine);
 	}
+	
+	public StringGatherer prettyPrint() {
+		return prettyPrint(0);
+	}
 
+	public StringGatherer prettyPrint(int level) {
+		StringGatherer builder = new StringGatherer();
+		prettyPrint(builder, level);
+		return builder;
+	}
+	
+	@Override
+	public void writeToStream(OutputStream stream, Charset charset) throws IOException {
+		prettyPrint().writeToStream(stream, charset);
+	}
+	
 	@SuppressWarnings("unchecked")
 	public <T extends HttpDescriptionLine> T cast() {
 		return (T) this;

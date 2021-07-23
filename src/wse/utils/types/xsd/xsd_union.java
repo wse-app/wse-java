@@ -52,7 +52,7 @@ public abstract class xsd_union extends AnySimpleType<Object> {
 						+ ArrayUtils.join(simpleTypes, ", "));
 	}
 
-	protected final void validateValueSpace(Object value) {
+	public final void validateValueSpace(Object value) {
 	}
 
 	protected final void validateLexicalSpace(String value) {

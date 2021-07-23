@@ -1,4 +1,10 @@
-package wse.utils.json2;
+package wse.utils.json;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+
+import wse.utils.internal.IParser;
 
 public class JUtils {
 
@@ -21,7 +27,7 @@ public class JUtils {
 		return "\"" + escape(key) + "\"";
 	}
 
-	protected static void addValueString(JStringBuilder builder, int level, Object value) {
+	protected static void addValueString(StringGatherer builder, int level, Object value) {
 		if (value == null) {
 			builder.add("null");
 			return;
@@ -43,4 +49,15 @@ public class JUtils {
 		builder.add(escape(String.valueOf(value)));
 		builder.add("\"");
 	}
+	
+	public static final IParser<JObject> JSON_PARSER = new IParser<JObject>() {
+		public JObject parse(InputStream input, Charset cs) throws IOException {
+			return JObject.parse(input, cs);
+		}
+
+		@Override
+		public JObject createEmpty() {
+			return new JObject();
+		}
+	};
 }

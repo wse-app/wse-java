@@ -2,6 +2,7 @@ package wse.server.servlet.ws;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.logging.Logger;
 
 import wse.WSE;
@@ -115,8 +116,8 @@ public abstract class WebSocketServlet extends HttpServlet implements WebSocketC
 	public void sendMessage(final String message) throws IOException {
 		sendMessage(OP_TEXT, new StreamWriter() {
 			@Override
-			public void writeToStream(OutputStream output) throws IOException {
-				output.write(message.getBytes("UTF-8"));
+			public void writeToStream(OutputStream output, Charset charset) throws IOException {
+				output.write(message.getBytes(charset));
 			}
 		});
 	}

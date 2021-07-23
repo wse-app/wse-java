@@ -2,6 +2,7 @@ package wse.client.shttp;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,7 +24,8 @@ import wse.utils.ssl.SSLAuth;
 
 public final class SHttpManager {
 
-	public static final int cipherKeySize = 128;
+	private static final Charset UTF8 = Charset.forName("UTF-8");
+	public static final int CIPHER_KEY_SIZE = 128;
 
 	// private static byte[] iv =
 	// { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -38,6 +40,7 @@ public final class SHttpManager {
 	private static String toStoreName(SKey key) {
 		return toStoreName(key.getInitHost(), key.getInitPort());
 	}
+
 	private static String toStoreName(String host, int port) {
 		return host + port;
 	}
@@ -47,22 +50,25 @@ public final class SHttpManager {
 	}
 
 	/**
-	 * Invalidates the key, meaning further calls to its destination must aquire a new key. 
+	 * Invalidates the key, meaning further calls to its destination must aquire a
+	 * new key.
+	 * 
 	 * @param key
 	 */
 	public static void invalidate(SKey key) {
 		store.remove(toStoreName(key));
 	}
-	
+
 	/**
-	 * Invalidates the target, meaning any potential keys to it are removed. 
+	 * Invalidates the target, meaning any potential keys to it are removed.
+	 * 
 	 * @param host
 	 * @param port
 	 */
 	public static void invalidate(String host, int port) {
 		store.remove(toStoreName(host, port));
 	}
-	
+
 	/**
 	 * Makes sure the connection to initialize- host and port exists. If not, a new
 	 * key is aquired and stored. The key contains port to the actual call
@@ -109,7 +115,7 @@ public final class SHttpManager {
 		// Create send file
 		HttpHeader header = new HttpHeader();
 
-		header.setDescriptionLine(SHttp.makeInitRequestLine(cipherKeySize));
+		header.setDescriptionLine(SHttp.makeInitRequestLine(CIPHER_KEY_SIZE));
 
 		header.setAttribute("From", WSE.getApplicationName());
 		header.setAttribute("User-Agent", "WebServiceEngine/" + WSE.VERSION);
@@ -133,7 +139,7 @@ public final class SHttpManager {
 
 		// Print
 		try {
-			header.writeToStream(output);
+			header.writeToStream(output, UTF8);
 			output.flush();
 		} catch (IOException e) {
 			throw new WseConnectionException(e);

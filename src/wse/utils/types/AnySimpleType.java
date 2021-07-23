@@ -106,6 +106,7 @@ public abstract class AnySimpleType<T> implements AnyType {
 		return result;
 	}
 
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public String validateOutput(Object output) {
 		T out;
@@ -139,7 +140,38 @@ public abstract class AnySimpleType<T> implements AnyType {
 		return result;
 	}
 
-	protected void validateValueSpace(T value) {
+	@SuppressWarnings("unchecked")
+	public Object validateOutputGeneric(Object output) {
+		T out;
+		// allStrings
+		if (output instanceof String)
+			out = parse((String) output);
+		else
+			out = (T) output;
+
+		try {
+			validateValueSpace(out);
+		} catch (Exception e) {
+			throw new WseBuildingException(
+					this.getClass().getName() + " failed during value space control: " + e.getMessage(), e);
+		}
+
+		if (this.length == null && this.minLength == null && this.maxLength == null) {
+			return out;
+		}
+
+		String result = this.print(out);
+		try {
+			validateLexicalSpace(result);
+		} catch (Exception e) {
+			throw new WseBuildingException(
+					this.getClass().getName() + " failed during lexical space control: " + e.getMessage(), e);
+		}
+		return result;
+
+	}
+
+	public void validateValueSpace(T value) {
 		if (!validateEnumeration(value, this.enumeration))
 			throw new SimpleTypeRestrictionException(this, value, "enumeration",
 					ArrayUtils.join(this.enumeration, ", "));

@@ -63,11 +63,11 @@ public class XMLTree implements StreamWriter{
 	}
 
 	@Override
-	public void writeToStream(OutputStream stream) throws IOException {
-		write(stream, 0);
+	public void writeToStream(OutputStream stream, Charset charset) throws IOException {
+		write(stream, charset, 0);
 	}
 	
-	public void write(OutputStream stream, int level) throws IOException {
+	public void write(OutputStream stream, Charset charset, int level) throws IOException {
 		
 		stream.write(XMLUtils.level(level));
 		stream.write("<?xml version=\"".getBytes(charset));

@@ -21,6 +21,7 @@ public class MimeType {
 			MESSAGE_S = MESSAGE + "/", TEXT_S = TEXT + "/", VIDEO_S = VIDEO + "/", MODEL_S = MODEL + "/",
 			FONT_S = FONT + "/", MULTIPART_S = MULTIPART + "/";
 
+	
 	private final String name;
 	private final String[] sub_names;
 	private final String[] extensions;

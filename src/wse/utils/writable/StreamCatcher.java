@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -61,18 +62,18 @@ public class StreamCatcher extends BufferedOutputStream implements StreamWriter 
 		return result;
 	}
 
-	public static StreamCatcher from(StreamWriter writer) {
+	public static StreamCatcher from(StreamWriter writer, Charset charset) {
 		StreamCatcher result = new StreamCatcher();
 		try {
 			if (writer != null)
-				writer.writeToStream(result);
+				writer.writeToStream(result, charset);
 		} catch (IOException e) {
 		}
 		return result;
 	}
 
 	@Override
-	public void writeToStream(OutputStream stream) throws IOException {
+	public void writeToStream(OutputStream stream, Charset charset) throws IOException {
 		flush();
 		StreamUtils.write(this.asInputStream(), stream, this.getSize());
 	}

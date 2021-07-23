@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,9 @@ import wse.utils.websocket.WebSocket.Message;
 import wse.utils.writable.StreamWriter;
 
 public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes {
+	
+	private static Charset UTF8 = Charset.forName("UTF-8");
+	
 	private boolean isCloseRequestedByMe = false;
 	private boolean isCloseRequestedByOther = false;
 	private boolean isClosed = false;
@@ -94,7 +98,7 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 		synchronized (OUTPUT_LOCK) {
 			output.setOpCode(opcode);
 			if (writer != null) {
-				writer.writeToStream(output);
+				writer.writeToStream(output, UTF8);
 				if (!output.isReadyForNextMessage()) {
 					output.flush();
 				}
@@ -118,8 +122,8 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 		sendMessage(OP_PING, new StreamWriter() {
 
 			@Override
-			public void writeToStream(OutputStream output) throws IOException {
-				output.write("ping".getBytes());
+			public void writeToStream(OutputStream output, Charset charset) throws IOException {
+				output.write("ping".getBytes(charset));
 				output.flush();
 			}
 		});
@@ -128,7 +132,7 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 	private void pong(final byte[] data) throws IOException {
 		sendMessage(OP_PONG, new StreamWriter() {
 			@Override
-			public void writeToStream(OutputStream output) throws IOException {
+			public void writeToStream(OutputStream output, Charset charset) throws IOException {
 				output.write(data);
 				output.flush();
 			}
@@ -234,7 +238,7 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 		final byte[] data = shutDownMessage.getBytes();
 		sendMessage(OP_CLOSE, new StreamWriter() {
 			@Override
-			public void writeToStream(OutputStream output) throws IOException {
+			public void writeToStream(OutputStream output, Charset charset) throws IOException {
 				output.write(SerializationWriter.getBytes((short) 1000));
 				output.write(data);
 				output.flush();
