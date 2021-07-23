@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class MimeType {
-	
+
 	private static final Map<String, MimeType> name_mime = new HashMap<String, MimeType>();
 	private static final Map<String, MimeType> ext_mime = new HashMap<String, MimeType>();
 
@@ -66,10 +66,10 @@ public class MimeType {
 		return Objects.equals(full_name, other.full_name);
 	}
 
-	private static class mime_builder {
+	private static class Builder {
 		private String[] sub_names;
 
-		public mime_builder(String[] sub_names) {
+		public Builder(String[] sub_names) {
 			this.sub_names = sub_names;
 		}
 
@@ -101,14 +101,14 @@ public class MimeType {
 		public message message(String... extensions) {
 			return new message(sub_names, extensions.length == 0 ? new String[] { sub_names[0] } : extensions);
 		}
-		
+
 		public multipart multipart(String... extensions) {
 			return new multipart(sub_names, extensions.length == 0 ? new String[] { sub_names[0] } : extensions);
 		}
 	}
 
-	public static mime_builder b(String... names) {
-		return new mime_builder(names);
+	public static Builder b(String... names) {
+		return new Builder(names);
 	}
 
 	static {
@@ -319,9 +319,12 @@ public class MimeType {
 		public static final application xml = b("xml").application("xml", "xsd", "wsdl");
 		public static final application xhtml = b("xhtml+xml").application("xhtml");
 		public static final application signed_exchange = b("signed-exchange").application("sxg");
-		
+
 		public static final application any = b("*").application("*");
-		public MimeType anySub() { return any; }
+
+		public MimeType anySub() {
+			return any;
+		}
 	}
 
 	public static final class audio extends MimeType {
@@ -359,7 +362,10 @@ public class MimeType {
 		public static final audio x_pn_realaudio = b("x-pn-realaudio").audio("ra", "ram");
 
 		public static final audio any = b("*").audio("*");
-		public MimeType anySub() { return any; }
+
+		public MimeType anySub() {
+			return any;
+		}
 	}
 
 	public static final class image extends MimeType {
@@ -413,7 +419,7 @@ public class MimeType {
 		public static final image svg = b("svg+xml").image("svg");
 		/** image format for the web */
 		public static final image webp = b("webp").image("webp");
-		
+
 		public static final image avif = b("avif").image("avif");
 		/** Sun raster graphic */
 		public static final image x_cmu_raster = b("x-cmu-raster").image("ras");
@@ -428,7 +434,10 @@ public class MimeType {
 		public static final image x_portable_anymap = b("x-portable-anymap").image("pnm");
 
 		public static final image any = b("*").image("*");
-		public MimeType anySub() { return any; }
+
+		public MimeType anySub() {
+			return any;
+		}
 	}
 
 	public static final class message extends MimeType {
@@ -454,9 +463,12 @@ public class MimeType {
 		public static final message rfc822 = b("rfc822").message("mht", "mhtml", "nws");
 
 		public static final message http = b("http").message("http");
-		
+
 		public static final message any = b("*").message("*");
-		public MimeType anySub() { return any; }
+
+		public MimeType anySub() {
+			return any;
+		}
 	}
 
 	public static final class text extends MimeType {
@@ -493,7 +505,7 @@ public class MimeType {
 		/** Cascading Style Sheet */
 		public static final text css = b("css").text("css");
 		/** XML Document */
-		public static final text xml = b("xml").text("xml", "wsdl");
+		public static final text xml = b("xml").text("xml", "xsd", "wsdl");
 		/** rich text file */
 		public static final text richtext = b("richtext").text("rtx");
 		/** HTML component file */
@@ -506,7 +518,10 @@ public class MimeType {
 		public static final text scriptlet = b("scriptlet").text("sct");
 
 		public static final text any = b("*").text("*");
-		public MimeType anySub() { return any; }
+
+		public MimeType anySub() {
+			return any;
+		}
 
 	}
 
@@ -545,7 +560,10 @@ public class MimeType {
 		public static final video mpeg = b("mpeg").video("mp2", "mpa", "mpe", "mpeg", "mpg", "mpv2");
 
 		public static final video any = b("*").video("*");
-		public MimeType anySub() { return any; }
+
+		public MimeType anySub() {
+			return any;
+		}
 	}
 
 	public static final class model extends MimeType {
@@ -577,7 +595,10 @@ public class MimeType {
 		public static final model vrml = b("vrml").model("vrml", "wrl", "wrz");
 
 		public static final model any = b("*").model("*");
-		public MimeType anySub() { return any; }
+
+		public MimeType anySub() {
+			return any;
+		}
 	}
 
 	public static final class multipart extends MimeType {
@@ -591,30 +612,35 @@ public class MimeType {
 			super(MULTIPART, sub_names, extensions);
 			values.add(this);
 		}
-		
+
 		public boolean isMultipart() {
 			return true;
 		}
 
 		public static void init() {
 		}
-		
+
 		/**  */
 		public static final multipart form_data = b("form-data").multipart("*");
 		/**  */
-		public static final multipart www_form_urlencoded = b("x-www-form-urlencoded", "www-form-urlencoded").multipart("*");
+		public static final multipart www_form_urlencoded = b("x-www-form-urlencoded", "www-form-urlencoded")
+				.multipart("*");
 
 		public static final multipart digest = b("digest").multipart("*");
 
 		public static final multipart any = b("*").multipart("*");
-		public MimeType anySub() { return any; }
+
+		public MimeType anySub() {
+			return any;
+		}
 
 	}
-	
-	public static final MimeType any = new MimeType("*", new String[] {"*"}, new String[0]);
+
+	public static final MimeType any = new MimeType("*", new String[] { "*" }, new String[0]);
 
 	/**
-	 * Returns the any form of the mimetype. <br><br>
+	 * Returns the any form of the mimetype. <br>
+	 * <br>
 	 * For example: <br>
 	 * <b>image/png</b> returns <b>image/*</b><br>
 	 * <b>application/xml</b> returns <b>application/*</b><br>
@@ -622,8 +648,9 @@ public class MimeType {
 	 * 
 	 * @return the /* (any) form of the mimetype.
 	 */
-	public MimeType anySub() { return any; }
-	
+	public MimeType anySub() {
+		return any;
+	}
 
 	public static MimeType getByName(String mimeType) {
 		return name_mime.get(mimeType);
@@ -675,18 +702,45 @@ public class MimeType {
 		 */
 	}
 
+	/**
+	 * Returns the type name of this MimeType. <br><br>
+	 * <b>Example:</b> <code>MimeType.text.plain.getFullName()</code> returns
+	 * <code>text</code>
+	 * 
+	 * @return the name of this MimeType
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Returns the first (or only, if there is only one) sub-name of this MimeType. <br><br>
+	 * <b>Example:</b> <code>MimeType.text.plain.getFullName()</code> returns
+	 * <code>plain</code>
+	 * 
+	 * @return the first sub-name of this MimeType
+	 */
 	public String getSubName() {
 		return sub_names[0];
 	}
 
+	/**
+	 * Returns the full name of this MimeType. <br><br>
+	 * <b>Example:</b> <code>MimeType.text.plain.getFullName()</code> returns
+	 * <code>text/plain</code>
+	 * 
+	 * @return the full name of this MimeType
+	 */
 	public String getFullName() {
 		return full_name;
 	}
 
+	/**
+	 * Returns the full name of this MimeType
+	 * 
+	 * @return the result of {@link MimeType#getFullName()}
+	 * @see {@link MimeType#getFullName()}
+	 */
 	@Override
 	public String toString() {
 		return getFullName();
@@ -695,7 +749,7 @@ public class MimeType {
 	public String withCharset(String charset) {
 		return charset == null ? getFullName() : getFullName() + "; charset=" + charset;
 	}
-	
+
 	public String withCharset(Charset charset) {
 		return charset == null ? getFullName() : getFullName() + "; charset=" + charset.displayName();
 	}
@@ -703,7 +757,7 @@ public class MimeType {
 	public String withBoundary(String boundary) {
 		return boundary == null ? getFullName() : getFullName() + "; boundary=" + boundary;
 	}
-	
+
 	public List<String> getSubNames() {
 		return Collections.unmodifiableList(Arrays.asList(sub_names));
 	}
@@ -713,7 +767,8 @@ public class MimeType {
 	}
 
 	public boolean contains(MimeType other) {
-		if (other == null) return false;
+		if (other == null)
+			return false;
 		if (this == MimeType.any)
 			return true;
 		if (this == other)
@@ -724,7 +779,7 @@ public class MimeType {
 			return true;
 		return false;
 	}
-	
+
 	public boolean isVideo() {
 		return false;
 	}
@@ -833,8 +888,6 @@ public class MimeType {
 		return startsWith(type, MULTIPART_S);
 	}
 
-	
-	
 	private static boolean startsWith(String type, String startsWith) {
 
 		if (type == null || startsWith == null)
