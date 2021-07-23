@@ -12,6 +12,7 @@ import java.util.Objects;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+import wse.utils.MimeType;
 import wse.utils.exception.WseXMLBuildingException;
 import wse.utils.internal.IElement;
 import wse.utils.json.StringGatherer;
@@ -639,13 +640,11 @@ public class XMLElement extends XMLNode implements IElement {
 
 		addChild(xmlChild);
 	}
-	
 
 	@Override
 	public void setChildArray(String key, Iterable<IElement> children) {
 		setChildArray(key, null, children);
 	}
-	
 
 	@Override
 	public void setChildArray(String key, String namespace, Iterable<IElement> children) {
@@ -654,4 +653,8 @@ public class XMLElement extends XMLNode implements IElement {
 		}
 	}
 
+	@Override
+	public MimeType getMimeType() {
+		return MimeType.application.xml;
+	}
 }

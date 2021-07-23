@@ -2,6 +2,7 @@ package wse.utils.internal;
 
 import java.util.Collection;
 
+import wse.utils.MimeType;
 import wse.utils.json.PrettyPrinter;
 import wse.utils.writable.StreamWriter;
 
@@ -41,4 +42,6 @@ public interface IElement extends HasRowColumn, StreamWriter, PrettyPrinter {
 	
 	public void setChildArray(String key, Iterable<IElement> children);
 	public void setChildArray(String key, String namespace, Iterable<IElement> children);
+	
+	public MimeType getMimeType();
 }

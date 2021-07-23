@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import wse.utils.MimeType;
 import wse.utils.internal.IElement;
 
 public class JObject extends LinkedHashMap<String, Object> implements JValue, IElement {
@@ -287,6 +288,12 @@ public class JObject extends LinkedHashMap<String, Object> implements JValue, IE
 	@Override
 	public void setChildArray(String key, String namespace, Iterable<IElement> children) {
 		setChildArray(key, children);
+	}
+
+	
+	@Override
+	public MimeType getMimeType() {
+		return MimeType.application.json;
 	}
 
 }
