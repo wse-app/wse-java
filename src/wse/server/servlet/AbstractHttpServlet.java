@@ -3,9 +3,17 @@ package wse.server.servlet;
 import java.io.IOException;
 
 import wse.server.CallTreatment;
+import wse.utils.http.HttpHeader;
 import wse.utils.http.HttpMethod;
 
 public abstract class AbstractHttpServlet implements CallTreatment {
+	
+	public static void CORSAllowAll(HttpServletResponse response) {
+		HttpHeader header = response.getHttpHeader();
+		header.setAttribute("Access-Control-Allow-Origin", "*");
+		header.setAttribute("Access-Control-Allow-Headers", "*");
+		header.setAttribute("Access-Control-Allow-Methods", "*");
+	}
 	
 	@Override
 	public final void treatCall(HttpServletRequest request, HttpServletResponse response) throws IOException{

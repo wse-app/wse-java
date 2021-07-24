@@ -60,6 +60,7 @@ public class MimeType {
 		if (obj == null) {
 			return false;
 		}
+		
 		if (!(obj instanceof MimeType)) {
 			return false;
 		}
@@ -662,50 +663,12 @@ public class MimeType {
 	}
 
 	public static Iterable<MimeType> all() {
-
 		return name_mime.values();
-
-		/*
-		 * return new Iterable<MimeType>() {
-		 * 
-		 * final Iterator<MimeType> applications = application.values().iterator();
-		 * final Iterator<MimeType> audios = audio.values().iterator(); final
-		 * Iterator<MimeType> images = image.values().iterator(); final
-		 * Iterator<MimeType> messages = message.values().iterator(); final
-		 * Iterator<MimeType> texts = text.values().iterator(); final Iterator<MimeType>
-		 * videos = video.values().iterator(); final Iterator<MimeType> models =
-		 * model.values().iterator();
-		 * 
-		 * @Override public Iterator<MimeType> iterator() { return new
-		 * Iterator<MimeType>() {
-		 * 
-		 * Iterator<MimeType> current = applications;
-		 * 
-		 * @Override public boolean hasNext() { return (current != models ||
-		 * current.hasNext()); }
-		 * 
-		 * @Override public MimeType next() { if (current.hasNext()) { return
-		 * current.next(); }
-		 * 
-		 * if (current == applications) current = audios; else if (current == audios)
-		 * current = images; else if (current == images) current = messages; else if
-		 * (current == messages) current = texts; else if (current == texts) current =
-		 * videos; else if (current == videos) current = models; else if (current ==
-		 * models) return null;
-		 * 
-		 * return next(); }
-		 * 
-		 * @Override public void remove() { throw new
-		 * UnsupportedOperationException("This array is immutable"); }
-		 * 
-		 * 
-		 * }; } };
-		 */
 	}
 
 	/**
 	 * Returns the type name of this MimeType. <br><br>
-	 * <b>Example:</b> <code>MimeType.text.plain.getFullName()</code> returns
+	 * <b>Example:</b> <code>MimeType.text.plain.getName()</code> returns
 	 * <code>text</code>
 	 * 
 	 * @return the name of this MimeType
@@ -716,7 +679,7 @@ public class MimeType {
 
 	/**
 	 * Returns the first (or only, if there is only one) sub-name of this MimeType. <br><br>
-	 * <b>Example:</b> <code>MimeType.text.plain.getFullName()</code> returns
+	 * <b>Example:</b> <code>MimeType.text.plain.getSubName()</code> returns
 	 * <code>plain</code>
 	 * 
 	 * @return the first sub-name of this MimeType

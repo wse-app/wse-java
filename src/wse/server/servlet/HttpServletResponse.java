@@ -63,7 +63,7 @@ public final class HttpServletResponse extends WseOutputStream {
 		log.finest("Response Header: [" + h.length + " bytes]\n" + new String(h));
 
 		if (!force_enable_output) {
-			if (!MimeType.isText(header.getContentType().mimeType) && !header.getContentType().is(MimeType.application.xml)) {
+			if (!MimeType.isText(header.getContentType().getMimeType()) && !header.getContentType().is(MimeType.application.xml)) {
 				disableOutputLogging();
 			}
 		}
@@ -160,6 +160,10 @@ public final class HttpServletResponse extends WseOutputStream {
 		setAttribute("Content-Disposition", disposition);
 	}
 
+	public void setContentType(MimeType type, Charset charset) {
+		setContentType(type.withCharset(charset));
+	}
+	
 	public void setContentType(MimeType type, String charset) {
 		setContentType(type.withCharset(charset));
 	}

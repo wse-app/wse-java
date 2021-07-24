@@ -3,12 +3,14 @@ package wse.server.servlet.soap;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import wse.WSE;
 import wse.server.servlet.HttpServletRequest;
 import wse.server.servlet.HttpServletResponse;
 import wse.server.servlet.OperationListener;
@@ -16,12 +18,14 @@ import wse.utils.ClassUtils;
 import wse.utils.ComplexType;
 import wse.utils.HttpCodes;
 import wse.utils.MimeType;
-import wse.utils.exception.SoapFault;
 import wse.utils.exception.WseBuildingException;
+import wse.utils.internal.IElement;
+import wse.utils.writable.StreamCatcher;
 import wse.utils.xml.XMLElement;
-import wse.utils.xml.XMLUtils;
 
 public class OperationServlet extends SoapServlet {
+
+	private static final Logger LOG = WSE.getLogger();
 
 	private final Map<String, Receiver> receiver = new HashMap<>();
 	private OperationListener instance;
@@ -53,66 +57,66 @@ public class OperationServlet extends SoapServlet {
 				receiver.put(h.value(), new Receiver(m, params, h));
 			}
 		}
-		log.info("OperationServlet of " + this.instance.getClass().getSimpleName() + " listenening for " + receiver.size() + " operation" + (receiver.size() == 1 ? "" : "s") + (log.isLoggable(Level.FINE) ? ":" : ""));
-		if (log.isLoggable(Level.FINE)) {
+		LOG.info("OperationServlet of " + this.instance.getClass().getSimpleName() + " listenening for "
+				+ receiver.size() + " operation" + (receiver.size() == 1 ? "" : "s")
+				+ (LOG.isLoggable(Level.FINE) ? ":" : ""));
+		if (LOG.isLoggable(Level.FINE)) {
 			for (Entry<String, Receiver> e : receiver.entrySet()) {
-				log.fine("    '" + e.getKey() + "' - " + e.getValue().method.toGenericString());
+				LOG.fine("    '" + e.getKey() + "' - " + e.getValue().method.toGenericString());
 			}
 		}
 	}
 
 	@Override
-	public void doSoap(HttpServletRequest request, XMLElement requestSoapHeader, XMLElement requestSoapBody, HttpServletResponse response)
+	public void doSoap(HttpServletRequest request, MimeType contentType, IElement content, HttpServletResponse response)
 			throws IOException {
-		if (requestSoapBody == null) {
-			response.sendError(400, "Envelope did not contain a Body element");
-			return;
-		}
-		
-		for (XMLElement hc : requestSoapHeader.getChildren()) {
-			if (Objects.equals(hc.getAttributeValue("mustUnderstand"), "1")) {
-				throw new SoapFault(SoapFault.MUST_UNDERSTAND, "Failed to understand header element \"" + hc.getName() + "\"");
-			}
-		}
-		
+
 		String soapAction = request.getAttributeValue("SOAPAction");
 		
-		
-		// TODO check URI
+		LOG.info(content.toString());
+
+		// TODO check URI, ???
 		Receiver m = receiver.get(soapAction);
 		if (m == null) {
 			response.sendError(HttpCodes.NOT_FOUND, "Unknown SOAPAction: '" + soapAction + "'");
 			return;
 		}
-		
+
 		ComplexType result;
 		try {
-			result = m.invoke(requestSoapBody);
+			result = m.invoke(content);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e) {
 			response.sendError(HttpCodes.INTERNAL_SERVER_ERROR, e.getMessage());
-			e.printStackTrace();
+			LOG.log(Level.SEVERE, e.getClass().getName() + ": " + e.getMessage(), e);
 			return;
 		}
-		
-		XMLElement responseSoapEnvelope = XMLUtils.createSOAPFrame();
-		XMLElement responseSoapBody = responseSoapEnvelope.getChild("Body");		
-		
-		try {	
-			result.create(responseSoapBody);
-		}catch(WseBuildingException e) {
+
+		IElement ie = content.createEmpty();
+
+		try {
+			result.create(ie);
+		} catch (WseBuildingException e) {
 			response.sendError(HttpCodes.INTERNAL_SERVER_ERROR, e);
 			return;
 		}
-		
-		XMLUtils.resetNamespaces(responseSoapEnvelope);
-		
-		byte[] responseContent = responseSoapEnvelope.toByteArray();
-		
-		response.setContentType(MimeType.application.xml, responseSoapEnvelope.getTree().getEncoding());
+
+		ie = soapWrap(ie);
+
+		StreamCatcher catcher = new StreamCatcher();
+
+		Charset charset = ie.preferredCharset();
+		if (charset == null)
+			charset = Charset.forName("UTF-8");
+
+		ie.writeToStream(catcher, charset);
+
+		byte[] responseContent = catcher.toByteArray();
+
+		response.setContentType(contentType, charset);
 		response.setContentLength(responseContent.length);
 		response.write(responseContent);
-		
+
 		return;
 	}
 
@@ -136,12 +140,11 @@ public class OperationServlet extends SoapServlet {
 			this.soapAction = handler.value();
 		}
 
-		public ComplexType invoke(XMLElement xml)
-				throws InstantiationException, IllegalAccessException, IllegalArgumentException,
-				InvocationTargetException {
+		public ComplexType invoke(IElement e) throws InstantiationException, IllegalAccessException,
+				IllegalArgumentException, InvocationTargetException {
 			ComplexType i = input.newInstance();
 			ComplexType o = output.newInstance();
-			i.load(xml);
+			i.load(e);
 
 //			System.out.println(i.getClass());
 //			System.out.println(o.getClass());
@@ -154,6 +157,11 @@ public class OperationServlet extends SoapServlet {
 			return soapAction;
 		}
 
+	}
+
+	@Override
+	public boolean canUnderstand(XMLElement xml) {
+		return false;
 	}
 
 }

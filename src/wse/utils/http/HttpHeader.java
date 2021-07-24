@@ -247,9 +247,5 @@ public class HttpHeader extends HttpAttributeList implements StreamWriter {
 		return descLine.isResponse();
 	}
 
-	public Charset getContentCharset() {
-		ContentType ct = getContentType();
-		if (ct == null) return null;
-		return ct.getCharsetParsed();
-	}
+	
 }

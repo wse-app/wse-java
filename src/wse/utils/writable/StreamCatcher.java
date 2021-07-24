@@ -67,7 +67,7 @@ public class StreamCatcher extends BufferedOutputStream implements StreamWriter 
 		try {
 			if (writer != null)
 				writer.writeToStream(result, charset);
-		} catch (IOException e) {
+		} catch (IOException ignore) {
 		}
 		return result;
 	}

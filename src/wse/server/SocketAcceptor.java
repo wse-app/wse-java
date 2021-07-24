@@ -14,7 +14,7 @@ import wse.WSE;
  * Accept loop
  * One instance per port
  * 
- * Sends accepted sockets to receiver's @link {@link SocketHandler}
+ * Sends accepted sockets to receiver's {@link SocketHandler}
  * 
  * @author WSE
  *

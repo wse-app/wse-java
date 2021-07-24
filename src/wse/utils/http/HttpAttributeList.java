@@ -580,4 +580,9 @@ public class HttpAttributeList implements Map<String, String>, StreamWriter {
 		return res;
 	}
 
+	public Charset getContentCharset() {
+		ContentType ct = getContentType();
+		if (ct == null) return null;
+		return ct.getCharsetParsed();
+	}
 }

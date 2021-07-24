@@ -222,7 +222,7 @@ public class JObject extends LinkedHashMap<String, Object> implements JValue, IE
 	}
 
 	@Override
-	public IElement createEmptyChild() {
+	public IElement createEmpty() {
 		return new JObject();
 	}
 
@@ -294,6 +294,11 @@ public class JObject extends LinkedHashMap<String, Object> implements JValue, IE
 	@Override
 	public MimeType getMimeType() {
 		return MimeType.application.json;
+	}
+	
+	@Override
+	public Charset preferredCharset() {
+		return Charset.forName("UTF-8");
 	}
 
 }

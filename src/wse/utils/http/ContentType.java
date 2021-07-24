@@ -9,7 +9,7 @@ import wse.utils.MimeType;
 
 public class ContentType {
 	
-	public String mimeType;
+	private String mimeType;
 	
 	private Map<String, String> args = new HashMap<>();
 	
@@ -91,7 +91,6 @@ public class ContentType {
 		return MimeType.getByName(mimeType);
 	}
 	
-	@SuppressWarnings("unlikely-arg-type")
 	public boolean is(MimeType type) {
 		if (this.mimeType == null)
 			return false;
@@ -104,7 +103,7 @@ public class ContentType {
 				return true;
 			return this.mimeType.startsWith(type.getName());
 		}
-		return type.equals(mimeType);
+		return type.getFullName().equals(mimeType);
 	}
 	
 	@Override

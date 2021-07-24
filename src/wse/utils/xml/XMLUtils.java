@@ -437,15 +437,22 @@ public class XMLUtils {
 			root.declareNamespace(e.getValue(), e.getKey());
 		}
 	}
-
+	
 	public static XMLElement createSOAPFrame() {
+		return createSOAPFrame(true);
+	}
+
+	public static XMLElement createSOAPFrame(boolean addBodyElement) {
 		XMLElement root = new XMLElement("Envelope", SOAP_ENVELOPE);
 		root.declareNamespace("soap", SOAP_ENVELOPE);
 
 		root.addAttribute("encodingStyle", SOAP_ENCODING, SOAP_ENVELOPE);
 
 		root.addChild("Header", SOAP_ENVELOPE);
-		root.addChild("Body", SOAP_ENVELOPE);
+		
+		if (addBodyElement) {
+			root.addChild("Body", SOAP_ENVELOPE);			
+		}
 
 		return root;
 	}

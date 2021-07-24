@@ -16,13 +16,13 @@ import wse.utils.xml.XMLElement;
 
 public abstract class ComplexType implements AnyType, Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	public void load(IElement src) {
-		throw new WseException("Generated code outdated!");
+		throw new WseException("Generated code outdated for this library version!");
 	}
-	
+
 	public void create(IElement target) {
-		throw new WseException("Generated code outdated!");
+		throw new WseException("Generated code outdated for this library version!");
 	}
 
 	// To JSON
@@ -32,20 +32,14 @@ public abstract class ComplexType implements AnyType, Serializable {
 		create(obj);
 		return obj;
 	}
-	
+
 	public XMLElement toXML() {
 		XMLElement xml = new XMLElement(getClass().getSimpleName());
 		create(xml);
 		return xml;
 	}
-	
-	// Generated Code Utils
 
-//	public static <T, F extends AnySimpleType<T>> T parse(XMLElement parent, String name, String namespace,
-//			Class<F> clazz, boolean mandatory, String default_) {
-//		String value = parent.getChildValue(name, namespace);
-//		return parse(value, name, clazz, mandatory, default_);
-//	}
+	// Generated Code Utils
 
 	public static <T, F extends AnySimpleType<T>> T parse(String value, String name, Class<F> clazz, boolean mandatory,
 			String default_) {
@@ -72,145 +66,10 @@ public abstract class ComplexType implements AnyType, Serializable {
 		}
 	}
 
-//	public static <T, F extends AnySimpleType<T>> void print(XMLElement parent, String name, String namespace,
-//			Object value, Class<F> clazz, boolean mandatory, String default_) {
-//		String text = print(value, name, clazz, mandatory, default_);
-//		if (text != null) {
-//			parent.addChildValue(name, namespace, text);
-//		}
-//
-//	}
-
-//	public static <T, F extends AnySimpleType<T>> String print(Object value, String name, Class<F> clazz,
-//			boolean mandatory, String default_) {
-//		AnySimpleType<T> simpleType = AnySimpleType.getInstance(clazz);
-//		String text = null;
-//
-//		if (value == null) {
-//			if (default_ != null) {
-//				text = default_;
-//			} else if (mandatory) {
-//				throw new wse.utils.exception.WseBuildingException(
-//						String.format("Field '%s' is mandatory but was null", name));
-//			}
-//		} else {
-//			text = simpleType.validateOutput(value);
-//		}
-//
-//		return text;
-//	}
-
 	public static <T, F extends AnySimpleType<T>> T parseFixed(Class<F> clazz, String value) {
 		AnySimpleType<T> simpleType = AnySimpleType.getInstance(clazz);
 		return simpleType.parse(value);
 	}
-
-//	public static void printFixed(XMLElement parent, String value, String name, String namespace) {
-//		parent.addChildValue(name, namespace, value);
-//	}
-
-//	public static <T, F extends AnySimpleType<T>> List<T> parseList(XMLElement parent, String name, String namespace,
-//			Class<F> clazz, int min, Integer max) {
-//		AnySimpleType<T> simpleType = AnySimpleType.getInstance(clazz);
-//		List<XMLElement> values = parent.getChildren(name, namespace);
-//
-//		if (values.size() < min || (max != null && values.size() > max)) {
-//			throw new wse.utils.exception.WseParsingException("Got unexpected number of '" + name + "': "
-//					+ values.size() + ", expected: " + min + (max == null ? "+" : ("-" + max)));
-//		}
-//
-//		List<T> result = new LinkedList<>();
-//		for (String value : XMLUtils.values(values)) {
-//			result.add(simpleType.validateInput(value));
-//		}
-//		return result;
-//	}
-
-//	public static <T, F extends AnySimpleType<T>> void printList(XMLElement parent, String name, String namespace,
-//			Collection<?> values, Class<F> clazz, int min, Integer max) {
-//		AnySimpleType<T> simpleType = AnySimpleType.getInstance(clazz);
-//
-//		if (values == null)
-//			values = Collections.EMPTY_LIST;
-//
-//		if (values.size() < min || (max != null && values.size() > max)) {
-//			throw new wse.utils.exception.WseBuildingException("Trying to send invalid amount of '" + name + "': "
-//					+ values.size() + ", should be: " + min + (max == null ? "+" : ("-" + max)));
-//		}
-//
-//		for (Object o : values) {
-//			parent.addChildValue(name, namespace, simpleType.validateOutput(o));
-//		}
-//	}
-
-//	public static <T extends ComplexType> T parseComplex(XMLElement parent, String name, String namespace,
-//			Class<T> clazz, boolean mandatory) {
-//		XMLElement xml = parent.getChild(name, namespace);
-//		if (xml == null) {
-//			if (mandatory) {
-//				throw new WseParsingException(String.format("Type '%s' is mandatory but was null", name));
-//			}
-//			return null;
-//		}
-//		return parseComplex(xml, clazz);
-//	}
-
-//	private static <T extends ComplexType> T parseComplex(XMLElement xml, Class<T> clazz) {
-//		T type;
-//		try {
-//			type = clazz.newInstance();
-//		} catch (InstantiationException | IllegalAccessException e) {
-//			throw new WseParsingException("Failed to instantiate ComplexType class " + clazz.getName()
-//					+ ". Make sure this class has an available default constructor", e);
-//		}
-//		type.load(xml);
-//		return type;
-//	}
-
-//	public static <T extends ComplexType> LinkedList<T> parseComplexList(XMLElement parent, String name,
-//			String namespace, Class<T> clazz, int min, Integer max) {
-//		Collection<XMLElement> children = parent.getChildren(name, namespace);
-//		if (children.size() < min || (max != null && children.size() > max)) {
-//			throw new wse.utils.exception.WseParsingException("Got unexpected number of '" + name + "': "
-//					+ children.size() + ", expected: " + min + (max == null ? "+" : ("-" + max)));
-//		}
-//		LinkedList<T> list = new LinkedList<>();
-//		for (XMLElement xml : children) {
-//			list.add(parseComplex(xml, clazz));
-//		}
-//		return list;
-//	}
-
-//	public static <T extends ComplexType> void printComplex(XMLElement parent, String name, String namespace, T type,
-//			boolean mandatory) {
-//		if (type == null) {
-//			if (mandatory) {
-//				throw new wse.utils.exception.WseBuildingException(
-//						String.format("Type '%s' is mandatory but was null", name));
-//			}
-//			return;
-//		}
-//		XMLElement child = parent.addChild(name, namespace);
-//		type.create(child);
-//	}
-
-//	public static <T extends ComplexType> void printComplexList(XMLElement parent, String name, String namespace,
-//			List<T> list, int min, Integer max) {
-//		if (list == null)
-//			list = Collections.emptyList();
-//
-//		if (list.size() < min || (max != null && list.size() > max)) {
-//			throw new wse.utils.exception.WseParsingException("Got unexpected number of '" + name + "': " + list.size()
-//					+ ", expected: " + min + (max == null ? "+" : ("-" + max)));
-//		}
-//
-//		for (T type : list) {
-//			XMLElement child = parent.addChild(name, namespace);
-//			type.create(child);
-//		}
-//	}
-
-	// Generated Code Utils Generic
 
 	public static <T, F extends AnySimpleType<T>> T parse(IElement parent, String name, String namespace,
 			Class<F> clazz, boolean mandatory, String default_) {
@@ -254,6 +113,8 @@ public abstract class ComplexType implements AnyType, Serializable {
 
 		AnySimpleType<T> simpleType = AnySimpleType.getInstance(clazz);
 		Collection<String> values = parent.getValueArray(name, namespace);
+		if (values == null)
+			values = Collections.emptyList();
 
 		if (values.size() < min || (max != null && values.size() > max)) {
 			throw new wse.utils.exception.WseParsingException("Got unexpected number of '" + name + "': "
@@ -280,16 +141,16 @@ public abstract class ComplexType implements AnyType, Serializable {
 		}
 
 		Collection<Object> out = new LinkedList<>();
-		
+
 		for (Object o : values) {
 			out.add(simpleType.validateOutputGeneric(o));
 		}
-		
+
 		parent.setValueArray(name, namespace, out);
 	}
-	
-	public static <T extends ComplexType> T parseComplex(IElement parent, String name, String namespace,
-			Class<T> clazz, boolean mandatory) {
+
+	public static <T extends ComplexType> T parseComplex(IElement parent, String name, String namespace, Class<T> clazz,
+			boolean mandatory) {
 		IElement child = parent.getChild(name, namespace);
 		if (child == null) {
 			if (mandatory) {
@@ -299,7 +160,7 @@ public abstract class ComplexType implements AnyType, Serializable {
 		}
 		return parseComplex(child, clazz);
 	}
-	
+
 	private static <T extends ComplexType> T parseComplex(IElement src, Class<T> clazz) {
 		T type;
 		try {
@@ -311,10 +172,10 @@ public abstract class ComplexType implements AnyType, Serializable {
 		type.load(src);
 		return type;
 	}
-	
-	public static <T extends ComplexType> LinkedList<T> parseComplexList(IElement parent, String name,
-			String namespace, Class<T> clazz, int min, Integer max) {
-		
+
+	public static <T extends ComplexType> LinkedList<T> parseComplexList(IElement parent, String name, String namespace,
+			Class<T> clazz, int min, Integer max) {
+
 		Collection<IElement> children = parent.getChildArray(name, namespace);
 		if (children.size() < min || (max != null && children.size() > max)) {
 			throw new wse.utils.exception.WseParsingException("Got unexpected number of '" + name + "': "
@@ -326,7 +187,7 @@ public abstract class ComplexType implements AnyType, Serializable {
 		}
 		return list;
 	}
-	
+
 	public static <T extends ComplexType> void printComplex(IElement parent, String name, String namespace, T type,
 			boolean mandatory) {
 		if (type == null) {
@@ -336,14 +197,14 @@ public abstract class ComplexType implements AnyType, Serializable {
 			}
 			return;
 		}
-		
-		IElement child = parent.createEmptyChild();
-		
+
+		IElement child = parent.createEmpty();
+
 		type.create(child);
-		
+
 		parent.setChild(name, namespace, child);
 	}
-	
+
 	public static <T extends ComplexType> void printComplexList(IElement parent, String name, String namespace,
 			List<T> list, int min, Integer max) {
 		if (list == null)
@@ -353,15 +214,15 @@ public abstract class ComplexType implements AnyType, Serializable {
 			throw new wse.utils.exception.WseParsingException("Got unexpected number of '" + name + "': " + list.size()
 					+ ", expected: " + min + (max == null ? "+" : ("-" + max)));
 		}
-		
+
 		Collection<IElement> children = new LinkedList<>();
 
 		for (T type : list) {
-			IElement child = parent.createEmptyChild();
+			IElement child = parent.createEmpty();
 			type.create(child);
 			children.add(child);
 		}
-		
+
 		parent.setChildArray(name, namespace, children);
 	}
 }

@@ -3,8 +3,8 @@ package wse.utils.exception;
 import java.util.Objects;
 
 import wse.utils.HttpCodes;
+import wse.utils.internal.IElement;
 import wse.utils.xml.XMLElement;
-import wse.utils.xml.XMLUtils;
 
 public class SoapFault extends WseHttpException {
 	private static final long serialVersionUID = -6803733893368261338L;
@@ -23,7 +23,7 @@ public class SoapFault extends WseHttpException {
 	
 	private String faultcode;
 	private String faultactor;
-	private XMLElement detail;
+	private IElement detail;
 	private XMLElement xmlSource;
 
 	public SoapFault(XMLElement fault) {
@@ -88,7 +88,7 @@ public class SoapFault extends WseHttpException {
 		return faultactor;
 	}
 
-	public XMLElement getDetail() {
+	public IElement getDetail() {
 		return detail;
 	}
 
@@ -100,7 +100,7 @@ public class SoapFault extends WseHttpException {
 		this.faultactor = faultactor;
 	}
 
-	public void setDetail(XMLElement detail) {
+	public void setDetail(IElement detail) {
 		this.detail = detail;
 	}
 
@@ -108,19 +108,30 @@ public class SoapFault extends WseHttpException {
 		return xmlSource;
 	}
 
-	public XMLElement toXML() {
-		XMLElement xml = new XMLElement("Fault", XMLUtils.SOAP_ENVELOPE);
-
+//	public XMLElement toXML() {
+//		XMLElement xml = new XMLElement("Fault", XMLUtils.SOAP_ENVELOPE);
+//
+//		String msg = this.getMessage();
+//		if (msg != null)
+//			xml.addChildValue("faultstring", null, msg);
+//		if (faultcode != null)
+//			xml.addChildValue("faultcode", null, faultcode);
+//		if (faultactor != null)
+//			xml.addChildValue("faultactor", null, faultactor);
+//		if (detail != null)
+//			xml.addChild(detail);
+//
+//		return xml;
+//	}
+	
+	public void create(IElement ie) {
+		
 		String msg = this.getMessage();
-		if (msg != null)
-			xml.addChildValue("faultstring", null, msg);
-		if (faultcode != null)
-			xml.addChildValue("faultcode", null, faultcode);
-		if (faultactor != null)
-			xml.addChildValue("faultactor", null, faultactor);
-		if (detail != null)
-			xml.addChild(detail);
-
-		return xml;
+		if (msg != null) ie.setValue("faultstring", null, msg);
+		if (faultcode != null) ie.setValue("faultcode", null, faultcode);
+		if (faultactor != null) ie.setValue("faultactor", null, faultactor);
+		if (detail != null) {
+			
+		}
 	}
 }

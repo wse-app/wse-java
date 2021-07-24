@@ -1,5 +1,6 @@
 package wse.utils.internal;
 
+import java.nio.charset.Charset;
 import java.util.Collection;
 
 import wse.utils.MimeType;
@@ -8,7 +9,7 @@ import wse.utils.writable.StreamWriter;
 
 public interface IElement extends HasRowColumn, StreamWriter, PrettyPrinter {
 	
-	public IElement createEmptyChild();
+	public IElement createEmpty();
 	
 	public String getValue(String key);
 	public String getValue(String key, String namespace);
@@ -44,4 +45,5 @@ public interface IElement extends HasRowColumn, StreamWriter, PrettyPrinter {
 	public void setChildArray(String key, String namespace, Iterable<IElement> children);
 	
 	public MimeType getMimeType();
+	public Charset preferredCharset();
 }

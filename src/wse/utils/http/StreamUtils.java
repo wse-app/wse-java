@@ -3,9 +3,12 @@ package wse.utils.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 import wse.utils.LinkedByteArray;
 import wse.utils.stream.LimitedInputStream;
+import wse.utils.writable.StreamCatcher;
+import wse.utils.writable.StreamWriter;
 
 public class StreamUtils {
 	
@@ -104,4 +107,7 @@ public class StreamUtils {
 		return readAll(new LimitedInputStream(stream, maxLength));
 	}
 
+	public static byte[] catchAll(StreamWriter writer, Charset charset) {
+		return StreamCatcher.from(writer, charset).toByteArray();
+	}
 }

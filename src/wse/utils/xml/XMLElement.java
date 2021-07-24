@@ -170,7 +170,6 @@ public class XMLElement extends XMLNode implements IElement {
 		return attributes.size() != 0;
 	}
 
-	@Deprecated
 	public byte[] toByteArray() {
 		return StreamCatcher.from(this, getTree().getCharset()).toByteArray();
 	}
@@ -578,7 +577,7 @@ public class XMLElement extends XMLNode implements IElement {
 	}
 
 	@Override
-	public IElement createEmptyChild() {
+	public IElement createEmpty() {
 		return new XMLElement();
 	}
 
@@ -656,5 +655,10 @@ public class XMLElement extends XMLNode implements IElement {
 	@Override
 	public MimeType getMimeType() {
 		return MimeType.application.xml;
+	}
+	
+	@Override
+	public Charset preferredCharset() {
+		return getTree().getCharset();
 	}
 }
