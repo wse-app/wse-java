@@ -43,6 +43,7 @@ public abstract class xsd_list<F, T extends AnySimpleType<F>> extends AnySimpleT
 		return result;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public String validateOutput(Object output_) {
 		@SuppressWarnings("unchecked")
@@ -61,6 +62,11 @@ public abstract class xsd_list<F, T extends AnySimpleType<F>> extends AnySimpleT
 		return ArrayUtils.join(result, " ");
 	}
 
+	@Override
+	public Object validateOutputGeneric(Object output) {
+		return validateOutput(output);
+	}
+	
 	@Override
 	public Class<F> getBaseType() {
 		return baseType;

@@ -454,6 +454,7 @@ public class HttpAttributeList implements Map<String, String>, StreamWriter {
 	/**
 	 * Contains double newline
 	 */
+	@Deprecated
 	public int write(byte[] dest, int off) {
 		int p = off;
 

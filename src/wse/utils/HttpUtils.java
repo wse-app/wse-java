@@ -3,6 +3,7 @@ package wse.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.SocketException;
 import java.nio.charset.Charset;
 import java.util.logging.Logger;
 
@@ -79,7 +80,16 @@ public final class HttpUtils extends HttpCodes {
 				return data != null ? data.length : 0;
 			}
 		}, caller.getSSLStore());
-
+		
+		call.setDefSocketFactory(caller.getSocketFactory());
+		call.setSocketProcessor(caller.getSocketProcessor());
+		if (caller.getSoTimeout() != null)
+			try {
+				call.setSoTimeout(caller.getSoTimeout());
+			} catch (SocketException e1) {
+				e1.printStackTrace();
+			}
+		
 		log.info("Calling service: " + caller);
 		try {
 

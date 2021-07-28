@@ -58,6 +58,7 @@ public abstract class xsd_union extends AnySimpleType<Object> {
 	protected final void validateLexicalSpace(String value) {
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public String print(Object output) {
 

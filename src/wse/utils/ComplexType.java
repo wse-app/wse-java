@@ -73,7 +73,13 @@ public abstract class ComplexType implements AnyType, Serializable {
 
 	public static <T, F extends AnySimpleType<T>> T parse(IElement parent, String name, String namespace,
 			Class<F> clazz, boolean mandatory, String default_) {
-		String value = String.valueOf((Object) parent.getValue(name, namespace));
+		String value = parent.getValue(name, namespace);
+		return parse(value, name, clazz, mandatory, default_);
+	}
+	
+	public static <T, F extends AnySimpleType<T>> T parseAttribute(IElement parent, String name, String namespace,
+			Class<F> clazz, boolean mandatory, String default_) {
+		String value = parent.getAttributeValue(name, namespace);
 		return parse(value, name, clazz, mandatory, default_);
 	}
 
@@ -82,6 +88,14 @@ public abstract class ComplexType implements AnyType, Serializable {
 		Object out = print(value, name, clazz, mandatory, default_);
 		if (out != null) {
 			parent.setValue(name, namespace, out);
+		}
+	}
+	
+	public static <T, F extends AnySimpleType<T>> void printAttribute(IElement parent, String name, String namespace,
+			Object value, Class<F> clazz, boolean mandatory, String default_) {
+		Object out = print(value, name, clazz, mandatory, default_);
+		if (out != null) {
+			parent.setAttributeValue(name, namespace, out);
 		}
 	}
 
@@ -106,6 +120,10 @@ public abstract class ComplexType implements AnyType, Serializable {
 
 	public static void printFixed(IElement parent, String value, String name, String namespace) {
 		parent.setValue(name, namespace, value);
+	}
+	
+	public static void printFixedAttribute(IElement parent, String value, String name, String namespace) {
+		parent.setAttributeValue(name, namespace, value);
 	}
 
 	public static <T, F extends AnySimpleType<T>> List<T> parseList(IElement parent, String name, String namespace,

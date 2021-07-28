@@ -26,7 +26,7 @@ public final class WSE extends WSEUtils {
 	public static final boolean runningAndroid;
 
 	private static String applicationName = "WebServiceEngine Application";
-	public static final String VERSION = "21.5";
+	public static final String VERSION = "21.7";
 
 	public static String getVersion() {
 		return VERSION;

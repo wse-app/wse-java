@@ -202,6 +202,7 @@ public class HttpHeader extends HttpAttributeList implements StreamWriter {
 	/**
 	 * Contains double newline
 	 */
+	@Deprecated
 	public int write(byte[] dest, int off) {
 		int p = off;
 		if (descLine != null) {

@@ -3,12 +3,15 @@ package wse.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Socket;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.net.SocketFactory;
 
 import wse.WSE;
 import wse.client.HttpConnection;
@@ -73,7 +76,10 @@ public class CallHandler {
 	private HttpResult result;
 	private String websocket_key;
 
-	private int readTimeout = 10 * 1000;
+	private SocketFactory defSocketFactory;
+	private Consumer<Socket> socketProcessor;
+
+	private int soTimeout = 10 * 1000;
 	private boolean sendChunked = false;
 
 	public CallHandler(HttpMethod method, URI uri, HttpWriter writer) {
@@ -97,7 +103,7 @@ public class CallHandler {
 	}
 
 	public void setSoTimeout(int timeout) throws SocketException {
-		this.readTimeout = timeout;
+		this.soTimeout = timeout;
 		if (this.connection != null) {
 			this.connection.setSoTimeout(timeout);
 		}
@@ -172,10 +178,14 @@ public class CallHandler {
 		}
 
 		connection = new HttpConnection(auth, host, usePort);
+
+		connection.setSocketFactory(this.defSocketFactory);
+		connection.setSocketProcessor(this.socketProcessor);
+
 		try {
-			connection.setSoTimeout(this.readTimeout);
+			connection.setSoTimeout(this.soTimeout);
 		} catch (SocketException e) {
-			throw new WseConnectionException("Failed to set SoTimeout: " + e.getMessage(), e);
+			throw new WseConnectionException("Failed to set SO_TIMEOUT: " + e.getMessage(), e);
 		}
 
 		if (protocol == Protocol.HTTPS || protocol == Protocol.WEB_SOCKET_SECURE) {
@@ -223,8 +233,8 @@ public class CallHandler {
 
 				if (sendChunked)
 					contentStream.addChunked(8192);
-				
-				if (writer != null) {					
+
+				if (writer != null) {
 					Charset cs = http_header.getContentCharset();
 					writer.writeToStream(contentStream, cs);
 				}
@@ -246,7 +256,8 @@ public class CallHandler {
 
 			} else {
 
-				LayeredOutputStream output = new LayeredOutputStream(new ProtectedOutputStream(connection.getOutputStream()));
+				LayeredOutputStream output = new LayeredOutputStream(
+						new ProtectedOutputStream(connection.getOutputStream()));
 
 				output.record(LOG, Level.FINEST, "Request: ");
 				buildHttpHeader(http_header = new HttpHeader());
@@ -471,4 +482,13 @@ public class CallHandler {
 			return null;
 		}
 	}
+
+	public void setDefSocketFactory(SocketFactory defSocketFactory) {
+		this.defSocketFactory = defSocketFactory;
+	}
+
+	public void setSocketProcessor(Consumer<Socket> socketProcessor) {
+		this.socketProcessor = socketProcessor;
+	}
+
 }
