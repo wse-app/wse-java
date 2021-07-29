@@ -187,7 +187,7 @@ public class CallHandler implements HasOptions {
 		}
 
 		boolean ssl = protocol == Protocol.HTTPS || protocol == Protocol.WEB_SOCKET_SECURE;
-		SocketConnection socketConnection = new SocketConnection(auth, ssl, host, port);
+		SocketConnection socketConnection = new SocketConnection(auth, ssl, host, usePort);
 		socketConnection.setOptions(this);
 
 		this.connection = socketConnection;
