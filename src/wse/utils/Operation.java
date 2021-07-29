@@ -25,4 +25,6 @@ public class Operation<I extends ComplexType, O extends ComplexType> extends Wra
 	protected final O unwrapOutput(O output) {
 		return output;
 	}
+
+	
 }

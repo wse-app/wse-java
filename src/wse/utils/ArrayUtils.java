@@ -55,7 +55,7 @@ public final class ArrayUtils {
 		Set<T> set = new HashSet<T>(e);
 		return (set.size() < e.size());
 	}
-	
+
 	public static <T> boolean containsMultiple(T value, @SuppressWarnings("unchecked") T... array) {
 		int copies = 0;
 		for (T t : array)
@@ -136,7 +136,6 @@ public final class ArrayUtils {
 	// ///////////////////////////////////////////////////
 	// invoke
 	// ///////////////////////////////////////////////////
-
 
 	public static Object[] invoke(Method m, Object performBy, Object[] data) {
 		if (m == null)
@@ -1461,10 +1460,14 @@ public final class ArrayUtils {
 		if (src == null || src.length == 0) {
 			return "";
 		}
-		String result = src[0];
-		for (int i = 1; i < src.length; i++)
-			result += between + src[i];
-		return result;
+		StringBuilder builder = new StringBuilder();
+
+		builder.append(src[0]);
+		for (int i = 1; i < src.length; i++) {
+			builder.append(between);
+			builder.append(src[i]);
+		}
+		return builder.toString();
 	}
 
 	public static String joinFilterEmpty(String between, String... src) {
@@ -1491,7 +1494,7 @@ public final class ArrayUtils {
 			}
 		});
 	}
-	
+
 	public static <F, T> String join(Collection<F> src, String between, Transformer<F, T> transformer) {
 		return join(stringValues(src, transformer), between);
 	}

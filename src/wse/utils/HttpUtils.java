@@ -2,19 +2,17 @@ package wse.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.SocketException;
-import java.nio.charset.Charset;
 import java.util.logging.Logger;
 
 import wse.WSE;
+import wse.client.IOConnection;
 import wse.utils.exception.SoapFault;
+import wse.utils.exception.WseConnectionException;
 import wse.utils.exception.WseException;
 import wse.utils.exception.WseHttpParsingException;
 import wse.utils.exception.WseHttpStatusCodeException;
-import wse.utils.exception.WseXMLBuildingException;
 import wse.utils.exception.WseXMLParsingException;
-import wse.utils.http.HttpHeader;
+import wse.utils.http.HttpBuilder;
 import wse.utils.http.HttpMethod;
 import wse.utils.xml.XMLElement;
 import wse.utils.xml.XMLUtils;
@@ -34,69 +32,16 @@ public final class HttpUtils extends HttpCodes {
 	public static void sendReceive(final HttpCall caller, final ComplexType requestMessage,
 			final ComplexType responseMessage) {
 
-		CallHandler call;
+		HttpWriter writer = new SoapXMLWriter(caller.getSoapAction(), requestMessage);
+		CallHandler call = new CallHandler(HttpMethod.POST, caller.getTarget(), writer, caller.getSSLStore());
+		call.setOptions(caller);
 
-		call = new CallHandler(HttpMethod.POST, caller.getTarget(), new HttpWriter() {
-
-			byte[] data = null;
-			Charset charset;
-
-			private void getData() {
-				if (data != null)
-					return;
-				XMLElement soapXML = XMLUtils.createSOAPFrame();
-				XMLElement body = soapXML.getChild("Body");
-
-				if (requestMessage != null) {
-					try {
-						requestMessage.create(body);
-					} catch (Exception e) {
-						throw new WseXMLBuildingException("Failed to create request XML: " + e.getMessage(), e);
-					}
-				}
-
-				XMLUtils.resetNamespaces(soapXML);
-				data = soapXML.toByteArray();
-				charset = soapXML.getTree().getCharset();
-			}
-
-			@Override
-			public void prepareHeader(HttpHeader header) {
-				header.setAttribute(SOAP_ACTION, caller.getSoapAction());
-				header.setContentType(MimeType.text.xml.withCharset(charset));
-			}
-
-			@Override
-			public void writeToStream(OutputStream output, Charset charset) throws IOException {
-				getData();
-				if (data == null)
-					return;
-				output.write(data);
-			}
-
-			@Override
-			public long requestContentLength() {
-				getData();
-				return data != null ? data.length : 0;
-			}
-		}, caller.getSSLStore());
-		
-		call.setDefSocketFactory(caller.getSocketFactory());
-		call.setSocketProcessor(caller.getSocketProcessor());
-		if (caller.getSoTimeout() != null)
-			try {
-				call.setSoTimeout(caller.getSoTimeout());
-			} catch (SocketException e1) {
-				e1.printStackTrace();
-			}
-		
 		log.info("Calling service: " + caller);
 		try {
 
 			HttpResult result;
 			try {
 				result = call.call();
-
 			} catch (WseException e) {
 				// Content may contain fault
 
@@ -163,6 +108,18 @@ public final class HttpUtils extends HttpCodes {
 				throw (SoapFault) e;
 
 			throw new WseException("Call failed: " + e.getMessage(), e);
+		}
+	}
+
+	public static HttpResult read(IOConnection connection, boolean modifyContent) {
+		return read(connection.getInputStream(), modifyContent);
+	}
+
+	public static HttpResult read(InputStream inputStream, boolean modifyContent) {
+		try {
+			return HttpBuilder.read(inputStream, modifyContent);
+		} catch (IOException e) {
+			throw new WseConnectionException("Failed to read: " + e.getMessage(), e);
 		}
 	}
 

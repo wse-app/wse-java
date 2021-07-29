@@ -18,7 +18,10 @@ import java.util.logging.Logger;
 import wse.WSE;
 import wse.server.servlet.ws.PongListener;
 import wse.utils.CallHandler;
+import wse.utils.HasOptions;
 import wse.utils.HttpResult;
+import wse.utils.IOptions;
+import wse.utils.Options;
 import wse.utils.StringUtils;
 import wse.utils.event.ListenerRegistration;
 import wse.utils.exception.WseWebSocketException;
@@ -36,7 +39,7 @@ import wse.utils.writable.StreamWriter;
  * @author WSE
  *
  */
-public class WebSocket implements WebSocketCodes {
+public class WebSocket implements WebSocketCodes, HasOptions {
 
 	public static final String getCodeName(int code) {
 		switch (code) {
@@ -239,6 +242,7 @@ public class WebSocket implements WebSocketCodes {
 
 	private static Logger log = WSE.getLogger();
 	private WebSocketEndpointImpl endpoint;
+	private final Options options = new Options();
 	private URI uri;
 	private SSLAuth auth;
 
@@ -301,9 +305,8 @@ public class WebSocket implements WebSocketCodes {
 
 	private void doHandshake() throws IOException {
 		this.handler = new CallHandler(HttpMethod.GET, this.uri, null, this.auth);
+		this.handler.setOptions(this);
 		
-		this.handler.setSoTimeout(1000 * 10);
-
 		String controlKey = controlKey();
 		this.handler.setWebSocketControlKey(controlKey);
 
@@ -373,6 +376,17 @@ public class WebSocket implements WebSocketCodes {
 				output.flush();
 			}
 		});
+	}
+
+	
+	@Override
+	public IOptions getOptions() {
+		return options;
+	}
+
+	@Override
+	public void setOptions(HasOptions other) {
+		options.setOptions(other);
 	}
 
 }

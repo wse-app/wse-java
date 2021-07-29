@@ -3,18 +3,15 @@ package wse.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Socket;
-import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.net.SocketFactory;
-
 import wse.WSE;
-import wse.client.HttpConnection;
+import wse.client.IOConnection;
+import wse.client.SocketConnection;
 import wse.client.shttp.SHttpManager;
 import wse.server.servlet.ws.WebSocketServlet;
 import wse.utils.exception.SecurityRetry;
@@ -41,7 +38,7 @@ import wse.utils.stream.ProtectedOutputStream;
 import wse.utils.stream.WseInputStream;
 import wse.utils.writable.StreamCatcher;
 
-public class CallHandler {
+public class CallHandler implements HasOptions {
 
 	private static final Logger LOG = WSE.getLogger();
 	private static final Charset UTF8 = Charset.forName("UTF-8");
@@ -59,7 +56,7 @@ public class CallHandler {
 	private HttpHeader shttp_header;
 
 	/** Connection */
-	private HttpConnection connection;
+	private IOConnection connection;
 
 	/** Response */
 	protected HttpResult responseHttp;
@@ -76,11 +73,13 @@ public class CallHandler {
 	private HttpResult result;
 	private String websocket_key;
 
-	private SocketFactory defSocketFactory;
-	private Consumer<Socket> socketProcessor;
+//	private SocketFactory defSocketFactory;
+//	private Consumer<Socket> socketProcessor;
 
-	private int soTimeout = 10 * 1000;
+//	private int soTimeout = 10 * 1000;
 	private boolean sendChunked = false;
+
+	private final Options options = new Options();
 
 	public CallHandler(HttpMethod method, URI uri, HttpWriter writer) {
 		this(method, uri, writer, null);
@@ -94,6 +93,15 @@ public class CallHandler {
 		this.auth = auth;
 	}
 
+	public IOptions getOptions() {
+		return options;
+	}
+
+	@Override
+	public void setOptions(HasOptions other) {
+		options.setOptions(other);
+	}
+
 	public void setDataWriter(HttpWriter writer) {
 		this.writer = writer;
 	}
@@ -102,12 +110,12 @@ public class CallHandler {
 		this.websocket_key = key;
 	}
 
-	public void setSoTimeout(int timeout) throws SocketException {
-		this.soTimeout = timeout;
-		if (this.connection != null) {
-			this.connection.setSoTimeout(timeout);
-		}
-	}
+//	public void setSoTimeout(int timeout) throws SocketException {
+//		this.soTimeout = timeout;
+//		if (this.connection != null) {
+//			this.connection.setSoTimeout(timeout);
+//		}
+//	}
 
 	/**
 	 * Call the requested uri, response is never null, an exception is thrown
@@ -141,7 +149,8 @@ public class CallHandler {
 	}
 
 	private void initialize() {
-
+		options.log(LOG, Level.FINE, "Options");
+		
 		protocol = Protocol.parse(uri.getScheme());
 		if (protocol == null) {
 			throw new WseInitException("Got invalid protocol: " + uri.getScheme());
@@ -177,23 +186,15 @@ public class CallHandler {
 			usePort = port;
 		}
 
-		connection = new HttpConnection(auth, host, usePort);
+		boolean ssl = protocol == Protocol.HTTPS || protocol == Protocol.WEB_SOCKET_SECURE;
+		SocketConnection socketConnection = new SocketConnection(auth, ssl, host, port);
+		socketConnection.setOptions(this);
 
-		connection.setSocketFactory(this.defSocketFactory);
-		connection.setSocketProcessor(this.socketProcessor);
-
-		try {
-			connection.setSoTimeout(this.soTimeout);
-		} catch (SocketException e) {
-			throw new WseConnectionException("Failed to set SO_TIMEOUT: " + e.getMessage(), e);
-		}
-
-		if (protocol == Protocol.HTTPS || protocol == Protocol.WEB_SOCKET_SECURE) {
-			connection.setUseSSL(true);
-		}
+		this.connection = socketConnection;
 
 		timer.begin("Connect");
-		connection.connect(LOG);
+		socketConnection.connect();
+
 		timer.end();
 	}
 
@@ -286,9 +287,7 @@ public class CallHandler {
 
 		timer.begin("Read");
 
-		connection.read(true);
-
-		this.result = connection.getRecievedHttp();
+		this.result = HttpUtils.read(this.connection, true);
 
 		timer.end();
 
@@ -449,9 +448,9 @@ public class CallHandler {
 
 	protected static class ConnectionClosingInputStream extends WseInputStream {
 
-		private final HttpConnection close;
+		private final IOConnection close;
 
-		public ConnectionClosingInputStream(InputStream stream, HttpConnection close) {
+		public ConnectionClosingInputStream(InputStream stream, IOConnection close) {
 			super(stream);
 			this.close = close;
 		}
@@ -481,14 +480,6 @@ public class CallHandler {
 		} catch (URISyntaxException e) {
 			return null;
 		}
-	}
-
-	public void setDefSocketFactory(SocketFactory defSocketFactory) {
-		this.defSocketFactory = defSocketFactory;
-	}
-
-	public void setSocketProcessor(Consumer<Socket> socketProcessor) {
-		this.socketProcessor = socketProcessor;
 	}
 
 }

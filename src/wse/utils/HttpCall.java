@@ -1,11 +1,8 @@
 package wse.utils;
 
-import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
+import java.util.Map;
 
 import wse.utils.ssl.SSLAuth;
 import wse.utils.ssl.SSLManager;
@@ -20,7 +17,7 @@ import wse.utils.ssl.SSLManager;
  * @author Greattech
  *
  */
-public abstract class HttpCall extends Target {
+public abstract class HttpCall extends Target implements IOptions {
 	public HttpCall() {
 	}
 
@@ -35,11 +32,6 @@ public abstract class HttpCall extends Target {
 	public HttpCall(URI uri) {
 		super(uri);
 	}
-
-	private SSLSocketFactory sslSocketFactory;
-	private SocketFactory socketFactory;
-	private Consumer<Socket> socketProcessor;
-	private Integer soTimeout;
 
 	//
 	// SSL
@@ -64,105 +56,47 @@ public abstract class HttpCall extends Target {
 		this.private_store = sslStore;
 	}
 
-	/**
-	 * Retrieves the socket factory that this HttpCall is requested to use. This can
-	 * be overridden by {@link #setSocketFactory(SocketFactory)}<br>
-	 * 
-	 * If the used protocol is secure, ssl socket factories are prioritized, as
-	 * specified by {@link Protocol#getDefaultSocketFactory()}.
-	 * 
-	 * @return the socket factory that this HttpCall should use.
-	 */
-	public SocketFactory getSocketFactory() {
-		return getSocketFactory(null);
+	//
+	// Options
+	//
+
+	private final Options options = new Options();
+
+	@Override
+	public IOptions getOptions() {
+		return options;
 	}
 
-	/**
-	 * Retrieves the socket factory that this HttpCall is requested to use. This can
-	 * be overridden by {@link #setSocketFactory(SocketFactory)}<br>
-	 * 
-	 * If the used protocol is secure, ssl socket factories are prioritized, as
-	 * specified by {@link Protocol#getDefaultSocketFactory()}.
-	 * 
-	 * @param protocolOverride A Protocol to be used instead of
-	 *                         {@link #getTargetSchemeAsProtocol()}
-	 * @return the socket factory that this HttpCall should use.
-	 */
-	public SocketFactory getSocketFactory(Protocol protocolOverride) {
-		Protocol protocol = protocolOverride != null ? protocolOverride : getTargetSchemeAsProtocol();
-
-		if (protocol == null) {
-			return SocketFactory.getDefault();
-		}
-
-		if (protocol.isSecure()) {
-			if (sslSocketFactory != null)
-				return sslSocketFactory;
-
-			SSLAuth sslAuth = getSSLStore();
-			if (sslAuth != null)
-				return sslAuth.getSSLSocketFactory();
-
-		} else {
-
-			if (socketFactory != null) {
-				return socketFactory;
-			}
-		}
-
-		return protocol.getDefaultSocketFactory();
+	@Override
+	public <T> T get(Option<T> option) {
+		return options.get(option);
 	}
 
-	/**
-	 * Sets the SocketFactory or SSLSocketFactory to be used by this HttpCall. If
-	 * not specified, default SocketFactories will be used.
-	 * 
-	 * @param factory
-	 */
-	public void setSocketFactory(SocketFactory factory) {
-		if (factory instanceof SSLSocketFactory) {
-			this.sslSocketFactory = (SSLSocketFactory) factory;
-		} else {
-			this.socketFactory = factory;
-		}
+	@Override
+	public <T> T get(Option<T> option, T def) {
+		return options.get(option, def);
 	}
 
-	/**
-	 * Specify a Socket processor that will receive Sockets before they are
-	 * connected
-	 * 
-	 * @param socketProcessor A Consumer that will receive Sockets before they are
-	 *                        connected
-	 */
-	public void setSocketProcessor(Consumer<Socket> socketProcessor) {
-		this.socketProcessor = socketProcessor;
+	@Override
+	public <T> void set(Option<T> option, T value) {
+		options.set(option, value);
 	}
 
-	/**
-	 * @return The Socket processor specified by
-	 *         {@link #setSocketProcessor(Consumer)}
-	 */
-	public Consumer<Socket> getSocketProcessor() {
-		return this.socketProcessor;
+	@Override
+	public void setOptions(IOptions other) {
+		options.setOptions(other);
 	}
 
-	/**
-	 * As specified by {@link Socket#setSoTimeout(int)}
-	 * @param timeout
-	 * @see Socket#setSoTimeout(int)
-	 */
-	public void setSoTimeout(Integer timeout) {
-		this.soTimeout = timeout;
+	@Override
+	public void setOptions(HasOptions other) {
+		this.options.setOptions(other);
 	}
-	
-	
-	/**
-	 * @return the SO_TIMEOUT specified by {@link #setSoTimeout(Integer)}
-	 */
-	public Integer getSoTimeout() {
-		return this.soTimeout;
+
+	@Override
+	public Map<Option<?>, Object> getAll() {
+		return options.getAll();
 	}
-	
+
 	/**
 	 * 
 	 * Returns the most relevant SSLAuth instance for this caller. <br>

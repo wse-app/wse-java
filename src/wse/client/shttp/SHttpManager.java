@@ -8,8 +8,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import wse.WSE;
-import wse.client.HttpConnection;
+import wse.client.IOConnection;
+import wse.client.SocketConnection;
 import wse.utils.HttpResult;
+import wse.utils.HttpUtils;
 import wse.utils.SHttp;
 import wse.utils.StringUtils;
 import wse.utils.exception.WseConnectionException;
@@ -126,18 +128,21 @@ public final class SHttpManager {
 		header.setSendContentLength(true);
 
 		// Create connection
-		HttpConnection connection = new HttpConnection(auth, host, port);
-		connection.setUseSSL(true);
-
-		log.finer("SHTTP init target: https://" + host + ":" + port);
+		IOConnection connection = new SocketConnection(auth, /* ssl: */ true, host, port);
+		
+		log.finer("SHttp init target: https://" + host + ":" + port);
 
 		// Connect
 
-		connection.connect(log);
+		try {
+			connection.connect();
+		} catch (IOException e) {
+			throw new WseConnectionException("Failed to connect: " + e.getMessage(), e);
+		}
 
 		OutputStream output = connection.getOutputStream();
 
-		// Print
+		// Write
 		try {
 			header.writeToStream(output, UTF8);
 			output.flush();
@@ -146,15 +151,14 @@ public final class SHttpManager {
 		}
 
 		if (log.isLoggable(Level.FINE))
-			log.fine("sHttp Init Request:\n" + header.toString());
+			log.fine("SHttp Init Request:\n" + header.toString());
 
-		// Retrieve
-		connection.read();
+		// Read
 
-		HttpResult answer = connection.getRecievedHttp();
+		HttpResult answer = HttpUtils.read(connection.getInputStream(), false);
 
 		if (log.isLoggable(Level.FINE))
-			log.fine("sHttp Init Response Header:\n" + answer.getHeader().toPrettyString());
+			log.fine("SHttp Init Response Header:\n" + answer.getHeader().toPrettyString());
 
 		HttpHeader responseHeader = answer.getHeader();
 
@@ -169,7 +173,7 @@ public final class SHttpManager {
 		// Check status code
 
 		if (!status.isSuccessCode())
-			throw new WseSHttpException("Failed to init shttp session. Got status \"" + status.toString());
+			throw new WseSHttpException("Failed to init SHttp session. Got status \"" + status.toString());
 
 		/**
 		 * - key name - encryption key, base64 encoded - port number for shttp
