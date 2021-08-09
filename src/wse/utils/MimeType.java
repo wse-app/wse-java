@@ -518,6 +518,8 @@ public class MimeType {
 		public static final text x_vcard = b("x-vcard").text("vcf");
 		/** Scitext continuous tone file */
 		public static final text scriptlet = b("scriptlet").text("sct");
+		/** Markdown */
+		public static final text markdown = b("markdown", "x-markdown").text("sct");
 
 		public static final text any = b("*").text("*");
 
