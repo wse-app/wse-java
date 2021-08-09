@@ -40,6 +40,9 @@ import wse.utils.writable.StreamCatcher;
 
 public class CallHandler implements HasOptions {
 
+	public static final Option<IOConnection> CONNECTION_OVERRIDE = new Option<>(CallHandler.class,
+			"CONNECTION_OVERRIDE");
+
 	private static final Logger LOG = WSE.getLogger();
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 
@@ -110,13 +113,6 @@ public class CallHandler implements HasOptions {
 		this.websocket_key = key;
 	}
 
-//	public void setSoTimeout(int timeout) throws SocketException {
-//		this.soTimeout = timeout;
-//		if (this.connection != null) {
-//			this.connection.setSoTimeout(timeout);
-//		}
-//	}
-
 	/**
 	 * Call the requested uri, response is never null, an exception is thrown
 	 * instead
@@ -150,18 +146,20 @@ public class CallHandler implements HasOptions {
 
 	private void initialize() {
 		options.log(LOG, Level.FINE, "Options");
-		
-		protocol = Protocol.parse(uri.getScheme());
+
+		protocol = Protocol.forName(uri.getScheme());
 		if (protocol == null) {
-			throw new WseInitException("Got invalid protocol: " + uri.getScheme());
+			throw new WseInitException("Unknown protocol: " + uri.getScheme());
 		}
 		LOG.fine("Protocol: " + protocol);
 
 		host = uri.getHost();
 
-		if (host == null) {
+		// Only care about host if default connection
+		if (host == null && this.getOptions().get(CallHandler.CONNECTION_OVERRIDE) == null) {
 			throw new WseInitException("Got host == null");
 		}
+
 		this.port = uri.getPort();
 		if (port == -1) {
 			if (protocol.isSecure())
@@ -186,16 +184,28 @@ public class CallHandler implements HasOptions {
 			usePort = port;
 		}
 
+		this.connection = getConnection();
+
+		try {
+			timer.begin("Connect");
+			connection.connect();
+			timer.end();
+		} catch (Exception e) {
+			LOG.severe("Failed to connect: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			throw new WseConnectionException(e.getClass().getSimpleName() + ": " + e.getMessage(), e);
+		}
+	}
+
+	private IOConnection getConnection() {
+
+		IOConnection override = getOptions().get(CallHandler.CONNECTION_OVERRIDE);
+		if (override != null)
+			return override;
+
 		boolean ssl = protocol == Protocol.HTTPS || protocol == Protocol.WEB_SOCKET_SECURE;
 		SocketConnection socketConnection = new SocketConnection(auth, ssl, host, usePort);
 		socketConnection.setOptions(this);
-
-		this.connection = socketConnection;
-
-		timer.begin("Connect");
-		socketConnection.connect();
-
-		timer.end();
+		return socketConnection;
 	}
 
 	private void shttpSetup() {

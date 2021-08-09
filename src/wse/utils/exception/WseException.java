@@ -31,6 +31,7 @@ public class WseException extends RuntimeException implements Iterable<Throwable
 
 	/**
 	 * Returns the last throwable in the getCause() chain.
+	 * 
 	 * @param t the parent throwable
 	 * @return the first throwable that was thrown in this exception chain.
 	 */
@@ -56,7 +57,8 @@ public class WseException extends RuntimeException implements Iterable<Throwable
 	}
 
 	/**
-	 * Returns an iterator over elements of type Throwable, iterating over all throwables in the exception chain.
+	 * Returns an iterator over elements of type Throwable, iterating over all
+	 * throwables in the exception chain.
 	 * 
 	 * @return An iterator for each throwable in the getCause() chain.
 	 */
@@ -66,7 +68,8 @@ public class WseException extends RuntimeException implements Iterable<Throwable
 	}
 
 	/**
-	 * Returns an iterable for elements of type Throwable, iterating over all throwables in the exception chain.
+	 * Returns an iterable for elements of type Throwable, iterating over all
+	 * throwables in the exception chain.
 	 * 
 	 * @return An iterable for each throwable in the getCause() chain.
 	 */
@@ -75,8 +78,6 @@ public class WseException extends RuntimeException implements Iterable<Throwable
 			@Override
 			public Iterator<Throwable> iterator() {
 				return new Iterator<Throwable>() {
-
-					boolean first = true;
 					Throwable c = first_;
 
 					@Override
@@ -86,31 +87,33 @@ public class WseException extends RuntimeException implements Iterable<Throwable
 
 					@Override
 					public Throwable next() {
-						if (first) {
-							first = false;
+						try {
 							return c;
+						} finally {
+							if (c != null)
+								c = c.getCause();
 						}
-
-						return c = c.getCause();
 					}
 
 					@Override
 					public boolean hasNext() {
-						return c.getCause() != null || first;
+						return c != null;
 					}
 				};
 			}
 		};
 	}
-	private static String[] layers = new String[] {"\n", "\n\t", "\n\t\t", "\n\t\t\t", "\n\t\t\t\t", "\n\t\t\t\t\t",
+
+	private static String[] layers = new String[] { "\n", "\n\t", "\n\t\t", "\n\t\t\t", "\n\t\t\t\t", "\n\t\t\t\t\t",
 			"\n\t\t\t\t\t\t", "\n\t\t\t\t\t\t\t", "\n\t\t\t\t\t\t\t\t", "\n\t\t\t\t\t\t\t\t\t" };
+
 	public static String getCauseTree(Throwable first) {
 		StringBuilder b = new StringBuilder();
-		
+
 		int i = 0;
 		for (Throwable t : iterable(first)) {
 			if (i != 0)
-				b.append(layers[i]);
+				b.append(layers[i % layers.length]);
 			b.append(t.getClass().getName());
 			i++;
 		}

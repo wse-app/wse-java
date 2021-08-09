@@ -112,7 +112,13 @@ public final class HttpUtils extends HttpCodes {
 	}
 
 	public static HttpResult read(IOConnection connection, boolean modifyContent) {
-		return read(connection.getInputStream(), modifyContent);
+		InputStream input;
+		try {
+			input = connection.getInputStream();
+		} catch (IOException e) {
+			throw new WseConnectionException(e);
+		}
+		return read(input, modifyContent);
 	}
 
 	public static HttpResult read(InputStream inputStream, boolean modifyContent) {

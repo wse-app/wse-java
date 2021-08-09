@@ -181,7 +181,7 @@ public class Target {
 	 * @return The scheme part of the target uri
 	 */
 	public Protocol getTargetSchemeAsProtocol() {
-		return Protocol.parseIgnoreCase(getTargetScheme());
+		return Protocol.forName(getTargetScheme());
 	}
 
 	/**

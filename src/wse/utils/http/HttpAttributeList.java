@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +28,7 @@ public class HttpAttributeList implements Map<String, String>, StreamWriter {
 	protected static final String USER_AGENT = "User-Agent";
 	protected static final String HOST = "Host";
 
-	protected Map<String, HeaderAttribute> attributes = new HashMap<>();
+	protected Map<String, HeaderAttribute> attributes = new LinkedHashMap<>();
 
 	public HttpAttributeList(HttpAttributeList copy) {
 		this();
@@ -312,8 +313,7 @@ public class HttpAttributeList implements Map<String, String>, StreamWriter {
 	 * 
 	 * @return an immutable list containing WeighedStrings representing the
 	 *         "Accept-Encoding" attribute value.
-	 * 
-	 */ // TODO
+	 */
 	public List<WeighedTransferEncoding> getAcceptEncoding() {
 		String val = getAttributeValue("Accept-Language");
 		if (val == null)

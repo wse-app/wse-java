@@ -5,21 +5,21 @@ import java.net.ServerSocket;
 
 import javax.net.ServerSocketFactory;
 
-public class ServiceReceiverHttp extends ServiceReceiver{
+public class ServiceReceiverHttp extends ServiceReceiver {
 
 	private ServerSocketFactory factory;
 	private ServerSocket socket;
-	
+
 	public ServiceReceiverHttp(ServiceManager manager, int port, Restrictions restrictions) {
 		super(manager, port, restrictions);
-		
+
 		factory = ServerSocketFactory.getDefault();
 	}
 
 	@Override
 	protected void initSocket() throws IOException {
 		socket = ServiceReceiver.makeSocket(getPort(), getRestrictions(), factory);
-		
+
 		socket.setReuseAddress(true);
 		socket.setSoTimeout(0);
 	}

@@ -168,7 +168,7 @@ class WSEUtils {
 		notNull(method, "Invalid method: null");
 		notNull(uri, "Invalid URI: null");
 
-		Protocol protocol = Protocol.parse(uri.getScheme());
+		Protocol protocol = Protocol.forName(uri.getScheme());
 		notNull(protocol, "Invalid procotol: null");
 
 		String host = uri.getHost();

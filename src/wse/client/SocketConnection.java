@@ -116,13 +116,8 @@ public class SocketConnection implements IOConnection, HasOptions {
 		this.port = port;
 	}
 
-	public void connect() {
-		try {
-			socket = this.ssl ? connectSSL() : connectNonSSL();
-		} catch (Exception e) {
-			LOG.severe("Failed to connect: " + e.getClass().getSimpleName() + ": " + e.getMessage());
-			throw new WseConnectionException(e.getClass().getSimpleName() + ": " + e.getMessage(), e);
-		}
+	public void connect() throws IOException {
+		socket = this.ssl ? connectSSL() : connectNonSSL();
 
 		if (!socket.isConnected() || socket.isClosed()) {
 			LOG.severe("Socket failed to open");

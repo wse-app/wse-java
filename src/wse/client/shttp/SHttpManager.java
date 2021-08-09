@@ -127,89 +127,95 @@ public final class SHttpManager {
 
 		header.setSendContentLength(true);
 
-		// Create connection
-		IOConnection connection = new SocketConnection(auth, /* ssl: */ true, host, port);
-		
 		log.finer("SHttp init target: https://" + host + ":" + port);
 
-		// Connect
+		// Create connection
 
-		try {
-			connection.connect();
-		} catch (IOException e) {
-			throw new WseConnectionException("Failed to connect: " + e.getMessage(), e);
+		HttpResult answer;
+
+		try (IOConnection connection = new SocketConnection(auth, /* ssl: */ true, host, port)) {
+
+			try {
+				// Connect
+
+				try {
+					connection.connect();
+				} catch (IOException e) {
+					throw new WseConnectionException("Failed to connect: " + e.getMessage(), e);
+				}
+
+				OutputStream output = connection.getOutputStream();
+
+				// Write
+				header.writeToStream(output, UTF8);
+				output.flush();
+
+				if (log.isLoggable(Level.FINE))
+					log.fine("SHttp Init Request:\n" + header.toString());
+
+				// Read
+				answer = HttpUtils.read(connection.getInputStream(), false);
+
+			} catch (IOException e) {
+				throw new WseConnectionException(e);
+			}
+
+			if (log.isLoggable(Level.FINE))
+				log.fine("SHttp Init Response Header:\n" + answer.getHeader().toPrettyString());
+
+			HttpHeader responseHeader = answer.getHeader();
+
+			if (responseHeader == null)
+				throw new WseSHttpInitException("Failed to parse response header");
+
+			HttpStatusLine status = responseHeader.getStatusLine();
+
+			if (status == null)
+				throw new WseSHttpInitException("Invalid response header: " + responseHeader.getDescriptionLine());
+
+			// Check status code
+
+			if (!status.isSuccessCode())
+				throw new WseSHttpException("Failed to init SHttp session. Got status \"" + status.toString());
+
+			/**
+			 * - key name - encryption key, base64 encoded - port number for shttp
+			 * communication (since shttp is not ssl/tls based) - ttl in seconds
+			 */
+			String payload;
+			try {
+				payload = new String(StreamUtils.readAll(answer.getContent()));
+			} catch (IOException e) {
+				throw new WseSHttpException("Failed to read shttp response: " + e.getMessage(), e);
+			}
+
+			String[] parts = payload.split(" ", 5);
+
+			int sPort = 0;
+			long exp = 0;
+			int len = 0;
+			try {
+				sPort = Integer.parseInt(parts[2]);
+				exp = Long.parseLong(parts[3]);
+				len = Integer.parseInt(parts[4]) / 8;
+			} catch (NumberFormatException e) {
+				throw new WseSHttpException("Failed to parse shttp response: " + e.getMessage(), e);
+			}
+
+			String key_64 = parts[1];
+
+			byte[] key = StringUtils.parseBase64Binary(key_64);
+
+			byte[] finalKey = new byte[len];
+			System.arraycopy(key, 0, finalKey, 0, finalKey.length);
+			SKey skey = new SKey(parts[0], finalKey, host, port, sPort, exp);
+
+			store(host, port, skey);
+
+			return skey;
+		} catch (IOException e1) {
+			throw new WseConnectionException(e1.getMessage(), e1);
 		}
-
-		OutputStream output = connection.getOutputStream();
-
-		// Write
-		try {
-			header.writeToStream(output, UTF8);
-			output.flush();
-		} catch (IOException e) {
-			throw new WseConnectionException(e);
-		}
-
-		if (log.isLoggable(Level.FINE))
-			log.fine("SHttp Init Request:\n" + header.toString());
-
-		// Read
-
-		HttpResult answer = HttpUtils.read(connection.getInputStream(), false);
-
-		if (log.isLoggable(Level.FINE))
-			log.fine("SHttp Init Response Header:\n" + answer.getHeader().toPrettyString());
-
-		HttpHeader responseHeader = answer.getHeader();
-
-		if (responseHeader == null)
-			throw new WseSHttpInitException("Failed to parse response header");
-
-		HttpStatusLine status = responseHeader.getStatusLine();
-
-		if (status == null)
-			throw new WseSHttpInitException("Invalid response header: " + responseHeader.getDescriptionLine());
-
-		// Check status code
-
-		if (!status.isSuccessCode())
-			throw new WseSHttpException("Failed to init SHttp session. Got status \"" + status.toString());
-
-		/**
-		 * - key name - encryption key, base64 encoded - port number for shttp
-		 * communication (since shttp is not ssl/tls based) - ttl in seconds
-		 * 
-		 */
-		String payload;
-		try {
-			payload = new String(StreamUtils.readAll(answer.getContent()));
-		} catch (IOException e) {
-			throw new WseSHttpException("Failed to read shttp response: " + e.getMessage(), e);
-		}
-		String[] parts = payload.split(" ", 5);
-
-		int sPort = 0;
-		long exp = 0;
-		int len = 0;
-		try {
-			sPort = Integer.parseInt(parts[2]);
-			exp = Long.parseLong(parts[3]);
-			len = Integer.parseInt(parts[4]) / 8;
-		} catch (NumberFormatException e) {
-			throw new WseSHttpException("Failed to parse shttp response: " + e.getMessage(), e);
-		}
-
-		String key_64 = parts[1];
-
-		byte[] key = StringUtils.parseBase64Binary(key_64);
-
-		byte[] finalKey = new byte[len];
-		System.arraycopy(key, 0, finalKey, 0, finalKey.length);
-		SKey skey = new SKey(parts[0], finalKey, host, port, sPort, exp);
-
-		store(host, port, skey);
-
-		return skey;
 	}
 
 }

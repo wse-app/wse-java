@@ -2,35 +2,54 @@ package wse.utils;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 
 public class Protocol {
-	private static final LinkedList<Protocol> values = new LinkedList<>();
+	private static final Map<String, Protocol> values = new LinkedHashMap<>();
 
 	public static final SecureProtocol WEB_SOCKET_SECURE = new SecureProtocol("wss");
 	public static final Protocol WEB_SOCKET = new Protocol("ws");
 	public static final SecureProtocol SHTTP = new SecureProtocol("shttp");
 	public static final SecureProtocol HTTPS = new SecureProtocol("https");
 	public static final Protocol HTTP = new Protocol("http");
+	
+	public static void register(Protocol protocol) {
+		register(protocol.name, protocol);
+	}
+	
+	public static void register(String name, Protocol protocol) {
+		if (name == null)
+			throw new NullPointerException("name == null");
+		if (protocol == null)
+			throw new NullPointerException("protocol == null");
+		
+		name = name.toLowerCase();
+		values.put(name, protocol);
+	}
+	
+	static {
+		register(WEB_SOCKET_SECURE);
+		register(WEB_SOCKET);
+		register(SHTTP);
+		register(HTTPS);
+		register(HTTP);
+	}
 
-//	HTTP("http"), 
-//	HTTPS("https"), 
-//	SHTTP("shttp"), 
-//	WEB_SOCKET("ws"), 
-//	WEB_SOCKET_SECURE("wss");
+	private final String name;
 
-	private String nicename;
-
-	public Protocol(String nicename) {
-		this.nicename = nicename;
-		values.addFirst(this);
+	/**
+	 * @param name Will be used when parsing an URL to find the protocol.
+	 */
+	public Protocol(String name) {
+		this.name = name;
 	}
 
 	public String toString() {
-		return nicename;
+		return name;
 	}
 
 	public boolean isWebSocket() {
@@ -50,23 +69,14 @@ public class Protocol {
 	}
 
 	public static Collection<Protocol> values() {
-		return Collections.unmodifiableCollection(values);
+		return Collections.unmodifiableCollection(values.values());
 	}
 
-	public static Protocol parseIgnoreCase(String nicename) {
-		for (Protocol t : Protocol.values()) {
-			if (t.nicename.equalsIgnoreCase(nicename))
-				return t;
-		}
-		return null;
-	}
 
-	public static Protocol parse(String nicename) {
-		for (Protocol t : Protocol.values()) {
-			if (t.nicename.equals(nicename))
-				return t;
-		}
-		return null;
+	public static Protocol forName(String name) {
+		if (name == null) return null;
+		name = name.toLowerCase();
+		return values.get(name);
 	}
 
 	/**
