@@ -94,7 +94,7 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 		if (isClosed)
 			throw new WseWebSocketException("WebSocket has been closed");
 		if (isCloseRequestedByMe)
-			throw new WseWebSocketException("WebSocket has been requested to closed");
+			throw new WseWebSocketException("WebSocket has been requested to close");
 		synchronized (OUTPUT_LOCK) {
 			output.setOpCode(opcode);
 			if (writer != null) {
@@ -192,7 +192,11 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 			}
 			return;
 		}
-		onMessage(message);
+		try {
+			onMessage(message);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private List<WebSocketListener> listeners = new ArrayList<>();
@@ -213,14 +217,14 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 		};
 	}
 
-	public void onInit(HttpHeader request) {
+	public void onInit(HttpHeader request) throws IOException {
 		synchronized (listeners) {
 			for (WebSocketListener l : listeners)
 				l.onInit(request);
 		}
 	}
 
-	public void onMessage(Message message) {
+	public void onMessage(Message message) throws IOException {
 		synchronized (listeners) {
 			for (WebSocketListener l : listeners)
 				l.onMessage(message.inputStream());
@@ -229,8 +233,13 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 
 	public void onClose(boolean controlledShutdown, String shutdownMessage) {
 		synchronized (listeners) {
-			for (WebSocketListener l : listeners)
-				l.onClose(controlledShutdown, shutdownMessage);
+			for (WebSocketListener l : listeners) {
+				try {
+					l.onClose(controlledShutdown, shutdownMessage);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 

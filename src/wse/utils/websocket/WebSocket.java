@@ -146,6 +146,7 @@ public class WebSocket implements WebSocketCodes, HasOptions {
 
 	public static Frame readNextFrame(InputStream stream, boolean client) throws IOException {
 
+		
 		byte[] f2 = read(stream, 2);
 		if (f2 == null) {
 			throw new WseWebSocketException("got end of stream");

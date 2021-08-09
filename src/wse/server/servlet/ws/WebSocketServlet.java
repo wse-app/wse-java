@@ -3,6 +3,7 @@ package wse.server.servlet.ws;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import wse.WSE;
@@ -24,18 +25,13 @@ import wse.utils.writable.StreamWriter;
 public abstract class WebSocketServlet extends HttpServlet implements WebSocketCodes, WebSocketEndpoint {
 
 	private static Logger log = WSE.getLogger();
-	
+
 	public static final int[] SUPPORTED_VERSIONS = { 13 };
 
-	public static final String 
-			UPGRADE_VALUE = "websocket",
-			CONNECTION_VALUE = "Upgrade";
+	public static final String UPGRADE_VALUE = "websocket", CONNECTION_VALUE = "Upgrade";
 
-	public static final String 
-			ATTRIB_UPGRADE = "Upgrade",
-			ATTRIB_CONNECTION = "Connection",
-			ATTRIB_KEY = "Sec-WebSocket-Key",
-			ATTRIB_VERSION = "Sec-WebSocket-Version",
+	public static final String ATTRIB_UPGRADE = "Upgrade", ATTRIB_CONNECTION = "Connection",
+			ATTRIB_KEY = "Sec-WebSocket-Key", ATTRIB_VERSION = "Sec-WebSocket-Version",
 			ATTRIB_ACCEPT = "Sec-WebSocket-Accept";
 
 	private WebSocketEndpointImpl endpoint;
@@ -53,7 +49,7 @@ public abstract class WebSocketServlet extends HttpServlet implements WebSocketC
 			return;
 		}
 		if (connection_attrib == null) {
-			
+
 			response.sendError(HttpCodes.BAD_REQUEST, "Header attribute " + ATTRIB_CONNECTION + " missing");
 			return;
 		}
@@ -100,15 +96,16 @@ public abstract class WebSocketServlet extends HttpServlet implements WebSocketC
 		response.setStatusCode(101);
 		response.writeHeader();
 		response.flush();
-		
+
 		this.endpoint = new WebSocketEndpointImpl(false);
 		this.endpoint.setInputStream(new ProtectedInputStream(request.getContent()));
 		this.endpoint.setOutputStream(new ProtectedOutputStream(response));
 		this.endpoint.registerListener(this);
 		this.endpoint.onInit(request);
 		try {
-			this.endpoint.readLoop();						
-		}catch(Exception e) {
+			this.endpoint.readLoop();
+		} catch (Exception e) {
+			log.log(Level.SEVERE, e.getMessage(), e);
 			this.forceClose(e.getMessage());
 		}
 	}
@@ -121,7 +118,7 @@ public abstract class WebSocketServlet extends HttpServlet implements WebSocketC
 			}
 		});
 	}
-	
+
 	@Override
 	public void sendMessage(byte opcode, StreamWriter writer) throws IOException {
 		this.endpoint.sendMessage(opcode, writer);
