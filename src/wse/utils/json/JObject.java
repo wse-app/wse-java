@@ -48,7 +48,11 @@ public class JObject extends LinkedHashMap<String, Object> implements JValue, IE
 	}
 
 	public void put(String key, Iterable<Object> valueArray) {
-		super.put(key, new JArray(valueArray));
+		put(key, new JArray(valueArray));
+	}
+	
+	public void put(String key, JArray array) {
+		super.put(key, array);
 	}
 
 	public String toString() {
