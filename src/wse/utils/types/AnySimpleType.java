@@ -156,11 +156,12 @@ public abstract class AnySimpleType<T> implements AnyType {
 					this.getClass().getName() + " failed during value space control: " + e.getMessage(), e);
 		}
 
+		String result = this.print(out);
+
 		if (this.length == null && this.minLength == null && this.maxLength == null) {
-			return out;
+			return result;
 		}
 
-		String result = this.print(out);
 		try {
 			validateLexicalSpace(result);
 		} catch (Exception e) {
