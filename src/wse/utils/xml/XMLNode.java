@@ -5,8 +5,8 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 import wse.utils.ArrayUtils;
-import wse.utils.json.PrettyPrinter;
-import wse.utils.json.StringGatherer;
+import wse.utils.internal.PrettyPrinter;
+import wse.utils.internal.StringGatherer;
 
 public abstract class XMLNode implements PrettyPrinter {
 

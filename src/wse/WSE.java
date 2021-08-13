@@ -25,8 +25,8 @@ public final class WSE extends WSEUtils {
 	public static final String LOG_FAMILY = "wse";
 	public static final boolean runningAndroid;
 
-	private static String applicationName = "WebServiceEngine Application";
-	public static final String VERSION = "21.7";
+	public static final String VERSION = "21.8";
+	private static String applicationName = "WebServiceEngine Application/" + VERSION;
 
 	public static String getVersion() {
 		return VERSION;

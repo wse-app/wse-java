@@ -87,6 +87,7 @@ public final class SocketHandler implements Runnable {
 					byte[] header = file.getHeader().toByteArray();
 					logger.finer("Request Header: [" + (header.length) + " bytes]\n" + new String(header));
 				}
+				
 
 				treatment.treatCall(request, response);
 

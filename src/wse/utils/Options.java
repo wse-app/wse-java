@@ -36,7 +36,7 @@ public class Options implements IOptions {
 	public void setOptions(HasOptions other) {
 		setOptions(other.getOptions());
 	}
-	
+
 	@Override
 	public void setOptions(IOptions other) {
 		this.options.putAll(other.getAll());
@@ -51,22 +51,58 @@ public class Options implements IOptions {
 	public IOptions getOptions() {
 		return this;
 	}
-	
+
 	@Override
 	public String toString() {
 		return options.toString();
 	}
-	
+
 	public void log(Logger log, Level level) {
 		log(log, level, "Options");
 	}
-	
+
 	public void log(Logger log, Level level, String title) {
 		log.log(level, String.format("%s: %d", title, options.size()));
-		
+
 		for (Entry<Option<?>, Object> e : options.entrySet()) {
 			log.log(level, String.format("%s: %s", String.valueOf(e.getKey()), String.valueOf(e.getValue())));
 		}
 	}
+
+	public static final IOptions EMPTY = new IOptions() {
+
+		@Override
+		public void setOptions(HasOptions other) {
+
+		}
+
+		@Override
+		public IOptions getOptions() {
+			return this;
+		}
+
+		@Override
+		public void setOptions(IOptions other) {
+		}
+
+		@Override
+		public <T> void set(Option<T> option, T value) {
+		}
+
+		@Override
+		public Map<Option<?>, Object> getAll() {
+			return Collections.emptyMap();
+		}
+
+		@Override
+		public <T> T get(Option<T> option, T def) {
+			return def != null ? def : option != null ? option.getDefaultValue() : null;
+		}
+
+		@Override
+		public <T> T get(Option<T> option) {
+			return option != null ? option.getDefaultValue() : null;
+		}
+	};
 
 }

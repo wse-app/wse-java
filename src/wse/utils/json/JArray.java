@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import wse.utils.internal.StringGatherer;
+
 public class JArray extends LinkedList<Object> implements JValue {
 	private static final long serialVersionUID = 1214660224200869636L;
 

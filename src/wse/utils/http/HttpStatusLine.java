@@ -1,7 +1,7 @@
 package wse.utils.http;
 
 import wse.utils.HttpCodes;
-import wse.utils.json.StringGatherer;
+import wse.utils.internal.StringGatherer;
 
 public class HttpStatusLine extends HttpDescriptionLine{
 	

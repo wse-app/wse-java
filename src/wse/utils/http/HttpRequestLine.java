@@ -1,7 +1,7 @@
 package wse.utils.http;
 
 import wse.utils.exception.WseHttpException;
-import wse.utils.json.StringGatherer;
+import wse.utils.internal.StringGatherer;
 
 public class HttpRequestLine extends HttpDescriptionLine {
 	private HttpMethod method;

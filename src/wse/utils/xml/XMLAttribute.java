@@ -6,7 +6,7 @@ import java.nio.charset.Charset;
 
 import org.w3c.dom.Node;
 
-import wse.utils.json.StringGatherer;
+import wse.utils.internal.StringGatherer;
 
 public class XMLAttribute extends XMLNode {
 

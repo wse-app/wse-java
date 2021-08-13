@@ -11,8 +11,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import wse.WSE;
-import wse.utils.json.PrettyPrinter;
-import wse.utils.json.StringGatherer;
+import wse.utils.internal.PrettyPrinter;
+import wse.utils.internal.StringGatherer;
 import wse.utils.writable.StreamWriter;
 
 public class HttpURI implements StreamWriter, PrettyPrinter {

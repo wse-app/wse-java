@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-import wse.utils.json.StringGatherer;
+import wse.utils.internal.StringGatherer;
 import wse.utils.writable.StreamWriter;
 
 public class HeaderAttribute implements StreamWriter {

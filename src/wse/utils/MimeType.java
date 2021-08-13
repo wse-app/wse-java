@@ -68,7 +68,7 @@ public class MimeType {
 		return Objects.equals(full_name, other.full_name);
 	}
 
-	private static class Builder {
+	public static class Builder {
 		private String[] sub_names;
 
 		public Builder(String[] sub_names) {
@@ -513,7 +513,7 @@ public class MimeType {
 		/** HTML component file */
 		public static final text x_component = b("x-component").text("htc");
 		/** BASIC source code file */
-		public static final text plain = b("plain").text("bas", "c", "h", "txt");
+		public static final text plain = b("plain").text("bas", "c", "h", "txt", "ini");
 		/** vCard file */
 		public static final text x_vcard = b("x-vcard").text("vcf");
 		/** Scitext continuous tone file */

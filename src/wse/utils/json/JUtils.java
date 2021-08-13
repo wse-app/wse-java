@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 
 import wse.utils.internal.IParser;
+import wse.utils.internal.StringGatherer;
 
 public class JUtils {
 

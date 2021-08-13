@@ -13,6 +13,7 @@ import java.util.Map;
 
 import wse.utils.MimeType;
 import wse.utils.internal.IElement;
+import wse.utils.internal.StringGatherer;
 
 public class JObject extends LinkedHashMap<String, Object> implements JValue, IElement {
 	private static final long serialVersionUID = 7358202224561375529L;
@@ -50,7 +51,7 @@ public class JObject extends LinkedHashMap<String, Object> implements JValue, IE
 	public void put(String key, Iterable<Object> valueArray) {
 		put(key, new JArray(valueArray));
 	}
-	
+
 	public void put(String key, JArray array) {
 		super.put(key, array);
 	}
@@ -294,15 +295,24 @@ public class JObject extends LinkedHashMap<String, Object> implements JValue, IE
 		setChildArray(key, children);
 	}
 
-	
 	@Override
 	public MimeType getMimeType() {
 		return MimeType.application.json;
 	}
-	
+
 	@Override
 	public Charset preferredCharset() {
 		return Charset.forName("UTF-8");
+	}
+
+	@Override
+	public Collection<String> getAttributeValueArray(String key) {
+		return getValueArray(key);
+	}
+
+	@Override
+	public Collection<String> getAttributeValueArray(String key, String namespace) {
+		return getAttributeValueArray(key);
 	}
 
 }

@@ -2,6 +2,7 @@ package wse.utils.json;
 
 import java.nio.charset.Charset;
 
+import wse.utils.internal.StringGatherer;
 import wse.utils.writable.StreamWriter;
 
 public interface JValue extends StreamWriter {

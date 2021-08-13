@@ -15,7 +15,7 @@ import org.w3c.dom.Node;
 import wse.utils.MimeType;
 import wse.utils.exception.WseXMLBuildingException;
 import wse.utils.internal.IElement;
-import wse.utils.json.StringGatherer;
+import wse.utils.internal.StringGatherer;
 import wse.utils.writable.StreamCatcher;
 
 public class XMLElement extends XMLNode implements IElement {
@@ -656,9 +656,19 @@ public class XMLElement extends XMLNode implements IElement {
 	public MimeType getMimeType() {
 		return MimeType.application.xml;
 	}
-	
+
 	@Override
 	public Charset preferredCharset() {
 		return getTree().getCharset();
+	}
+
+	@Override
+	public Collection<String> getAttributeValueArray(String key) {
+		return getAttributeValueArray(key, null);
+	}
+
+	@Override
+	public Collection<String> getAttributeValueArray(String key, String namespace) {
+		return getValueArray(key, namespace);
 	}
 }

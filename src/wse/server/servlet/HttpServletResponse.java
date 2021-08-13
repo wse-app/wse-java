@@ -41,7 +41,7 @@ public final class HttpServletResponse extends WseOutputStream {
 
 		this.header = new HttpHeader(statusLine = HttpStatusLine.fromCode(200));
 
-		header.setAttribute("Server", "WebServiceEngine/" + WSE.VERSION);
+		header.setAttribute("Server", WSE.getApplicationName());
 	}
 
 	private boolean headerWritten = false;

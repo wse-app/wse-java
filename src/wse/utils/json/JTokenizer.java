@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 
+import wse.utils.internal.PushableReader;
+
 public class JTokenizer {
 
 	private static final char BEGIN_ARRAY = '[';
@@ -19,7 +21,7 @@ public class JTokenizer {
 	private static final char QUOTE = '"';
 	private static final char APOS = '\'';
 
-	private final JReader reader;
+	private final PushableReader reader;
 
 	@SuppressWarnings("unchecked")
 	public static <T> T parse(InputStream input, Charset cs) throws IOException {
@@ -32,7 +34,7 @@ public class JTokenizer {
 	}
 
 	protected JTokenizer(Reader reader) {
-		this.reader = new JReader(reader);
+		this.reader = new PushableReader(reader);
 	}
 
 	private Object beginValue() throws IOException {
@@ -239,6 +241,7 @@ public class JTokenizer {
 			case 0:
 			case '\n':
 			case '\r':
+				if (end == 0) return sb.toString();
 				throw this.syntaxError("Unterminated string");
 			case '\\':
 				c = next();
