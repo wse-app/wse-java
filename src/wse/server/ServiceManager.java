@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 import wse.WSE;
 import wse.server.servlet.HttpServletRequest;
 import wse.server.servlet.HttpServletResponse;
-import wse.server.servlet.OperationListener;
+import wse.server.servlet.soap.OperationListener;
 import wse.server.servlet.soap.OperationServlet;
 import wse.utils.HttpCodes;
 import wse.utils.exception.WseException;

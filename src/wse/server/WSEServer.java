@@ -14,10 +14,6 @@ import wse.utils.ssl.SSLAuth;
 
 public class WSEServer {
 	private ServiceManager callManager;
-	//
-	// private KeyStore ks;
-	// private KeyManagerFactory kmf;
-	// private TrustManagerFactory tmf;
 
 	private static Logger logger = WSE.getLogger();
 

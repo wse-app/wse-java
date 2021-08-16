@@ -48,6 +48,7 @@ public class SocketAcceptor implements Runnable{
 				counter.plus();
 				InetAddress ia = socket.getInetAddress();
 				String address = ia.getHostAddress();
+				
 				if (receiver.isBanned(address))
 				{
 					logger.fine("Accepted socket from " + address + ", but IP is Banned!");

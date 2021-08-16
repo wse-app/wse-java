@@ -21,6 +21,7 @@ import wse.utils.exception.WseHttpParsingException;
 import wse.utils.exception.WseHttpStatusCodeException;
 import wse.utils.exception.WseInitException;
 import wse.utils.exception.WseSHttpException;
+import wse.utils.http.HttpAttributeList;
 import wse.utils.http.HttpBuilder;
 import wse.utils.http.HttpHeader;
 import wse.utils.http.HttpMethod;
@@ -40,8 +41,8 @@ import wse.utils.writable.StreamCatcher;
 
 public class CallHandler implements HasOptions {
 
-	public static final Option<IOConnection> CONNECTION_OVERRIDE = new Option<>(CallHandler.class,
-			"CONNECTION_OVERRIDE");
+	public static final Option<IOConnection> CONNECTION_OVERRIDE = new Option<>(CallHandler.class, "CONNECTION_OVERRIDE");
+	public static final Option<HttpAttributeList> ADDITIONAL_ATTRIBUTES = new Option<>(CallHandler.class, "ADDITIONAL_ATTRIBUTES");
 
 	private static final Logger LOG = WSE.getLogger();
 	private static final Charset UTF8 = Charset.forName("UTF-8");
@@ -411,11 +412,10 @@ public class CallHandler implements HasOptions {
 			if (!this.protocol.isSecure()) {
 				LOG.warning("Sending credentials in non-secure http is prohibited");
 			}
-			header.setAttribute(HttpUtils.AUTHORIZATION,
-					"Basic " + WSE.printBase64Binary(uri.getUserInfo().getBytes()));
+			header.setAttribute(HttpUtils.AUTHORIZATION, "Basic " + WSE.printBase64Binary(uri.getUserInfo().getBytes()));
 		}
+		
 		if (this.protocol.isWebSocket()) {
-
 			header.setAttribute(WebSocketServlet.ATTRIB_UPGRADE, WebSocketServlet.UPGRADE_VALUE);
 			header.setAttribute(WebSocketServlet.ATTRIB_CONNECTION, WebSocketServlet.CONNECTION_VALUE);
 			header.setAttribute(WebSocketServlet.ATTRIB_KEY, this.websocket_key);
@@ -424,6 +424,11 @@ public class CallHandler implements HasOptions {
 			header.setAttribute(HttpUtils.CONNECTION, HttpUtils.CONNECTION_CLOSE);
 		}
 
+		HttpAttributeList additional = getOptions().get(ADDITIONAL_ATTRIBUTES);
+		if (additional != null) {
+			header.putAll(additional);
+		}
+		
 		if (writer != null)
 			writer.prepareHeader(header);
 

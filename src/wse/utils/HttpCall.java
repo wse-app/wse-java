@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+import wse.utils.http.HttpAttributeList;
 import wse.utils.ssl.SSLAuth;
 import wse.utils.ssl.SSLManager;
 
@@ -96,7 +97,16 @@ public abstract class HttpCall extends Target implements IOptions {
 	public Map<Option<?>, Object> getAll() {
 		return options.getAll();
 	}
-
+	
+	public HttpAttributeList getHeaderAttributes() {
+		HttpAttributeList list = get(CallHandler.ADDITIONAL_ATTRIBUTES);
+		if (list == null) {
+			list = new HttpAttributeList();
+			set(CallHandler.ADDITIONAL_ATTRIBUTES, list);
+		}
+		return list;
+	}
+	
 	/**
 	 * 
 	 * Returns the most relevant SSLAuth instance for this caller. <br>

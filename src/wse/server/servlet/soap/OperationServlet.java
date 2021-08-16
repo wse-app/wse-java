@@ -13,12 +13,12 @@ import java.util.logging.Logger;
 import wse.WSE;
 import wse.server.servlet.HttpServletRequest;
 import wse.server.servlet.HttpServletResponse;
-import wse.server.servlet.OperationListener;
 import wse.utils.ClassUtils;
 import wse.utils.ComplexType;
 import wse.utils.HttpCodes;
 import wse.utils.MimeType;
 import wse.utils.exception.WseBuildingException;
+import wse.utils.exception.WseException;
 import wse.utils.internal.IElement;
 import wse.utils.writable.StreamCatcher;
 import wse.utils.xml.XMLElement;
@@ -28,17 +28,30 @@ public class OperationServlet extends SoapServlet {
 	private static final Logger LOG = WSE.getLogger();
 
 	private final Map<String, Receiver> receiver = new HashMap<>();
-	private OperationListener instance;
+	private final OperationListener instance;
+	private final Class<? extends OperationListener> listenerClass;
 
 	public OperationServlet(OperationListener listener) {
 		this.instance = listener;
+		this.listenerClass = listener.getClass();
 		loadReceivers(listener.getClass());
 	}
 
 	public OperationServlet(final Class<? extends OperationListener> listener)
 			throws InstantiationException, IllegalAccessException {
-		this.instance = listener.newInstance();
+		this.listenerClass = listener;
+		this.instance = null;
 		loadReceivers(listener);
+	}
+	
+	public OperationListener getInstance() {
+		if (instance != null) return instance;
+		try {
+			return listenerClass.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			LOG.log(Level.SEVERE, "Failed to instantiate OperationListener", e);
+			throw new WseException(e.getMessage(), e);
+		}
 	}
 
 	private void loadReceivers(final Class<? extends OperationListener> listener) {
@@ -82,9 +95,13 @@ public class OperationServlet extends SoapServlet {
 			return;
 		}
 
+		OperationListener instance = getInstance();
+		instance.request = request;
+		instance.response = response;
+		
 		ComplexType result;
 		try {
-			result = m.invoke(content);
+			result = m.invoke(instance, content);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e) {
 			response.sendError(HttpCodes.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -140,16 +157,13 @@ public class OperationServlet extends SoapServlet {
 			this.soapAction = handler.value();
 		}
 
-		public ComplexType invoke(IElement e) throws InstantiationException, IllegalAccessException,
+		public ComplexType invoke(OperationListener instance, IElement e) throws InstantiationException, IllegalAccessException,
 				IllegalArgumentException, InvocationTargetException {
 			ComplexType i = input.newInstance();
 			ComplexType o = output.newInstance();
 			i.load(e);
-
-//			System.out.println(i.getClass());
-//			System.out.println(o.getClass());
-//			System.out.println(method.toGenericString());
-			method.invoke(OperationServlet.this.instance, i, o);
+			
+			method.invoke(instance, i, o);
 			return o;
 		}
 
