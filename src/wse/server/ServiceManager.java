@@ -20,10 +20,10 @@ public final class ServiceManager implements CallTreatment {
 
 	private Treatment defaultTreatment;
 	private static final Logger logger = WSE.getLogger();
-	
+
 	private final Map<String, Treatment> path_servlet;
 	private final Map<Pattern, Treatment> pattern_servlet;
-	
+
 	protected ServiceManager() {
 		path_servlet = new HashMap<>();
 		pattern_servlet = new HashMap<>();
@@ -77,18 +77,16 @@ public final class ServiceManager implements CallTreatment {
 	public void register(String path, Treatment treatment) {
 		if (treatment == null)
 			throw new NullPointerException("null Treatment");
-		
+
 		if (path == null) {
 			registerDefault(treatment);
 			return;
 		}
-		
+
 		path = path.trim();
 
 		if (path.isEmpty())
 			path = "/";
-
-		
 
 		if (path_servlet.containsKey(path)) {
 			Treatment registered = path_servlet.get(path);
@@ -100,7 +98,7 @@ public final class ServiceManager implements CallTreatment {
 		logger.info("Servlet \"" + treatment.getTreatmentClassName() + "\" bound to \"" + path + "\"");
 		return;
 	}
-	
+
 	public void register(Pattern pattern, CallTreatment treatment) {
 		register(pattern, new Treatment(treatment));
 	}
@@ -108,11 +106,11 @@ public final class ServiceManager implements CallTreatment {
 	public void register(Pattern pattern, Class<? extends CallTreatment> treatment) {
 		register(pattern, new Treatment(treatment));
 	}
-	
+
 	public void register(Pattern pattern, Treatment treatment) {
 		if (treatment == null)
 			throw new NullPointerException("null Treatment");
-		
+
 		if (pattern == null) {
 			registerDefault(treatment);
 			return;
@@ -120,7 +118,8 @@ public final class ServiceManager implements CallTreatment {
 
 		if (pattern_servlet.containsKey(pattern)) {
 			Treatment registered = pattern_servlet.get(pattern);
-			logger.warning("Service \"" + registered.getTreatmentClassName() + "\" already registered at path: " + pattern.pattern() + ", OVERRIDING!");
+			logger.warning("Service \"" + registered.getTreatmentClassName() + "\" already registered at path: "
+					+ pattern.pattern() + ", OVERRIDING!");
 		}
 
 		pattern_servlet.put(pattern, treatment);
@@ -130,15 +129,16 @@ public final class ServiceManager implements CallTreatment {
 
 	private Treatment getService(String path) {
 		Treatment treatment = path_servlet.get(path);
-		if (treatment != null) return treatment;
-		
+		if (treatment != null)
+			return treatment;
+
 		for (Entry<Pattern, Treatment> entry : pattern_servlet.entrySet()) {
 			if (entry.getKey().matcher(path).matches()) {
 				return entry.getValue();
 			}
 		}
-		
-		return null;	
+
+		return null;
 	}
 
 	@Override
@@ -158,7 +158,8 @@ public final class ServiceManager implements CallTreatment {
 
 		if (treatment == null) { // default might be null
 			// Bad URI or Service doesen't exist.
-			logger.info("Received call for \"" + request.getRequestURI().toString() + "\", but no treatment was available for this path");
+			logger.info("Received call for \"" + request.getRequestURI().toString()
+					+ "\", but no treatment was available for this path");
 			response.sendError(HttpCodes.NOT_FOUND, "Bad URI or Service doesnt exist");
 			return;
 		}

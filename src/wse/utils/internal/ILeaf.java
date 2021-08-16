@@ -11,6 +11,8 @@ public interface ILeaf extends HasRowColumn, StreamWriter, PrettyPrinter {
 	public MimeType getMimeType();
 	public Charset preferredCharset();
 	
+	public void preparePrint();
+	
 	// Values 
 	
 	public String getValue(String key);

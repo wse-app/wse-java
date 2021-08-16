@@ -1,5 +1,6 @@
 package wse.utils;
 
+import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +22,6 @@ public class MimeType {
 			MESSAGE_S = MESSAGE + "/", TEXT_S = TEXT + "/", VIDEO_S = VIDEO + "/", MODEL_S = MODEL + "/",
 			FONT_S = FONT + "/", MULTIPART_S = MULTIPART + "/";
 
-	
 	private final String name;
 	private final String[] sub_names;
 	private final String[] extensions;
@@ -60,7 +60,7 @@ public class MimeType {
 		if (obj == null) {
 			return false;
 		}
-		
+
 		if (!(obj instanceof MimeType)) {
 			return false;
 		}
@@ -106,6 +106,10 @@ public class MimeType {
 
 		public multipart multipart(String... extensions) {
 			return new multipart(sub_names, extensions.length == 0 ? new String[] { sub_names[0] } : extensions);
+		}
+
+		public font font(String... extensions) {
+			return new font(sub_names, extensions.length == 0 ? new String[] { sub_names[0] } : extensions);
 		}
 	}
 
@@ -321,6 +325,9 @@ public class MimeType {
 		public static final application xml = b("xml").application("xml", "xsd", "wsdl");
 		public static final application xhtml = b("xhtml+xml").application("xhtml");
 		public static final application signed_exchange = b("signed-exchange").application("sxg");
+
+		public static final application textedit = b("textedit").application("ini");
+		public static final application zz_winassoc_ini = b("zz-winassoc-ini").application("ini");
 
 		public static final application any = b("*").application("*");
 
@@ -640,6 +647,26 @@ public class MimeType {
 
 	}
 
+	public static final class font extends MimeType {
+		private static final List<MimeType> values = new ArrayList<>();
+
+		public static Iterable<MimeType> values() {
+			return Collections.unmodifiableList(values);
+		}
+
+		public font(String[] sub_names, String[] extensions) {
+			super(FONT, sub_names, extensions);
+			values.add(this);
+		}
+
+		public static final font any = b("*").font("*");
+
+		@Override
+		public MimeType anySub() {
+			return any;
+		}
+	}
+
 	public static final MimeType any = new MimeType("*", new String[] { "*" }, new String[0]);
 
 	/**
@@ -660,6 +687,16 @@ public class MimeType {
 		return name_mime.get(mimeType);
 	}
 
+	public static MimeType getByExtension(File file) {
+		if (file == null)
+			throw new NullPointerException("file == null");
+
+		String fileName = file.getName();
+		String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
+		
+		return getByExtension(extension);
+	}
+
 	public static MimeType getByExtension(String extension) {
 		return ext_mime.get(extension);
 	}
@@ -669,7 +706,8 @@ public class MimeType {
 	}
 
 	/**
-	 * Returns the type name of this MimeType. <br><br>
+	 * Returns the type name of this MimeType. <br>
+	 * <br>
 	 * <b>Example:</b> <code>MimeType.text.plain.getName()</code> returns
 	 * <code>text</code>
 	 * 
@@ -680,7 +718,9 @@ public class MimeType {
 	}
 
 	/**
-	 * Returns the first (or only, if there is only one) sub-name of this MimeType. <br><br>
+	 * Returns the first (or only, if there is only one) sub-name of this MimeType.
+	 * <br>
+	 * <br>
 	 * <b>Example:</b> <code>MimeType.text.plain.getSubName()</code> returns
 	 * <code>plain</code>
 	 * 
@@ -691,7 +731,8 @@ public class MimeType {
 	}
 
 	/**
-	 * Returns the full name of this MimeType. <br><br>
+	 * Returns the full name of this MimeType. <br>
+	 * <br>
 	 * <b>Example:</b> <code>MimeType.text.plain.getFullName()</code> returns
 	 * <code>text/plain</code>
 	 * 

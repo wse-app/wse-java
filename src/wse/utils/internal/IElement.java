@@ -18,4 +18,7 @@ public interface IElement extends ILeaf {
 	public void setChildArray(String key, Iterable<IElement> children);
 	public void setChildArray(String key, String namespace, Iterable<IElement> children);
 	
+	public void setName(String name);
+	public void setName(String name, String namespace);
+	
 }

@@ -92,7 +92,7 @@ public class IniSection extends LinkedHashMap<String, Object> implements ILeaf, 
 				builder.add("\r\n");
 			}
 		}
-		
+
 		if (this instanceof IniFile) {
 			if (size() > 0)
 				builder.add("\r\n");
@@ -234,6 +234,11 @@ public class IniSection extends LinkedHashMap<String, Object> implements ILeaf, 
 	@Override
 	public String toString() {
 		return prettyPrint().toString();
+	}
+
+	@Override
+	public void preparePrint() {
+		// nothing to be done
 	}
 
 }

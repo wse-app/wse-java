@@ -38,6 +38,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import wse.utils.IOptions;
 import wse.utils.collections.Occurances;
 import wse.utils.exception.WseXMLParsingException;
 import wse.utils.internal.IParser;
@@ -46,7 +47,7 @@ import wse.utils.writable.StreamWriter;
 import wse.utils.xml.XMLHierarchyIterator.Receiver;
 
 public class XMLUtils {
-	
+
 	public final static String XMLNS = "http://www.w3.org/2000/xmlns/";
 	public final static String SCHEMA = "http://www.w3.org/2001/XMLSchema";
 	public final static String SOAP_ENVELOPE = "http://schemas.xmlsoap.org/soap/envelope/";
@@ -69,15 +70,13 @@ public class XMLUtils {
 		defaultNSPrefix.put(HTTP, "http");
 	}
 
-	
-	
 	final static String LINE_NUMBER_KEY_NAME = "lineNumber";
 	final static String COLUMN_NUMBER_KEY_NAME = "columnNumber";
 
 	private final static DocumentBuilderFactory documentBuilderFactory;
 	private final static TransformerFactory transformerFactory;
 	private final static Transformer nullTransformer;
-	
+
 	static {
 		documentBuilderFactory = DocumentBuilderFactory.newInstance();
 		transformerFactory = TransformerFactory.newInstance();
@@ -90,7 +89,7 @@ public class XMLUtils {
 		}
 		nullTransformer = t;
 	}
-	
+
 	public static Document parseDOMsimple(InputStream is)
 			throws ParserConfigurationException, SAXException, IOException {
 		Document result;
@@ -105,13 +104,17 @@ public class XMLUtils {
 		return result;
 	}
 
-	/** @throws ClassNotFoundException Android may not be able to use some features used by this parse method, use instead parseDOMsimple() if this is the case */
-	public static Document parseDOMLineNRAware(final InputStream is)
-			throws IOException, SAXException, ParserConfigurationException, TransformerException, NoClassDefFoundError, ClassNotFoundException {
-		
+	/**
+	 * @throws ClassNotFoundException Android may not be able to use some features
+	 *                                used by this parse method, use instead
+	 *                                parseDOMsimple() if this is the case
+	 */
+	public static Document parseDOMLineNRAware(final InputStream is) throws IOException, SAXException,
+			ParserConfigurationException, TransformerException, NoClassDefFoundError, ClassNotFoundException {
+
 		if (nullTransformer == null)
 			return parseDOMsimple(is);
-		
+
 		DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
 		Document doc = docBuilder.newDocument();
 		DOMResult domResult = new DOMResult(doc);
@@ -126,7 +129,7 @@ public class XMLUtils {
 
 		InputSource inputSource = new InputSource(is);
 		SAXSource saxSource = new SAXSource(locationAnnotator, inputSource);
-		
+
 		nullTransformer.transform(saxSource, domResult);
 
 		return doc;
@@ -165,16 +168,18 @@ public class XMLUtils {
 		return result;
 	}
 
-
-	public static XMLElement parse(InputStream input) throws ParserConfigurationException, SAXException, IOException, TransformerException {
+	public static XMLElement parse(InputStream input)
+			throws ParserConfigurationException, SAXException, IOException, TransformerException {
 		return parseSimple(input);
 	}
-	
-	public static XMLElement parseLineNRAware(InputStream input) throws NoClassDefFoundError, ClassNotFoundException, IOException, SAXException, ParserConfigurationException, TransformerException {
+
+	public static XMLElement parseLineNRAware(InputStream input) throws NoClassDefFoundError, ClassNotFoundException,
+			IOException, SAXException, ParserConfigurationException, TransformerException {
 		return parseDOM(parseDOMLineNRAware(input));
 	}
-	
-	public static XMLElement parseSimple(InputStream input) throws ParserConfigurationException, SAXException, IOException, TransformerException {
+
+	public static XMLElement parseSimple(InputStream input)
+			throws ParserConfigurationException, SAXException, IOException, TransformerException {
 		return parseDOM(parseDOMsimple(input));
 	}
 
@@ -287,29 +292,28 @@ public class XMLUtils {
 			{ '\t', '\t', '\t', '\t', '\t', '\t', '\t' }, { '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t' },
 			{ '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t' },
 			{ '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t' } };
-	
+
 	public static final IParser<XMLElement> XML_PARSER = new IParser<XMLElement>() {
 
 		@Override
-		public XMLElement parse(InputStream input, Charset cs) throws IOException {
+		public XMLElement parse(InputStream input, Charset cs, IOptions options) throws IOException {
 			try {
 				return XMLUtils.parse(input);
 			} catch (ParserConfigurationException | SAXException | TransformerException e) {
 				throw new WseXMLParsingException(e.getMessage(), e);
 			}
 		}
-		
+
 		public XMLElement createEmpty() {
 			return new XMLElement();
 		};
-		
+
 	};
 
 	protected static byte[] level(int i) {
 		return levels[i];
 	}
 
-	
 	protected static void solveNamespacePrefixes(XMLElement e) {
 		solveNamespacePrefixes(e, new ArrayList<String[]>());
 	}
@@ -437,7 +441,7 @@ public class XMLUtils {
 			root.declareNamespace(e.getValue(), e.getKey());
 		}
 	}
-	
+
 	public static XMLElement createSOAPFrame() {
 		return createSOAPFrame(true);
 	}
@@ -449,14 +453,14 @@ public class XMLUtils {
 		root.addAttribute("encodingStyle", SOAP_ENCODING, SOAP_ENVELOPE);
 
 		root.addChild("Header", SOAP_ENVELOPE);
-		
+
 		if (addBodyElement) {
-			root.addChild("Body", SOAP_ENVELOPE);			
+			root.addChild("Body", SOAP_ENVELOPE);
 		}
 
 		return root;
 	}
-	
+
 	public static String printOverview(final XMLElement element) {
 		Charset charset = element.getTree().getCharset();
 		byte[] data = StreamCatcher.from(new StreamWriter() {
@@ -467,8 +471,9 @@ public class XMLUtils {
 		}, charset).toByteArray();
 		return new String(data, charset);
 	}
-	
-	public static void writeElementOverview(XMLElement element, OutputStream stream, Charset charset, int level) throws IOException {
+
+	public static void writeElementOverview(XMLElement element, OutputStream stream, Charset charset, int level)
+			throws IOException {
 		byte[] tabs = XMLUtils.level(level);
 		stream.write(tabs);
 		stream.write('<');
@@ -506,9 +511,9 @@ public class XMLUtils {
 			stream.write(qname);
 		} else if (element.hasValue()) {
 			stream.write('>');
-			
+
 			byte[] data;
-			
+
 			if (element.cdata) {
 				data = XMLUtils.convertToCDATA(element.value);
 			} else {
@@ -516,14 +521,14 @@ public class XMLUtils {
 				d = d.replaceAll("\r", "\\r").replaceAll("\n", "\\n");
 				data = d.getBytes(charset);
 			}
-			
+
 			if (data.length > 50) {
 				stream.write(data, 0, Math.min(data.length, 50));
 				stream.write(("[+" + (data.length - 50) + "b]").getBytes(charset));
-			}else {
+			} else {
 				stream.write(data);
 			}
-			
+
 			stream.write('<');
 			stream.write('/');
 			stream.write(qname);

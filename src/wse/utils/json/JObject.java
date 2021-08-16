@@ -315,4 +315,19 @@ public class JObject extends LinkedHashMap<String, Object> implements JValue, IE
 		return getAttributeValueArray(key);
 	}
 
+	@Override
+	public void setName(String name) {
+		// ignore
+	}
+
+	@Override
+	public void setName(String name, String namespace) {
+		// ignore
+	}
+
+	@Override
+	public void preparePrint() {
+		// nothing to be done
+	}
+
 }

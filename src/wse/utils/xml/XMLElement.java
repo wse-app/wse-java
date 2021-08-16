@@ -671,4 +671,15 @@ public class XMLElement extends XMLNode implements IElement {
 	public Collection<String> getAttributeValueArray(String key, String namespace) {
 		return getValueArray(key, namespace);
 	}
+
+	@Override
+	public void setName(String name, String namespace) {
+		this.setName(name);
+		this.setNamespaceURI(namespace);
+	}
+
+	@Override
+	public void preparePrint() {
+		XMLUtils.resetNamespaces(this);
+	}
 }

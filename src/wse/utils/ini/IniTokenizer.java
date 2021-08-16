@@ -15,11 +15,10 @@ import wse.utils.ini.IniOptions.DuplicatePropertyRule;
 import wse.utils.ini.IniOptions.WhitespaceRule;
 import wse.utils.internal.HasRowColumn;
 import wse.utils.internal.PushableReader;
-import wse.utils.json.JException;
 
 public class IniTokenizer implements HasRowColumn {
 
-	private static final Logger log = WSE.getLogger();
+	private static final Logger log = WSE.getLogger(IniTokenizer.class);
 
 	private final PushableReader reader;
 
@@ -32,6 +31,10 @@ public class IniTokenizer implements HasRowColumn {
 	}
 
 	public static IniFile parse(InputStream input, Charset cs, IOptions options) throws IOException {
+		if (input == null)
+			throw new NullPointerException("input == null");
+		if (cs == null)
+			throw new NullPointerException("cs == null");
 		IniTokenizer tokenizer = new IniTokenizer(input, cs, options);
 		return tokenizer.beginIni();
 	}
@@ -41,6 +44,8 @@ public class IniTokenizer implements HasRowColumn {
 	}
 
 	public IniTokenizer(Reader reader, IOptions options) {
+		if (reader == null)
+			throw new NullPointerException("reader == null");
 		this.reader = new PushableReader(reader);
 
 		if (options == null)
@@ -240,12 +245,12 @@ public class IniTokenizer implements HasRowColumn {
 		return new String(chars);
 	}
 
-	private JException syntaxError(String message) {
+	private IniException syntaxError(String message) {
 		return syntaxError(message, null);
 	}
 
-	private JException syntaxError(String message, Throwable causedBy) {
-		return new JException(getRow(), getColumn(), message, causedBy);
+	private IniException syntaxError(String message, Throwable causedBy) {
+		return new IniException(getRow(), getColumn(), message, causedBy);
 	}
 
 	@Override

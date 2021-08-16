@@ -49,6 +49,10 @@ public final class WSE extends WSEUtils {
 		return Logger.getLogger(LOG_FAMILY);
 	}
 	
+	public static Logger getLogger(Class<?> clazz) {
+		return Logger.getLogger(clazz.getName());
+	}
+	
 	public static Logger getLogger(String child) {
 		return Logger.getLogger(LOG_FAMILY + "." + child);
 	}

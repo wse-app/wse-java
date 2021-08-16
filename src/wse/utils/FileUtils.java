@@ -41,4 +41,12 @@ public class FileUtils {
 		StreamUtils.write(source, output, buffsize);
 		output.close();
 	}
+	
+	public static File getAbsolute(File root, String relative) {
+		File tmp = new File(relative);
+		if (tmp.isAbsolute())
+			return tmp;
+
+		return new File(root, relative);
+	}
 }

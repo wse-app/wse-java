@@ -10,10 +10,12 @@ import wse.server.servlet.HttpServletRequest;
 import wse.server.servlet.HttpServletResponse;
 import wse.utils.MimeType;
 import wse.utils.exception.SoapFault;
+import wse.utils.exception.WseParsingException;
 import wse.utils.exception.WseXMLParsingException;
 import wse.utils.http.ContentType;
 import wse.utils.http.HttpMethod;
 import wse.utils.internal.IElement;
+import wse.utils.internal.ILeaf;
 import wse.utils.internal.InternalFormat;
 import wse.utils.xml.XMLElement;
 import wse.utils.xml.XMLUtils;
@@ -81,7 +83,15 @@ public abstract class SoapServlet extends HttpServlet {
 		
 		IElement ie;
 		try {
-			ie = InternalFormat.parse(mt, request.getContent(), cs);
+			ILeaf il = InternalFormat.parse(mt, request.getContent(), cs);
+			
+			if (!(il instanceof IElement)) {
+				// TODO Support ILeaf structure for very simple requests?
+				throw new WseParsingException("Only tree-based content types are supported.");
+			}
+			
+			ie = (IElement) il;
+			
 		} catch (Exception e) {
 			response.sendError(400, e);
 			log.log(Level.FINEST, e.getClass().getName() + ": " + e.getMessage(), e);

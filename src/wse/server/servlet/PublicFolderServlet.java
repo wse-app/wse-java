@@ -53,6 +53,7 @@ public class PublicFolderServlet extends AuthenticationServlet {
 		for (File f : roots) {
 			validateFile(f);
 			public_folder.add(f);
+			log.info("PublicFolderServlet: " + f);
 		}
 	}
 

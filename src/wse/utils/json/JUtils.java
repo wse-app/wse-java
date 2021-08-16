@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
+import wse.utils.IOptions;
 import wse.utils.internal.IParser;
 import wse.utils.internal.StringGatherer;
 
@@ -52,7 +53,7 @@ public class JUtils {
 	}
 	
 	public static final IParser<JObject> JSON_PARSER = new IParser<JObject>() {
-		public JObject parse(InputStream input, Charset cs) throws IOException {
+		public JObject parse(InputStream input, Charset cs, IOptions options) throws IOException {
 			return JObject.parse(input, cs);
 		}
 

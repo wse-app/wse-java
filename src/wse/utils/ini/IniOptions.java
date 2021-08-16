@@ -29,7 +29,7 @@ public class IniOptions {
 		
 	}
 	
-	public static Option<DuplicatePropertyRule> DUPLICATE_PROPERTY_RULE = new Option<>(IniOptions.class, "DUPLICATE_PROPERTY_RULE", DuplicatePropertyRule.OVERRIDE);
+	public static Option<DuplicatePropertyRule> DUPLICATE_PROPERTY_RULE = new Option<>(IniOptions.class, "DUPLICATE_PROPERTY_RULE", DuplicatePropertyRule.ARRAY);
 	
 	public static Option<WhitespaceRule> WHITESPACE_RULE = new Option<>(IniOptions.class, "WHITESPACE_RULE", WhitespaceRule.TRIM);
 	

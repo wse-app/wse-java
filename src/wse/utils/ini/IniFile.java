@@ -22,7 +22,7 @@ public class IniFile extends IniSection implements ILeaf, PrettyPrinter {
 	@Override
 	public void prettyPrint(StringGatherer builder, int level) {
 		super.prettyPrint(builder, level);
-		
+
 		for (Map.Entry<String, IniSection> s : sections.entrySet()) {
 			builder.add("[");
 			builder.add(s.getKey());
@@ -30,7 +30,7 @@ public class IniFile extends IniSection implements ILeaf, PrettyPrinter {
 			s.getValue().setOptions(this);
 			s.getValue().prettyPrint(builder, level);
 		}
-		
+
 	}
 
 	@Override
@@ -84,6 +84,8 @@ public class IniFile extends IniSection implements ILeaf, PrettyPrinter {
 	}
 
 	public IniSection getSection(String name) {
+		if (name == null)
+			return getGlobalSection();
 		return getSection(name, false);
 	}
 
@@ -95,13 +97,11 @@ public class IniFile extends IniSection implements ILeaf, PrettyPrinter {
 		}
 		return section;
 	}
-	
+
 	public IniSection addSection(String name) {
 		IniSection section = new IniSection();
 		sections.put(name, section);
 		return section;
 	}
-
-	
 
 }
