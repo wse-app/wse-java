@@ -5,16 +5,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -44,7 +40,6 @@ import wse.utils.exception.WseXMLParsingException;
 import wse.utils.internal.IParser;
 import wse.utils.writable.StreamCatcher;
 import wse.utils.writable.StreamWriter;
-import wse.utils.xml.XMLHierarchyIterator.Receiver;
 
 public class XMLUtils {
 
@@ -89,6 +84,23 @@ public class XMLUtils {
 		}
 		nullTransformer = t;
 	}
+	
+	public static final IParser<XMLElement> XML_PARSER = new IParser<XMLElement>() {
+
+		@Override
+		public XMLElement parse(InputStream input, Charset cs, IOptions options) throws IOException {
+			try {
+				return XMLUtils.parse(input);
+			} catch (ParserConfigurationException | SAXException | TransformerException e) {
+				throw new WseXMLParsingException(e.getMessage(), e);
+			}
+		}
+
+		public XMLElement createEmpty() {
+			return new XMLElement();
+		};
+
+	};
 
 	public static Document parseDOMsimple(InputStream is)
 			throws ParserConfigurationException, SAXException, IOException {
@@ -284,7 +296,7 @@ public class XMLUtils {
 			"\t\t\t\t\t\t\t", "\t\t\t\t\t\t\t\t", "\t\t\t\t\t\t\t\t\t", };
 
 	protected static String level_str(int level) {
-		return levels_str[(level) % levels_str.length];
+		return levels_str[level % levels_str.length];
 	}
 
 	private static final byte[][] levels = { {}, { '\t' }, { '\t', '\t' }, { '\t', '\t', '\t' },
@@ -293,119 +305,29 @@ public class XMLUtils {
 			{ '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t' },
 			{ '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t' } };
 
-	public static final IParser<XMLElement> XML_PARSER = new IParser<XMLElement>() {
-
-		@Override
-		public XMLElement parse(InputStream input, Charset cs, IOptions options) throws IOException {
-			try {
-				return XMLUtils.parse(input);
-			} catch (ParserConfigurationException | SAXException | TransformerException e) {
-				throw new WseXMLParsingException(e.getMessage(), e);
-			}
-		}
-
-		public XMLElement createEmpty() {
-			return new XMLElement();
-		};
-
-	};
+	
 
 	protected static byte[] level(int i) {
-		return levels[i];
-	}
-
-	protected static void solveNamespacePrefixes(XMLElement e) {
-		solveNamespacePrefixes(e, new ArrayList<String[]>());
-	}
-
-	private static void solveNamespacePrefixes(XMLElement e, List<String[]> map) {
-		int size = map.size();
-
-		for (XMLAttribute a : e.getNamespaceDeclarations()) {
-			map.add(a.ns());
-		}
-
-		if (e.namespace != null) {
-			String prefix = findPrefix(map, e.namespace);
-			if (prefix == null) {
-//				System.out.println("WARNING: namespace \"" + e.namespace + "\" was never defined or was not accessable");
-			} else {
-				e.prefix = prefix.isEmpty() ? null : prefix;
-			}
-		}
-
-		for (XMLAttribute a : e.attributes) {
-			if (!a.isNamespaceDeclaration())
-				solveNamespacePrefixes(a, map);
-		}
-
-		for (XMLElement c : e.children) {
-			solveNamespacePrefixes(c, map);
-		}
-
-		map.subList(size, map.size()).clear();
-	}
-
-	private static void solveNamespacePrefixes(XMLAttribute a, List<String[]> map) {
-		if (a.namespace != null) {
-			String prefix = findPrefix(map, a.namespace);
-			if (prefix == null) {
-//				System.out.println("WARNING: namespace \"" + a.namespace + "\" was never defined or was not accessable");
-			} else {
-				a.prefix = prefix.isEmpty() ? null : prefix;
-			}
-		}
-	}
-
-	private static String findPrefix(List<String[]> map, String namespace) {
-//		System.out.println("looking for " + namespace);
-		ListIterator<String[]> it = map.listIterator(map.size());
-		String[] ns;
-		while (it.hasPrevious() && ((ns = it.previous()) != null)) {
-//			System.out.println("loop: " + ns[0] + " - " + ns[1]);
-			if (Objects.equals(ns[1], namespace)) {
-				if (!obstructed(map, it.nextIndex() + 1, ns[0])) {
-					if (ns[0] == null)
-						return "";
-					return ns[0];
-				} else {
-//					System.out.println(ns[0] + " was obstructed");
-				}
-			}
-		}
-		return null;
-	}
-
-	private static boolean obstructed(List<String[]> map, int index, String prefix) {
-		for (int i = index; i < map.size(); i++) {
-//			System.out.println(" obstruction test: " + map.get(i)[0]);
-			if (Objects.equals(map.get(i)[0], prefix)) {
-				return true;
-			}
-		}
-		return false;
+		return levels[i % levels.length];
 	}
 
 	public static void resetNamespaces(XMLElement root) {
 
 		final Occurances<String> occurances = new Occurances<>();
 
-		XMLHierarchyIterator.iterate(new Receiver() {
-			@Override
-			public void receive(XMLElement element) {
-				occurances.add(element.getNamespaceURI());
-				Iterator<XMLAttribute> it = element.getAttributes().iterator();
-				XMLAttribute a;
-				while (it.hasNext() && ((a = it.next()) != null)) {
-					if (a.isNamespaceDeclaration()) {
-						it.remove();
-					} else {
-						if (a.getNamespaceURI() != null)
-							occurances.add(a.getNamespaceURI());
-					}
+		for (XMLElement element : root.treeIterable()) {
+			occurances.add(element.getNamespaceURI());
+			Iterator<XMLAttribute> it = element.getAttributes().iterator();
+			XMLAttribute a;
+			while (it.hasNext() && ((a = it.next()) != null)) {
+				if (a.isNamespaceDeclaration()) {
+					it.remove();
+				} else {
+					if (a.getNamespaceURI() != null)
+						occurances.add(a.getNamespaceURI());
 				}
 			}
-		}, root);
+		}
 
 		final Map<String, String> prefixMap = new HashMap<String, String>();
 
@@ -427,15 +349,12 @@ public class XMLUtils {
 			String def = occurances.getMostCommon();
 			prefixMap.put(def, null);
 		}
-
-		XMLHierarchyIterator.iterate(new Receiver() {
-			@Override
-			public void receive(XMLElement element) {
-				element.setPrefix(prefixMap.get(element.getNamespaceURI()));
-				for (XMLAttribute a : element.getAttributes())
-					a.setPrefix(prefixMap.get(a.getNamespaceURI()));
-			}
-		}, root);
+		
+		for (XMLElement element : root.treeIterable()) {
+			element.setPrefix(prefixMap.get(element.getNamespaceURI()));
+			for (XMLAttribute a : element.getAttributes())
+				a.setPrefix(prefixMap.get(a.getNamespaceURI()));
+		}
 
 		for (Entry<String, String> e : prefixMap.entrySet()) {
 			root.declareNamespace(e.getValue(), e.getKey());
@@ -515,7 +434,7 @@ public class XMLUtils {
 			byte[] data;
 
 			if (element.cdata) {
-				data = XMLUtils.convertToCDATA(element.value);
+				data = XMLUtils.convertToCDATA(element.getRawValue());
 			} else {
 				String d = XMLUtils.escape(element.getValue());
 				d = d.replaceAll("\r", "\\r").replaceAll("\n", "\\n");
@@ -538,20 +457,4 @@ public class XMLUtils {
 		stream.write('>');
 		stream.write('\n');
 	}
-
-	/**
-	 * public static XMLObject createSOAPFrame() { String soap =
-	 * "http://www.w3.org/2003/05/soap-envelope/";
-	 * 
-	 * XMLObject root = new XMLObject("Envelope"); root.setNamespace(soap);
-	 * 
-	 * root.declareNamespace(soap, "soap"); root.addAttribute("encodingStyle",
-	 * "http://www.w3.org/2003/05/soap-encoding").setNamespace(soap);
-	 * 
-	 * root.addChild("Header").setNamespace(soap);
-	 * root.addChild("Body").setNamespace(soap);
-	 * 
-	 * return root; }
-	 * 
-	 */
 }
