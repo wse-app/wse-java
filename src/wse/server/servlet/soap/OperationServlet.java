@@ -70,7 +70,7 @@ public class OperationServlet extends SoapServlet {
 				receiver.put(h.value(), new Receiver(m, params, h));
 			}
 		}
-		LOG.info("OperationServlet of " + this.instance.getClass().getSimpleName() + " listenening for "
+		LOG.info("OperationServlet of " + this.listenerClass.getSimpleName() + " listenening for "
 				+ receiver.size() + " operation" + (receiver.size() == 1 ? "" : "s")
 				+ (LOG.isLoggable(Level.FINE) ? ":" : ""));
 		if (LOG.isLoggable(Level.FINE)) {
@@ -138,7 +138,7 @@ public class OperationServlet extends SoapServlet {
 	}
 
 	public String getRequestedPath() {
-		return this.instance.path();
+		return getInstance().path();
 	}
 
 	public boolean supportsSoapAction(String soapAction) {
