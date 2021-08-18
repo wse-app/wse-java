@@ -20,7 +20,7 @@ import wse.utils.writable.StreamCatcher;
 
 public class XMLElement extends XMLNode implements IElement {
 
-	public byte[] value;
+	protected byte[] value;
 	protected boolean cdata;
 
 	protected final XChildList children = new XChildList();
@@ -65,7 +65,6 @@ public class XMLElement extends XMLNode implements IElement {
 	public byte[] getRawValue() {
 		return value;
 	}
-
 	public XMLElement setValue(String value) {
 		return setValue(value, false);
 	}
@@ -247,13 +246,12 @@ public class XMLElement extends XMLNode implements IElement {
 
 		if (hasAttributes()) {
 			Iterator<XMLAttribute> it = attributes.iterator();
-			int len = 0;
+			int len = builder.length();
 
 			XMLAttribute att;
-			while (it.hasNext() && len < 30 && (att = it.next()) != null) {
+			while (it.hasNext() && (builder.length() - len) < 30 && (att = it.next()) != null) {
 				builder.add(" ");
-				att.prettyPrint(builder, level);
-				len += att.length();
+				att.prettyPrint(builder, 0);
 			}
 
 			while (it.hasNext() && (att = it.next()) != null) {
@@ -488,6 +486,7 @@ public class XMLElement extends XMLNode implements IElement {
 		}
 	}
 
+
 	public static XMLElement parseNode(Node node) {
 		if (node.getNodeType() != Node.ELEMENT_NODE)
 			throw new IllegalStateException(
@@ -523,9 +522,13 @@ public class XMLElement extends XMLNode implements IElement {
 		return res;
 	}
 
-	public void resetHierarchyNamespaces() {
-		XMLUtils.resetNamespaces(this);
+	public Iterable<XMLElement> treeIterable() {
+		return XMLHierarchyIterator.iterable(this);
 	}
+	
+	//
+	// IElement compatible
+	//
 
 	@Override
 	public int getRow() {
@@ -577,7 +580,7 @@ public class XMLElement extends XMLNode implements IElement {
 	}
 
 	@Override
-	public IElement createEmpty() {
+	public XMLElement createEmpty() {
 		return new XMLElement();
 	}
 
