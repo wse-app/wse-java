@@ -96,7 +96,7 @@ public class XMLAttribute extends XMLNode {
 		if (this.name != null && !this.isDefaultNamespace())
 			len += this.name.length();
 		if (this.value != null)
-			len += this.value.length();
+			len += XMLUtils.escape(this.value).length();
 		return len;
 	}
 
@@ -105,8 +105,10 @@ public class XMLAttribute extends XMLNode {
 		writeQualifiedName(stream, charset);
 		stream.write('=');
 		stream.write('"');
-		if (value != null)
-			stream.write(value.getBytes(charset));
+		if (value != null) {
+			byte[] data = XMLUtils.escape(value).getBytes(charset);
+			stream.write(data);
+		}
 		stream.write('"');
 	}
 	
@@ -122,7 +124,7 @@ public class XMLAttribute extends XMLNode {
 		
 		builder.add("=\"");
 		if (value != null) {
-			builder.add(value);
+			builder.add(XMLUtils.escape(value));
 		}
 		builder.add("\"");
 		
