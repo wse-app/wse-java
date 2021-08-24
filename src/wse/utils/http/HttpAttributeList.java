@@ -95,6 +95,10 @@ public class HttpAttributeList implements Map<String, String>, StreamWriter {
 	}
 
 	public HeaderAttribute setAttribute(String name, String value) {
+		if (value == null) {
+			removeAttribute(name);
+			return null;
+		}
 		return setAttribute(new HeaderAttribute(name, value));
 	}
 

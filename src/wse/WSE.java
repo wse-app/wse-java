@@ -15,6 +15,7 @@ import wse.utils.exception.WseException;
 import wse.utils.log.LogPrintStream;
 import wse.utils.log.WseConsoleHandler;
 import wse.utils.log.WseFileHandler;
+import wse.utils.source.Source;
 
 public final class WSE extends WSEUtils {
 	
@@ -25,13 +26,7 @@ public final class WSE extends WSEUtils {
 	public static final String LOG_FAMILY = "wse";
 	public static final boolean runningAndroid;
 
-	public static final String VERSION = "21.8";
-	private static String applicationName = "WebServiceEngine Application/" + VERSION;
-
-	public static String getVersion() {
-		return VERSION;
-	};
-
+	public static final String VERSION;
 	
 	static {
 		String val = System.getProperty("java.runtime.name");
@@ -40,11 +35,25 @@ public final class WSE extends WSEUtils {
 		} else {
 			runningAndroid = false;
 		}
+		
+		String v = "?";
+		try {
+			v = Source.getContainingText(WSE.class.getResourceAsStream("/version"));
+		} catch (Throwable t) {
+			// ignore
+		}
+		VERSION = v;
 	}
+	
+	private static String applicationName = "WebServiceEngine Application/" + VERSION;
 
 	public static final PrintStream out = new LogPrintStream(getLogger(), Level.INFO);
 	public static final PrintStream err = new LogPrintStream(getLogger(), Level.SEVERE);
 
+	public static String getVersion() {
+		return VERSION;
+	};
+	
 	public static Logger getLogger() {
 		return Logger.getLogger(LOG_FAMILY);
 	}

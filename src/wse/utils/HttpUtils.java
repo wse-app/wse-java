@@ -104,8 +104,8 @@ public final class HttpUtils extends HttpCodes {
 			if (e.getMessage() != null)
 				log.severe(e.getMessage());
 
-			if (e instanceof SoapFault)
-				throw (SoapFault) e;
+			if (e instanceof WseException)
+				throw (WseException) e;
 
 			throw new WseException("Call failed: " + e.getMessage(), e);
 		}

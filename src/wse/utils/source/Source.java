@@ -43,7 +43,7 @@ public final class Source {
 	public final static LinkedByteArray toByteArray(InputStream file) {
 		LinkedByteArray lba = new LinkedByteArray();
 
-		byte[] buff = new byte[5000];
+		byte[] buff = new byte[4096];
 		int actual;
 		int ptr = 0;
 

@@ -145,7 +145,15 @@ public class ServiceReceiverHttps extends ServiceReceiver {
 			return; // Invalid method
 		}
 
-		int keyLen = Integer.parseInt(method.substring(3));
+		int keyLen;
+		try {
+			keyLen = Integer.parseInt(method.substring(3));			
+		} catch (Exception e) {
+			response.sendError(HttpCodes.BAD_REQUEST,
+					"Encryption method not supported, supported: AESx, x=[" + SHttp.getKeyLengthsSupported() + "]");
+			return; // Invalid method
+		}
+		
 
 		if (!SHttp.keyLengthSupported(keyLen) || (keyLen % 8 != 0)) {
 			// Key length not supported

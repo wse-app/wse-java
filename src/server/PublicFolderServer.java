@@ -22,6 +22,8 @@ public class PublicFolderServer extends WSEServer {
 
 		WSE.initDefaultStandaloneLogging();
 		WSE.setLogLevel(Level.FINEST);
+		
+		log.info("Version: " + WSE.getVersion());
 
 		File jarFile = ClassUtils.getJarFile(PublicFolderServer.class);
 

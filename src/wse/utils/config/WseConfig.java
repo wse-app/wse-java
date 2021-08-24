@@ -1,11 +1,9 @@
 package wse.utils.config;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -17,7 +15,6 @@ import wse.server.ServiceManager;
 import wse.server.WSEServer;
 import wse.server.servlet.PublicFolderServlet;
 import wse.utils.FileUtils;
-import wse.utils.exception.WseException;
 import wse.utils.exception.WseParsingException;
 import wse.utils.internal.InternalFormat;
 import wse.utils.ssl.SSLAuth;
@@ -48,14 +45,9 @@ public class WseConfig extends Config {
 
 		log.info("Generating default configuration file.");
 
-		URL sourceUrl = WseConfig.class.getResource("default.ini");
-		if (sourceUrl == null)
-			throw new WseException("Could not load default.ini file");
-		File source = new File(sourceUrl.getFile());
-
 		boolean result;
 
-		try (InputStream input = new FileInputStream(source)) {
+		try (InputStream input = WseConfig.class.getResourceAsStream("default.ini")) {
 			result = saveDefault(target, input);
 		}
 		

@@ -15,12 +15,14 @@ import wse.client.SocketConnection;
 import wse.client.shttp.SHttpManager;
 import wse.server.servlet.ws.WebSocketServlet;
 import wse.utils.exception.SecurityRetry;
+import wse.utils.exception.SoapFault;
 import wse.utils.exception.WseConnectionException;
 import wse.utils.exception.WseException;
 import wse.utils.exception.WseHttpParsingException;
 import wse.utils.exception.WseHttpStatusCodeException;
 import wse.utils.exception.WseInitException;
 import wse.utils.exception.WseSHttpException;
+import wse.utils.http.ContentType;
 import wse.utils.http.HttpAttributeList;
 import wse.utils.http.HttpBuilder;
 import wse.utils.http.HttpHeader;
@@ -38,11 +40,15 @@ import wse.utils.stream.LimitedInputStream;
 import wse.utils.stream.ProtectedOutputStream;
 import wse.utils.stream.WseInputStream;
 import wse.utils.writable.StreamCatcher;
+import wse.utils.xml.XMLElement;
+import wse.utils.xml.XMLUtils;
 
 public class CallHandler implements HasOptions {
 
-	public static final Option<IOConnection> CONNECTION_OVERRIDE = new Option<>(CallHandler.class, "CONNECTION_OVERRIDE");
-	public static final Option<HttpAttributeList> ADDITIONAL_ATTRIBUTES = new Option<>(CallHandler.class, "ADDITIONAL_ATTRIBUTES");
+	public static final Option<IOConnection> CONNECTION_OVERRIDE = new Option<>(CallHandler.class,
+			"CONNECTION_OVERRIDE");
+	public static final Option<HttpAttributeList> ADDITIONAL_ATTRIBUTES = new Option<>(CallHandler.class,
+			"ADDITIONAL_ATTRIBUTES");
 
 	private static final Logger LOG = WSE.getLogger();
 	private static final Charset UTF8 = Charset.forName("UTF-8");
@@ -139,6 +145,8 @@ public class CallHandler implements HasOptions {
 			}
 			return new HttpResult(responseHttp.getHeader(),
 					new ConnectionClosingInputStream(responseHttp.getContent(), connection), false);
+		} catch (SoapFault sf) {
+			throw sf;
 		} catch (Exception e) {
 			throw new WseException("Call to " + String.valueOf(withHiddenPassword(uri)) + " failed: " + e.getMessage(),
 					e);
@@ -364,7 +372,7 @@ public class CallHandler implements HasOptions {
 			throw new WseHttpParsingException("Invalid response status line: " + header.getDescriptionLine());
 		}
 
-		if ((this.protocol.isWebSocket() && line.getStatusCode() == 101)) {
+		if ((this.protocol.isWebSocket() && line.getStatusCode() == HttpCodes.SWITCHING_PROTOCOLS)) {
 
 			LOG.fine("Upgrading to websocket v13");
 
@@ -375,28 +383,58 @@ public class CallHandler implements HasOptions {
 				throw new SecurityRetry();
 			}
 
-			if (!header.getContentType().is(MimeType.text.xml)) {
-				String errMsg = null;
-				if (LOG.isLoggable(Level.SEVERE)) {
-					if (responseHttp != null) {
-						if (responseHttp.getContent() != null) {
-							try {
-								errMsg = new String(
-										StreamUtils.readAll(new LimitedInputStream(responseHttp.getContent(), 2000)));
-							} catch (IOException e) {
-							}
+			ContentType ct = header.getContentType();
+			MimeType mt = header.getContentType().parseType();
+
+			boolean isXML = mt != null && mt == MimeType.text.xml || mt == MimeType.application.xml;
+
+			if (isXML) {
+				// Will throw SoapFault exception
+				soapFault(ct);
+
+				// Could not parse as soapFault, fall through
+			}
+
+			String errMsg = null;
+			if (LOG.isLoggable(Level.SEVERE)) {
+				if (responseHttp != null) {
+					if (responseHttp.getContent() != null) {
+						try {
+							errMsg = new String(
+									StreamUtils.readAll(new LimitedInputStream(responseHttp.getContent(), 2000)));
+						} catch (IOException e) {
 						}
 					}
 				}
-
-				throw new WseHttpStatusCodeException(
-						"Got bad response status: \"" + line.toString().trim() + "\" errMsg: " + errMsg,
-						line.getStatusCode());
 			}
 
-			throw new WseHttpStatusCodeException("Got bad response status: \"" + line.toString().trim() + "\"",
+			throw new WseHttpStatusCodeException(
+					"Got bad response status: \"" + line.toString().trim() + "\" errMsg: " + errMsg,
 					line.getStatusCode());
+
 		}
+	}
+
+	private void soapFault(ContentType ct) {
+
+		SoapFault fault = null;
+
+		try {
+			Charset cs = ct.getCharsetParsed();
+			if (cs == null)
+				cs = Charset.forName("UTF-8");
+
+			XMLElement env = XMLUtils.XML_PARSER.parse(responseHttp.getContent(), cs);
+
+			XMLElement bodyXml = env.getChild("Body", XMLUtils.SOAP_ENVELOPE);
+			XMLElement faultXml = bodyXml.getChild("Fault");
+
+			fault = new SoapFault(faultXml);
+		} catch (Throwable e) {
+			return;
+		}
+
+		throw fault;
 	}
 
 	public void buildHttpHeader(HttpHeader header) {
@@ -412,9 +450,10 @@ public class CallHandler implements HasOptions {
 			if (!this.protocol.isSecure()) {
 				LOG.warning("Sending credentials in non-secure http is prohibited");
 			}
-			header.setAttribute(HttpUtils.AUTHORIZATION, "Basic " + WSE.printBase64Binary(uri.getUserInfo().getBytes()));
+			header.setAttribute(HttpUtils.AUTHORIZATION,
+					"Basic " + WSE.printBase64Binary(uri.getUserInfo().getBytes()));
 		}
-		
+
 		if (this.protocol.isWebSocket()) {
 			header.setAttribute(WebSocketServlet.ATTRIB_UPGRADE, WebSocketServlet.UPGRADE_VALUE);
 			header.setAttribute(WebSocketServlet.ATTRIB_CONNECTION, WebSocketServlet.CONNECTION_VALUE);
@@ -428,7 +467,7 @@ public class CallHandler implements HasOptions {
 		if (additional != null) {
 			header.putAll(additional);
 		}
-		
+
 		if (writer != null)
 			writer.prepareHeader(header);
 

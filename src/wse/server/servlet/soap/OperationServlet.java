@@ -19,6 +19,7 @@ import wse.utils.HttpCodes;
 import wse.utils.MimeType;
 import wse.utils.exception.WseBuildingException;
 import wse.utils.exception.WseException;
+import wse.utils.exception.WseParsingException;
 import wse.utils.internal.IElement;
 import wse.utils.writable.StreamCatcher;
 import wse.utils.xml.XMLElement;
@@ -85,8 +86,6 @@ public class OperationServlet extends SoapServlet {
 			throws IOException {
 
 		String soapAction = request.getAttributeValue("SOAPAction");
-		
-		LOG.info(content.toString());
 
 		// TODO check URI, ???
 		Receiver m = receiver.get(soapAction);
@@ -106,6 +105,9 @@ public class OperationServlet extends SoapServlet {
 				| InvocationTargetException e) {
 			response.sendError(HttpCodes.INTERNAL_SERVER_ERROR, e.getMessage());
 			LOG.log(Level.SEVERE, e.getClass().getName() + ": " + e.getMessage(), e);
+			return;
+		} catch (WseParsingException e) {
+			response.sendError(400, e);
 			return;
 		}
 
