@@ -1,28 +1,14 @@
 package wse.utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public final class StringUtils {
 	private StringUtils() {
-	}
-
-	/**
-	 * Returns the counting expression of the number, ex: 1st, 2nd, 56th, 41st
-	 * 
-	 * @param number
-	 * @return
-	 */
-	public static String getOrdinal(int number) {
-		String string = "" + number;
-		int end = Integer.parseInt(string.charAt(string.length() - 1) + "");
-		String ending = "th";
-		if (end == 1)
-			ending = "st";
-		if (end == 2)
-			ending = "nd";
-		return string + ending;
 	}
 
 	public static String stack(String piece, int times) {
@@ -30,15 +16,18 @@ public final class StringUtils {
 			return "";
 
 		char[] result = new char[piece.length() * times];
-		char[] res = piece.toCharArray();
+		char[] src = piece.toCharArray();
 
 		for (int i = 0; i < times; i++) {
-			System.arraycopy(res, 0, result, i * res.length, res.length);
+			System.arraycopy(src, 0, result, i * src.length, src.length);
 		}
 		return new String(result);
 	}
 
 	public static String[] split(String source, char s, PrefixGroup... ignore) {
+		if (ignore == null)
+			ignore = new PrefixGroup[0];
+
 		ArrayList<Integer> splitPoints = new ArrayList<Integer>();
 		String split = s + "";
 		Map<Integer, Integer> ignored = new HashMap<Integer, Integer>();
@@ -139,56 +128,54 @@ public final class StringUtils {
 		return value.replaceAll("\\s", " ");
 	}
 
-	/**
-	 * never returns null<br>
-	 * if source is null, returns empty array<br>
-	 * if source does not contain split sequence, then returns array with only
-	 * source.<br>
-	 */
 	public static String[] split(String source, String split) {
 		return split(source, split, split);
 	}
 
-	/**
-	 * never returns null<br>
-	 * if source is null, returns empty array<br>
-	 * if source does not contain split sequence, then returns array with only
-	 * source.<br>
-	 */
-	public static String[] split(String source, String split, int max) {
-		return split(source, split, split, max);
+	public static String[] split(String source, String regex, int max) {
+		return split(source, null, regex, max);
 	}
 
-	/**
-	 * never returns null<br>
-	 * if source is null, returns empty array<br>
-	 * if source does not contain containsCheck sequence, then returns array with
-	 * only source<br>
-	 */
-	public static String[] split(String source, String containsCheck, String pattern) {
+	public static String[] split(String source, String containsCheck, String regex) {
+		return split(source, containsCheck, regex, -1);
+	}
+
+	public static String[] split(String source, String containsCheck, String regex, int max) {
 		if (source == null)
 			return new String[0];
 
-		if (!source.contains(containsCheck))
+		if (containsCheck != null && !source.contains(containsCheck))
 			return new String[] { source };
 
-		return source.split(pattern);
+		return source.split(regex, max);
 	}
 
-	/**
-	 * never returns null<br>
-	 * if source is null, returns empty array<br>
-	 * if source does not contain containsCheck sequence, then returns array with
-	 * only source<br>
-	 */
-	public static String[] split(String source, String containsCheck, String pattern, int max) {
-		if (source == null)
-			return new String[0];
+	public static List<String> split(String source, char split) {
+		return split(source, split, -1);
+	}
+	
+	public static List<String> split(String source, char split, int max) {
+		if (source == null || source.length() == 0)
+			return Collections.emptyList();
 
-		if (!source.contains(containsCheck))
-			return new String[] { source };
+		List<String> result = new LinkedList<>();
 
-		return source.split(pattern, max);
+		char[] c = source.toCharArray();
+
+		int s = 0;
+		for (int i = 0; i < c.length && (max <= 0 || result.size() < max - 1); i++) {
+			if (c[i] == split) {
+				if (i - s != 0)
+					result.add(new String(c, s, i - s));
+				s = i + 1;
+			}
+		}
+
+		if (s < c.length) {
+			result.add(new String(c, s, c.length - s));
+		}
+
+		return result;
 	}
 
 	public static int getIndexFromLineColumn(int line, int column, String text) {
@@ -204,12 +191,12 @@ public final class StringUtils {
 	}
 
 	public static String[] split(String source, int[] splitPoints, String split) {
-		String[] Chars = destroy(source);
+		String[] chars = destroy(source);
 		String[] result = new String[splitPoints.length + 1];
 
 		int point = 0;
-		for (int i = 0; i < Chars.length; i++) {
-			String now = Chars[i];
+		for (int i = 0; i < chars.length; i++) {
+			String now = chars[i];
 			if (ArrayUtils.contains(splitPoints, i))
 				point++;
 			if (result[point] == null)
@@ -292,7 +279,7 @@ public final class StringUtils {
 				result++;
 		return result;
 	}
-	
+
 	/**
 	 * Returns an array with size: first parameters size / second parameter
 	 * Exceptions: - (first parameter size) % (second parameter) != 0: returns null
@@ -519,12 +506,13 @@ public final class StringUtils {
 	}
 
 	public static String capitalize(String text) {
-		if (text == null) return "Null";
+		if (text == null)
+			return "Null";
 		if (text.length() <= 1)
 			return text.toUpperCase();
 		return text.substring(0, 1).toUpperCase() + text.substring(1);
 	}
-	
+
 	////////////////////////////////////
 	/*
 	 * Code for base 64
@@ -753,19 +741,19 @@ public final class StringUtils {
 		}
 		return data;
 	}
-	
+
 	public static String printHexBinary(byte[] input) {
 		return printHexBinary(input, 0, input.length);
 	}
-	
+
 	public static String printHexBinary(byte[] input, int offset, int len) {
 		char[] buf = new char[len * 2];
 		printHexBinary(input, offset, len, buf, 0);
 		return new String(buf);
 	}
-	
+
 	public static void printHexBinary(byte[] input, int offset, int len, char[] target, int targetOffset) {
-		for(int i = offset, j = targetOffset; i < len; i++){
+		for (int i = offset, j = targetOffset; i < len; i++) {
 			target[j++] = Character.forDigit((input[i] >> 4) & 0xF, 16);
 			target[j++] = Character.forDigit((input[i] & 0xF), 16);
 		}

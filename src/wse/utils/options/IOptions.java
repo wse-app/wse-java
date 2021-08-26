@@ -1,4 +1,4 @@
-package wse.utils;
+package wse.utils.options;
 
 import java.util.Map;
 

@@ -14,11 +14,10 @@ import wse.server.servlet.HttpServletRequest;
 import wse.server.servlet.HttpServletResponse;
 import wse.utils.HttpCodes;
 import wse.utils.HttpResult;
-import wse.utils.exception.WseBuildingException;
 import wse.utils.exception.WseHttpException;
-import wse.utils.exception.WseParsingException;
 import wse.utils.exception.WseWebSocketException;
 import wse.utils.http.HttpBuilder;
+import wse.utils.http.HttpHeader;
 import wse.utils.http.HttpMethod;
 import wse.utils.stream.ProtectedInputStream;
 import wse.utils.stream.ProtectedOutputStream;
@@ -33,16 +32,19 @@ import wse.utils.stream.RecordingOutputStream;
  */
 public final class SocketHandler implements Runnable {
 
-	private static Object lock = new Object();
-	protected static int threadsActive = 0;
+	protected static int handlersActive = 0;
 
-	private static final Logger logger = WSE.getLogger();
+	private static final Object LOCK = new Object();
+	private static final Logger LOG = WSE.getLogger();
+	
+	/** Persistant socket timeout in milliseconds */
+	public static int PERSISTANT_SOCKET_TIMEOUT = 60000;
 
 	private final Socket socket;
 	private final ServerSocket serverSocket;
-	private final CallTreatment treatment;
+	private final HttpCallTreatment treatment;
 
-	protected SocketHandler(final Socket socket, final ServerSocket serverSocket, final CallTreatment treatment) {
+	protected SocketHandler(final Socket socket, final ServerSocket serverSocket, final HttpCallTreatment treatment) {
 		this.socket = socket;
 		this.serverSocket = serverSocket;
 		this.treatment = treatment;
@@ -54,92 +56,131 @@ public final class SocketHandler implements Runnable {
 		onTreatmentStart();
 
 		try {
+			socket.setSoTimeout(5 * 1000);
 
-			socket.setSoTimeout(60 * 1000);
-			final InputStream input = socket.getInputStream();
-
-			HttpResult file = HttpBuilder.read(input, true);
-			if (file == null)
-				return;
-			RequestInfo info = RequestInfo.fromSocket(socket, serverSocket);
-
+			InputStream input = new ProtectedInputStream(socket.getInputStream());
 			OutputStream output = new ProtectedOutputStream(socket.getOutputStream());
-			if (file.getHeader().getMethod() != HttpMethod.SECURE) {
-				output = new RecordingOutputStream(output, logger, Level.FINEST, "Response:");				
-			}
-			HttpServletResponse response = new HttpServletResponse(output);
 
-			try {
-				// TODO implement connection: keep-alive
-				HttpServletRequest request;
-				InputStream content = file.getContent();
+			readLoop(input, output);
 
-				if (file.getHeader().getMethod() != HttpMethod.SECURE) {
-					
-					long len = file.getHeader().getContentLength();
-
-					if (len >= 0 && len <= 40000)
-						content = new RecordingInputStream(content, logger, Level.FINEST, "Request Body: ");
-				}
-
-				request = HttpServletRequest.make(file.getHeader(), info, new ProtectedInputStream(content));
-				if (logger.isLoggable(Level.FINER)) {
-					byte[] header = file.getHeader().toByteArray();
-					logger.finer("Request Header: [" + (header.length) + " bytes]\n" + new String(header));
-				}
-				
-
-				treatment.treatCall(request, response);
-
-				output.flush();
-				output.close();
-				response.close();
-			} catch (WseHttpException e) {
-				Integer sendCode = e.getStatusCode();
-				response.sendError(sendCode != null ? sendCode : HttpCodes.BAD_REQUEST, e.getMessage());
-				logger.log(Level.FINEST, e.getClass().getName() + ": " + e.getMessage(), e);
-			} catch (WseParsingException e) {
-				response.sendError(HttpCodes.BAD_REQUEST, e.getMessage());
-				logger.log(Level.FINEST, e.getClass().getName() + ": " + e.getMessage(), e);
-			} catch (WseBuildingException e) {
-				response.sendError(HttpCodes.INTERNAL_SERVER_ERROR, "Server failed to produce a correct soap response");
-				logger.log(Level.SEVERE, "Server failed to produce a correct soap response: " + e.getMessage(), e);
-			} catch (SocketException | WseWebSocketException e) {
-				logger.log(Level.FINER, e.getClass().getName() + ": " + e.getMessage(), e);
-			} catch (Exception e) {
-				logger.log(Level.FINE, "Unknown error: " + e.getMessage(), e);
-				if (!socket.isClosed()) {
-					
-					response.sendError(HttpCodes.INTERNAL_SERVER_ERROR);
-				}
-			}
-		} catch (SocketException e) {
-			logger.log(Level.FINEST, e.getClass().getName() + ": " + e.getMessage());
+		} catch (SocketException | WseWebSocketException e) {
+			LOG.log(Level.FINEST, e.getClass().getName() + ": " + e.getMessage());
 		} catch (IOException e) {
-			logger.log(Level.FINER, e.getClass().getName() + ": " + e.getMessage());
-		} catch (Exception e) {
-			logger.log(Level.INFO, "Unhandled " + e.getClass().getName() + ", discarding request: " + e.getMessage(),
-					e);
-		} finally {
-			try {
-				if (!socket.isClosed())
-					socket.close();
-			} catch (Exception e) {
-			}
+			LOG.log(Level.FINER, e.getClass().getName() + ": " + e.getMessage());
+		} catch (Throwable e) {
+			LOG.log(Level.INFO, "Unhandled " + e.getClass().getName() + ", discarding request: " + e.getMessage(), e);
+		}
+
+		try {
+			if (!socket.isClosed())
+				socket.close();
+		} catch (Throwable ignore) {
 		}
 
 		onTreatmentEnd();
 	}
 
+	private void readLoop(InputStream input, OutputStream output) throws Throwable {
+		int count = 0;
+		for (;;) {
+			boolean keepAlive = readHttp(count, input, output);
+			if (!keepAlive)
+				break;
+			
+			count++;
+			LOG.fine("Persistant socket, count=" + count);
+		}
+	}
+
+	private boolean readHttp(int count, InputStream input, OutputStream output) throws Throwable {
+		HttpResult file = HttpBuilder.read(input, true);
+
+		if (count > 0)
+			LOG.fine("Got new message on persistant socket");
+
+		RequestInfo info = RequestInfo.fromSocket(socket, serverSocket);
+		HttpHeader requestHeader = file.getHeader();
+
+		if (requestHeader.getMethod() != HttpMethod.SECURE) {
+			output = new RecordingOutputStream(output, LOG, Level.FINEST, "Response:");
+		}
+		HttpServletResponse response = new HttpServletResponse(output);
+		HttpHeader responseHeader = response.getHttpHeader();
+
+		boolean keepAlive = requestHeader.getConnection(/* lowerCase: */ true).contains("keep-alive");
+
+		if (keepAlive) {
+			responseHeader.setConnection("keep-alive");
+			
+			if (PERSISTANT_SOCKET_TIMEOUT > 0) {
+				// Keep-Alive timeout is in seconds
+				responseHeader.setKeepAlive(PERSISTANT_SOCKET_TIMEOUT / 1000, null);
+			}
+		}
+
+		try {
+
+			HttpServletRequest request;
+			InputStream content = file.getContent();
+
+			if (requestHeader.getMethod() != HttpMethod.SECURE) {
+
+				long len = requestHeader.getContentLength();
+
+				if (len >= 0 && len <= 40000)
+					content = new RecordingInputStream(content, LOG, Level.FINEST, "Request Body: ");
+			}
+
+			request = HttpServletRequest.make(file.getHeader(), info, content);
+			if (LOG.isLoggable(Level.FINER)) {
+				byte[] header = requestHeader.toByteArray();
+				LOG.finer("Request Header: [" + (header.length) + " bytes]\n" + new String(header));
+			}
+
+			treatment.treatCall(request, response);
+
+			if (!response.isHeaderWritten()) {
+				response.setContentLength(0);
+				response.writeHeader();
+			}
+
+			keepAlive = requestHeader.getConnection(/* lowerCase: */ true).contains("keep-alive");
+
+			output.flush();
+
+		} catch (WseHttpException e) {
+			Integer sendCode = e.getStatusCode();
+			response.sendError(sendCode != null ? sendCode : HttpCodes.BAD_REQUEST, e.getMessage());
+			LOG.log(Level.FINEST, e.getClass().getName() + ": " + e.getMessage(), e);
+		}
+//		catch (WseParsingException e) {
+//			response.sendError(HttpCodes.BAD_REQUEST, e.getMessage());
+//			logger.log(Level.FINEST, e.getClass().getName() + ": " + e.getMessage(), e);
+//		} catch (WseBuildingException e) {
+//			response.sendError(HttpCodes.INTERNAL_SERVER_ERROR, "Server failed to produce a correct soap response");
+//			logger.log(Level.SEVERE, "Server failed to produce a correct soap response: " + e.getMessage(), e);
+//		}
+
+		if (keepAlive) {
+			if (input.available() > 0) {
+				LOG.severe("Connection: keep-alive, but input contains left-over data. Persistant socket may fail.");
+			}
+			
+			socket.setSoTimeout(PERSISTANT_SOCKET_TIMEOUT);
+		}
+
+		return keepAlive;
+	}
+
 	private void onTreatmentStart() {
-		synchronized (lock) {
-			threadsActive++;
+		synchronized (LOCK) {
+			handlersActive++;
 		}
 	}
 
 	private void onTreatmentEnd() {
-		synchronized (lock) {
-			threadsActive--;
+		synchronized (LOCK) {
+			handlersActive--;
 		}
 	}
 }

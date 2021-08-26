@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
-import wse.utils.IOptions;
 import wse.utils.internal.IParser;
 import wse.utils.internal.StringGatherer;
+import wse.utils.options.IOptions;
 
 public class JUtils {
 

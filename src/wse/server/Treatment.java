@@ -4,8 +4,8 @@ import wse.utils.exception.WseException;
 
 public class Treatment {
 
-	private CallTreatment treatment;
-	private Class<? extends CallTreatment> clazz;
+	private HttpCallTreatment treatment;
+	private Class<? extends HttpCallTreatment> clazz;
 
 	public String getTreatmentClassName() {
 		if (treatment != null)
@@ -15,15 +15,15 @@ public class Treatment {
 		return null;
 	}
 
-	public Treatment(CallTreatment treatment) {
+	public Treatment(HttpCallTreatment treatment) {
 		this.treatment = treatment;
 	}
 
-	public Treatment(Class<? extends CallTreatment> clazz) {
+	public Treatment(Class<? extends HttpCallTreatment> clazz) {
 		this.clazz = clazz;
 	}
 
-	public CallTreatment getCallTreatment() {
+	public HttpCallTreatment getCallTreatment() {
 		if (this.treatment != null) {
 			return treatment;
 		}

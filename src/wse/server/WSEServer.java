@@ -178,7 +178,7 @@ public class WSEServer {
 	}
 
 	public static int getSessionsActive() {
-		return SocketHandler.threadsActive;
+		return SocketHandler.handlersActive;
 	}
 
 	private final static int MIN_PORT_NUMBER = 0, MAX_PORT_NUMBER = 65535;

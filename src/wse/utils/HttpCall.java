@@ -5,6 +5,10 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 import wse.utils.http.HttpAttributeList;
+import wse.utils.options.HasOptions;
+import wse.utils.options.IOptions;
+import wse.utils.options.Option;
+import wse.utils.options.Options;
 import wse.utils.ssl.SSLAuth;
 import wse.utils.ssl.SSLManager;
 

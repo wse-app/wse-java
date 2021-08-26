@@ -1,6 +1,8 @@
-package wse.utils;
+package wse.utils.options;
 
 import java.util.Objects;
+
+import wse.utils.Supplier;
 
 public class Option<T> {
 	private final String name;

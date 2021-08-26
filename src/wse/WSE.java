@@ -24,9 +24,9 @@ public final class WSE extends WSEUtils {
 	
 	public static final String NS = "https://wse.app/ns/wse";
 	public static final String LOG_FAMILY = "wse";
-	public static final boolean runningAndroid;
-
 	public static final String VERSION;
+	
+	public static final boolean runningAndroid;
 	
 	static {
 		String val = System.getProperty("java.runtime.name");

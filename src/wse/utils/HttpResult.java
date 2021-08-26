@@ -62,6 +62,10 @@ public class HttpResult {
 	protected void wrapLogger(String title, Logger logger, Level level) {
 		this.content = new RecordingInputStream(this.content, logger, level, title);
 	}
+	
+	protected void setContent(InputStream inputStream) {
+		this.content = inputStream;
+	}
 
 	public HttpHeader getHeader() {
 		return header;

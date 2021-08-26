@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
-import wse.utils.IOptions;
+import wse.utils.options.IOptions;
 
 public abstract class IParser<T extends ILeaf> {
 	public final T parse(InputStream input, Charset cs) throws IOException {

@@ -11,17 +11,17 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 
 import wse.WSE;
-import wse.utils.HasOptions;
-import wse.utils.IOptions;
 import wse.utils.MimeType;
-import wse.utils.Option;
-import wse.utils.Options;
 import wse.utils.exception.WseParsingException;
 import wse.utils.http.StreamUtils;
 import wse.utils.internal.IElement;
 import wse.utils.internal.ILeaf;
 import wse.utils.internal.InternalFormat;
 import wse.utils.internal.StringGatherer;
+import wse.utils.options.HasOptions;
+import wse.utils.options.IOptions;
+import wse.utils.options.Option;
+import wse.utils.options.Options;
 
 public class Config implements ILeaf, HasOptions {
 

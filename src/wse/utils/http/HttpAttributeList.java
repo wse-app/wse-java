@@ -8,7 +8,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -113,15 +115,15 @@ public class HttpAttributeList implements Map<String, String>, StreamWriter {
 	public Credentials getAuthorization() {
 		return Credentials.fromHeader(this);
 	}
-	
+
 	public void setAuthorizationBasic(Credentials cred) {
 		this.setAttribute(Credentials.HEADER_ATTRIB_KEY, "Basic " + WSE.printBase64Binary(cred.toByteArray()));
 	}
-	
+
 	public void setAuthorizationBearer(String token) {
 		this.setAttribute(Credentials.HEADER_ATTRIB_KEY, "Bearer " + token);
 	}
-	
+
 	public void setAuthorization(String authentication) {
 		this.setAttribute(Credentials.HEADER_ATTRIB_KEY, authentication);
 	}
@@ -147,16 +149,16 @@ public class HttpAttributeList implements Map<String, String>, StreamWriter {
 
 	public void setContentType(MimeType type) {
 		if (type != null) {
-			setContentType(type.toString());			
-		}else {
+			setContentType(type.toString());
+		} else {
 			removeAttribute("Content-Type");
 		}
 	}
-	
+
 	public void setContentType(String type) {
 		setAttribute("Content-Type", type);
 	}
-	
+
 	public ContentDisposition getContentDisposition() {
 		return ContentDisposition.fromAttributes(this);
 	}
@@ -171,7 +173,10 @@ public class HttpAttributeList implements Map<String, String>, StreamWriter {
 	 */
 	public long getContentLength() {
 		try {
-			return Long.parseLong(getAttributeValue(CONTENT_LENGTH));
+			String val = getAttributeValue(CONTENT_LENGTH);
+			if (val == null)
+				return -1;
+			return Long.parseLong(val);
 		} catch (NumberFormatException e) {
 			return -1;
 		}
@@ -257,10 +262,11 @@ public class HttpAttributeList implements Map<String, String>, StreamWriter {
 	public void setFrom(String from) {
 		setAttribute(FROM, from);
 	}
+
 	public void setUserAgent(String userAgent) {
 		setAttribute(USER_AGENT, userAgent);
 	}
-	
+
 	public void setHost(String host, int port, Protocol protocol) {
 		StringBuilder result = new StringBuilder(host);
 		Integer def = protocol == null ? null : protocol.getDefaultPort();
@@ -268,11 +274,11 @@ public class HttpAttributeList implements Map<String, String>, StreamWriter {
 			result.append(":").append(port);
 		setHost(result.toString());
 	}
-	
+
 	public void setHost(String host) {
 		setAttribute(HOST, host);
 	}
-	
+
 	/**
 	 * Parses the "Accept-Language" attribute and returns an immutable list
 	 * containing WeighedStrings the representing attribute value. <br>
@@ -359,14 +365,15 @@ public class HttpAttributeList implements Map<String, String>, StreamWriter {
 	public double accepts(MimeType mimeType) {
 		for (WeighedString ws : getAccept()) {
 			MimeType mt = MimeType.getByName(ws.string);
-			if (mt == null) continue;
+			if (mt == null)
+				continue;
 			if (mt.contains(mimeType)) {
 				return ws.q;
 			}
 		}
 		return 0;
 	}
-	
+
 	/**
 	 * Parses the specified attribute and returns an immutable list containing
 	 * WeighedStrings representing the attribute value. <br>
@@ -384,9 +391,9 @@ public class HttpAttributeList implements Map<String, String>, StreamWriter {
 		if (val == null)
 			return Collections.emptyList();
 
-		List<WeighedString> result = new ArrayList<>();
+		List<String> parts = parseStringList(val, ',', true, false);
+		List<WeighedString> result = new ArrayList<>(parts.size());
 
-		String[] parts = StringUtils.split(val, ",", "[,]");
 		for (String s : parts)
 			result.add(new WeighedString(s));
 
@@ -394,34 +401,120 @@ public class HttpAttributeList implements Map<String, String>, StreamWriter {
 		return Collections.unmodifiableList(result);
 	}
 
-	/**
-	 * Parses the specified attribute and returns an immutable map containing
-	 * String:String entries that represent the attribute value. <br>
-	 * Assumes the following format: key=value;key=value;key=value<br>
-	 * Space separation is not needed as both key and value are trimmed anyways<br>
-	 * <br>
-	 * Example: <br>
-	 * <code>Cookie: PHPSESSID=298zf09hf012fh2; csrftoken=u32t4o3tb3gg43; _gat=1;</code><br>
-	 * 
-	 * @return an immutable map containing WeighedStrings representing the attribute
-	 *         value. Result is sorted with respect to weight.
-	 * 
-	 */
-	public Map<String, String> getStringMap(String attribute_name) {
-		String val = getAttributeValue(attribute_name);
+	public Map<String, String> getStringMap(String attributeName, char entrySeparator, char keyValueSeparator,
+			boolean trim) {
+		String val = getAttributeValue(attributeName);
+		return parseStringMap(val, entrySeparator, keyValueSeparator, trim);
+	}
+
+	public static Map<String, String> parseStringMap(String val, char entrySeparator, char keyValueSeparator,
+			boolean trim) {
 		if (val == null)
 			return Collections.emptyMap();
 
-		Map<String, String> result = new HashMap<>();
+		Map<String, String> result = new LinkedHashMap<>();
 
-		String[] cookies = StringUtils.split(val, ";");
-		for (String s : cookies) {
-			String[] kv = StringUtils.split(s, "=", 2);
-			if (kv.length == 2)
-				result.put(kv[0].trim(), kv[1].trim());
+		List<String> entries = StringUtils.split(val, entrySeparator);
+
+		for (String entry : entries) {
+
+			List<String> keyValue = StringUtils.split(entry, keyValueSeparator, 2);
+
+			if (keyValue.size() == 2) {
+				String key = keyValue.get(0);
+				String value = keyValue.get(1);
+
+				if (trim) {
+					key = key.trim();
+					value = value.trim();
+				}
+
+				result.put(keyValue.get(0).trim(), keyValue.get(1).trim());
+			} else if (keyValue.size() == 1) {
+				String key = keyValue.get(0);
+				if (trim) {
+					key = key.trim();
+				}
+				result.put(key, key);
+			}
+		}
+		return result;
+	}
+
+	public List<String> getStringList(String attributeName, char entrySeparator, boolean trim, boolean lowerCase) {
+		String val = getAttributeValue(attributeName);
+		return parseStringList(val, entrySeparator, trim, lowerCase);
+	}
+
+	public static List<String> parseStringList(String val, char entrySeparator, boolean trim, boolean lowerCase) {
+		if (val == null)
+			return Collections.emptyList();
+
+		List<String> split = StringUtils.split(val, entrySeparator);
+		if (!trim && !lowerCase)
+			return split;
+
+		List<String> result = new LinkedList<>();
+		for (String s : split) {
+			if (trim)
+				s = s.trim();
+			if (lowerCase)
+				s = s.toLowerCase();
+			result.add(s);
 		}
 
 		return result;
+	}
+
+	public static String printStringMap(Map<String, String> map, char entrySeparator, char keyValueSeparator) {
+		if (map.size() == 0)
+			return "";
+
+		StringBuilder builder = new StringBuilder();
+
+		Iterator<Entry<String, String>> entryIt = map.entrySet().iterator();
+
+		Entry<String, String> entry = entryIt.next();
+		builder.append(String.format("%s%c%s", entry.getKey(), keyValueSeparator, entry.getValue()));
+
+		while (entryIt.hasNext()) {
+			builder.append(entrySeparator);
+			entry = entryIt.next();
+			builder.append(String.format("%s%c%s", entry.getKey(), keyValueSeparator, entry.getValue()));
+		}
+		return builder.toString();
+	}
+
+	public List<String> getConnection(boolean lowerCase) {
+		return getStringList("Connection", ',', true, lowerCase);
+	}
+
+	public void setConnection(String... connection) {
+		setConnection(ArrayUtils.join(connection, ", "));
+	}
+
+	public void setConnection(String connection) {
+		setAttribute("Connection", connection);
+	}
+
+	public Map<String, String> getKeepAlive() {
+		return getStringMap("Keep-Alive", ',', '=', true);
+	}
+
+	public void setKeepAlive(Integer timeout, Integer max) {
+		if (timeout == null && max == null)
+			removeAttribute("keep-alive");
+
+		Map<String, String> map = new HashMap<>();
+		if (timeout != null)
+			map.put("timeout", String.valueOf(timeout));
+		if (max != null)
+			map.put("max", String.valueOf(max));
+		setKeepAlive(printStringMap(map, ',', '='));
+	}
+
+	public void setKeepAlive(String keepAlive) {
+		setAttribute("Keep-Alive", keepAlive);
 	}
 
 	/** Get the "Sec-Fetch-Mode header" attribute */
@@ -587,7 +680,8 @@ public class HttpAttributeList implements Map<String, String>, StreamWriter {
 
 	public Charset getContentCharset() {
 		ContentType ct = getContentType();
-		if (ct == null) return null;
+		if (ct == null)
+			return null;
 		return ct.getCharsetParsed();
 	}
 }

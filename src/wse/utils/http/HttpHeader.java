@@ -103,13 +103,14 @@ public class HttpHeader extends HttpAttributeList implements StreamWriter {
 	/**
 	 * Get all query parameter names as an immutable set
 	 * 
-	 * @return an immutable set containing the query parameter names, or empty set
+	 * @return If this is a request: an immutable set containing the query parameter names, or empty set
 	 *         if there are no parameters
+	 *         If this is a response: an empty set is returned
 	 */
 	public Set<String> getQueryNames() {
 		if (this.isRequest())
 			return Collections.unmodifiableSet(getRequestURI().getQueryNames());
-		return null;
+		return Collections.emptySet();
 	}
 
 	public Set<Entry<String, String>> getQueryEntrySet() {

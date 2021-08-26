@@ -79,13 +79,7 @@ public class LayeredOutputStream extends WseOutputStream {
 	
 	public void sHttpEncrypt(SKey skey) {
 		then(new RIMOutputStream(skey.getBlockSize(), skey.getInjectionSize()));
-//		then(new RecordingOutputStream(WSE.getLogger(), Level.FINEST, 1024, "RIM"));
-
 		then(new EncryptingOutputStream(skey, skey.getBlockSize(), skey.getBlockSize() * 512));
-//		then(new RecordingOutputStream(WSE.getLogger(), Level.FINEST, 1024, "Encrypted"));
-
-//		then(new ChunkedOutputStream(skey.getBlockSize() * 512)); //TODO Shttp should not require chunked
-//		then(new RecordingOutputStream(WSE.getLogger(), Level.FINEST, 1024, "Chunked"));
 	}
 
 	@Override

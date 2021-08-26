@@ -20,7 +20,6 @@ import wse.utils.exception.WseSHttpInitException;
 import wse.utils.http.HttpHeader;
 import wse.utils.http.HttpStatusLine;
 import wse.utils.http.StreamUtils;
-import wse.utils.log.Loggers;
 import wse.utils.shttp.SKey;
 import wse.utils.ssl.SSLAuth;
 
@@ -88,12 +87,7 @@ public final class SHttpManager {
 		}
 
 		// Needs renewal
-		Loggers.trace(logger, "aquireNewShttpKey()", new Runnable() {
-			@Override
-			public void run() {
-				aquireNewShttpKey(auth, host, port, logger);
-			}
-		});
+		aquireNewShttpKey(auth, host, port, logger);
 
 		key = getAquiredKey(host, port);
 		return key;
@@ -122,7 +116,6 @@ public final class SHttpManager {
 		header.setAttribute("From", WSE.getApplicationName());
 		header.setAttribute("User-Agent", "WebServiceEngine/" + WSE.VERSION);
 		header.setAttribute("Host", host);
-		header.setAttribute("Connection", "close");
 		header.setContentLength(0);
 
 		header.setSendContentLength(true);

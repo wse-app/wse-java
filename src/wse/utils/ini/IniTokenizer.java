@@ -9,12 +9,12 @@ import java.util.LinkedList;
 import java.util.logging.Logger;
 
 import wse.WSE;
-import wse.utils.IOptions;
-import wse.utils.Options;
 import wse.utils.ini.IniOptions.DuplicatePropertyRule;
 import wse.utils.ini.IniOptions.WhitespaceRule;
 import wse.utils.internal.HasRowColumn;
 import wse.utils.internal.PushableReader;
+import wse.utils.options.IOptions;
+import wse.utils.options.Options;
 
 public class IniTokenizer implements HasRowColumn {
 

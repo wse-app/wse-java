@@ -12,12 +12,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import wse.utils.HasOptions;
-import wse.utils.IOptions;
 import wse.utils.MimeType;
-import wse.utils.Options;
 import wse.utils.internal.ILeaf;
 import wse.utils.internal.StringGatherer;
+import wse.utils.options.HasOptions;
+import wse.utils.options.IOptions;
+import wse.utils.options.Options;
 
 public class IniSection extends LinkedHashMap<String, Object> implements ILeaf, HasOptions {
 

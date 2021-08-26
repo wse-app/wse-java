@@ -1,6 +1,6 @@
 package wse.utils.ini;
 
-import wse.utils.Option;
+import wse.utils.options.Option;
 
 public class IniOptions {
 	

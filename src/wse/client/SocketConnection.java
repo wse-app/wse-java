@@ -17,11 +17,11 @@ import javax.net.ssl.SSLSocketFactory;
 import wse.WSE;
 import wse.utils.Consumer;
 import wse.utils.Consumers;
-import wse.utils.HasOptions;
-import wse.utils.IOptions;
-import wse.utils.Option;
-import wse.utils.Options;
 import wse.utils.exception.WseConnectionException;
+import wse.utils.options.HasOptions;
+import wse.utils.options.IOptions;
+import wse.utils.options.Option;
+import wse.utils.options.Options;
 import wse.utils.ssl.SSLAuth;
 
 public class SocketConnection implements IOConnection, HasOptions {
@@ -117,6 +117,9 @@ public class SocketConnection implements IOConnection, HasOptions {
 	}
 
 	public void connect() throws IOException {
+		if (this.socket != null)
+			throw new IllegalStateException("This SocketConnection has already been connected");
+
 		socket = this.ssl ? connectSSL() : connectNonSSL();
 
 		if (!socket.isConnected() || socket.isClosed()) {
@@ -153,9 +156,9 @@ public class SocketConnection implements IOConnection, HasOptions {
 	}
 
 	private void options(Socket socket) throws SocketException {
-		socket.setReuseAddress(options.get(SocketConnection.SOCKET_REUSE_ADDRESS));
-		socket.setSoTimeout(options.get(SocketConnection.SOCKET_TIMEOUT));
-		socket.setTcpNoDelay(options.get(SocketConnection.SOCKET_TCP_NODELAY));
+		socket.setSoTimeout(options.get(SocketConnection.SOCKET_TIMEOUT, 10000));
+		socket.setTcpNoDelay(options.get(SocketConnection.SOCKET_TCP_NODELAY, true));
+		socket.setReuseAddress(options.get(SocketConnection.SOCKET_REUSE_ADDRESS, true));
 
 		options.get(SocketConnection.SOCKET_PROCESSOR, Consumers.<Socket>empty()).consume(socket);
 	}
@@ -222,7 +225,49 @@ public class SocketConnection implements IOConnection, HasOptions {
 		return sslAuth;
 	}
 
+	@Override
+	public boolean isOpen() throws IOException {
+		return socket != null && socket.isConnected() && !socket.isClosed();
+	}
+
 	public void close() throws IOException {
 		socket.close();
+	}
+
+	public static IOConnection fromSocket(final Socket socket) {
+		return fromSocket(socket, null);
+	}
+
+	public static IOConnection fromSocket(final Socket socket, final SocketAddress connectAddress) {
+		return fromSocket(socket, connectAddress, 10000);
+	}
+
+	public static IOConnection fromSocket(final Socket socket, final SocketAddress connectAddress, final int timeout) {
+		return new IOConnection() {
+			@Override
+			public void close() throws IOException {
+				socket.close();
+			}
+
+			@Override
+			public OutputStream getOutputStream() throws IOException {
+				return socket.getOutputStream();
+			}
+
+			@Override
+			public InputStream getInputStream() throws IOException {
+				return socket.getInputStream();
+			}
+
+			@Override
+			public void connect() throws IOException {
+				socket.connect(connectAddress, timeout);
+			}
+
+			@Override
+			public boolean isOpen() throws IOException {
+				return socket.isConnected() && !socket.isClosed();
+			}
+		};
 	}
 }

@@ -2,11 +2,11 @@ package wse.server.servlet;
 
 import java.io.IOException;
 
-import wse.server.CallTreatment;
+import wse.server.HttpCallTreatment;
 import wse.utils.http.HttpHeader;
 import wse.utils.http.HttpMethod;
 
-public abstract class AbstractHttpServlet implements CallTreatment {
+public abstract class AbstractHttpServlet implements HttpCallTreatment {
 	
 	public static void CORSAllowAll(HttpServletResponse response) {
 		HttpHeader header = response.getHttpHeader();

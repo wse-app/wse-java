@@ -1,4 +1,4 @@
-package wse.utils;
+package wse.utils.options;
 
 public interface HasOptions {
 	IOptions getOptions();

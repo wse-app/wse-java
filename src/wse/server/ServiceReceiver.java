@@ -16,7 +16,7 @@ import wse.WSE;
 import wse.server.servlet.HttpServletRequest;
 import wse.server.servlet.HttpServletResponse;
 
-public abstract class ServiceReceiver implements CallTreatment {
+public abstract class ServiceReceiver implements HttpCallTreatment {
 
 	protected Thread listenerThread;
 	private final int port;
@@ -131,7 +131,6 @@ public abstract class ServiceReceiver implements CallTreatment {
 	}
 
 	public void treatCall(HttpServletRequest request, HttpServletResponse response)  throws IOException{
-		
 		manager.treatCall(request, response);
 	}
 }

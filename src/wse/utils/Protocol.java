@@ -4,28 +4,24 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
+import java.util.Objects;
 
 public class Protocol {
 	private static final Map<String, Protocol> values = new LinkedHashMap<>();
 
-	public static final SecureProtocol WEB_SOCKET_SECURE = new SecureProtocol("wss");
-	public static final Protocol WEB_SOCKET = new Protocol("ws");
-	public static final SecureProtocol SHTTP = new SecureProtocol("shttp");
-	public static final SecureProtocol HTTPS = new SecureProtocol("https");
-	public static final Protocol HTTP = new Protocol("http");
+	public static final Protocol WEB_SOCKET_SECURE = new Protocol("wss", true);
+	public static final Protocol WEB_SOCKET = new Protocol("ws", false);
+	public static final Protocol SHTTP = new Protocol("shttp", true);
+	public static final Protocol HTTPS = new Protocol("https", true);
+	public static final Protocol HTTP = new Protocol("http", false);
 	
 	public static void register(Protocol protocol) {
 		register(protocol.name, protocol);
 	}
 	
 	public static void register(String name, Protocol protocol) {
-		if (name == null)
-			throw new NullPointerException("name == null");
-		if (protocol == null)
-			throw new NullPointerException("protocol == null");
+		Objects.requireNonNull(name, "name == null");
+		Objects.requireNonNull(protocol, "protocol == null");
 		
 		name = name.toLowerCase();
 		values.put(name, protocol);
@@ -40,12 +36,14 @@ public class Protocol {
 	}
 
 	private final String name;
+	private final boolean secure;
 
 	/**
 	 * @param name Will be used when parsing an URL to find the protocol.
 	 */
-	public Protocol(String name) {
+	public Protocol(String name, boolean secure) {
 		this.name = name;
+		this.secure = secure;
 	}
 
 	public String toString() {
@@ -57,7 +55,7 @@ public class Protocol {
 	}
 
 	public boolean isSecure() {
-		return this == HTTPS || this == SHTTP || this == WEB_SOCKET_SECURE;
+		return secure;
 	}
 
 	public Integer getDefaultPort() {
@@ -79,25 +77,4 @@ public class Protocol {
 		return values.get(name);
 	}
 
-	/**
-	 * Gets the default SocketFactory for this protocol.
-	 * 
-	 * @return the default SocketFactory
-	 */
-	public SocketFactory getDefaultSocketFactory() {
-		return SocketFactory.getDefault();
-	}
-
-	public static class SecureProtocol extends Protocol {
-		public SecureProtocol(String nicename) {
-			super(nicename);
-		}
-
-		/**
-		 * @return the default SSLSocketFactory
-		 */
-		public SSLSocketFactory getDefaultSocketFactory() {
-			return (SSLSocketFactory) SSLSocketFactory.getDefault();
-		}
-	}
 }

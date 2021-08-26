@@ -1,15 +1,18 @@
-package wse.utils;
+package wse.utils.writer;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
+import wse.utils.ComplexType;
+import wse.utils.HttpUtils;
+import wse.utils.MimeType;
 import wse.utils.exception.WseXMLBuildingException;
 import wse.utils.http.HttpHeader;
 import wse.utils.xml.XMLElement;
 import wse.utils.xml.XMLUtils;
 
-public class SoapXMLWriter extends HttpWriter {
+public class SoapXMLWriter implements HttpWriter {
 
 	private byte[] data = null;
 	private Charset charset;
@@ -56,7 +59,7 @@ public class SoapXMLWriter extends HttpWriter {
 	}
 
 	@Override
-	public long requestContentLength() {
+	public long requestContentLength(Charset cs) {
 		getData();
 		return data != null ? data.length : 0;
 	}

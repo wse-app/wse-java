@@ -19,15 +19,15 @@ import wse.utils.stream.WseOutputStream;
 public final class HttpServletResponse extends WseOutputStream {
 
 	private static final Charset UTF8 = Charset.forName("UTF-8");
-	
+
 	private static final Logger log = WSE.getLogger();
 	private final HttpHeader header;
 	private final HttpStatusLine statusLine;
-	
+
 	private boolean force_enable_output = false;
 
 	protected String err_msg;
-	
+
 	private ErrorFormatter errorFormatter;
 
 	public HttpServletResponse(OutputStream output) {
@@ -49,28 +49,33 @@ public final class HttpServletResponse extends WseOutputStream {
 	public void writeHeader() throws IOException {
 		if (headerWritten)
 			throw new IllegalStateException("Can't write header twice");
-		
-		
-		if (header.getAttribute("Connection") == null)
-			header.setAttribute("Connection", "close");
+
+		if (header.getConnection(true).isEmpty())
+			header.setConnection("close");
 
 		HttpStatusLine sl = this.header.getStatusLine();
 		if (sl != null) {
-			log.fine("Responding: " + sl.getStatusCode() + " " + sl.getStatusMessage() + (this.err_msg != null ? (" err: " + this.err_msg) : ""));
+			log.fine("Responding: " + sl.getStatusCode() + " " + sl.getStatusMessage()
+					+ (this.err_msg != null ? (" err: " + this.err_msg) : ""));
 		}
 
 		byte[] h = header.toByteArray();
 		log.finest("Response Header: [" + h.length + " bytes]\n" + new String(h));
 
 		if (!force_enable_output) {
-			if (!MimeType.isText(header.getContentType().getMimeType()) && !header.getContentType().is(MimeType.application.xml)) {
+			if (!MimeType.isText(header.getContentType().getMimeType())
+					&& !header.getContentType().is(MimeType.application.xml)) {
 				disableOutputLogging();
 			}
 		}
-		
+
 		// order important
 		headerWritten = true;
 		header.writeToStream(this, UTF8);
+	}
+	
+	public boolean isHeaderWritten() {
+		return headerWritten;
 	}
 
 	public void setStatusCode(int code) {
@@ -82,13 +87,13 @@ public final class HttpServletResponse extends WseOutputStream {
 	public void sendError(int code) throws IOException {
 		sendError(code, (String) null);
 	}
-	
+
 	public ErrorFormatter getErrorFormatter() {
 		if (this.errorFormatter != null)
 			return this.errorFormatter;
 		return ErrorFormatter.DEFAULT;
 	}
-	
+
 	public void setErrorFormatter(ErrorFormatter formatter) {
 		this.errorFormatter = formatter;
 	}
@@ -98,29 +103,29 @@ public final class HttpServletResponse extends WseOutputStream {
 			throw new IllegalStateException("Can't write header twice");
 		statusLine.setStatusCode(code);
 		this.err_msg = message;
-		
+
 		byte[] data = getErrorFormatter().error(code, message, getHttpHeader());
 		if (data != null) {
-			setContentLength(data.length);			
+			setContentLength(data.length);
 			writeHeader();
 			write(data);
-		}else {
+		} else {
 			writeHeader();
 		}
 	}
-	
+
 	public void sendError(int code, Throwable cause) throws IOException {
 		if (headerWritten)
 			throw new IllegalStateException("Can't write header twice");
 		statusLine.setStatusCode(code);
 		this.err_msg = cause.getMessage();
-		
+
 		byte[] data = getErrorFormatter().error(code, cause, getHttpHeader());
 		if (data != null) {
-			setContentLength(data.length);			
+			setContentLength(data.length);
 			writeHeader();
 			write(data);
-		}else {
+		} else {
 			writeHeader();
 		}
 	}
@@ -163,7 +168,7 @@ public final class HttpServletResponse extends WseOutputStream {
 	public void setContentType(MimeType type, Charset charset) {
 		setContentType(type.withCharset(charset));
 	}
-	
+
 	public void setContentType(MimeType type, String charset) {
 		setContentType(type.withCharset(charset));
 	}
@@ -211,15 +216,13 @@ public final class HttpServletResponse extends WseOutputStream {
 		if (!headerWritten)
 			writeHeader();
 		super.write(b, off, len);
-
 	}
 
-	
 	@Override
 	public void disableOutputLogging() {
 		super.disableOutputLogging();
 	}
-	
+
 	public void forceEnableMessageLogging() {
 		this.force_enable_output = true;
 	}

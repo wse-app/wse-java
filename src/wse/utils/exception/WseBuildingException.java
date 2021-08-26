@@ -1,6 +1,6 @@
 package wse.utils.exception;
 
-public class WseBuildingException extends WseException{
+public class WseBuildingException extends WseException {
 
 	private static final long serialVersionUID = -4635403305443656943L;
 
@@ -11,6 +11,5 @@ public class WseBuildingException extends WseException{
 	public WseBuildingException(String message, Throwable cause) {
 		super(message, cause);
 	}
-	
-	
+
 }

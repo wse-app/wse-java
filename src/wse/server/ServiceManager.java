@@ -15,7 +15,7 @@ import wse.server.servlet.soap.OperationServlet;
 import wse.utils.HttpCodes;
 import wse.utils.exception.WseException;
 
-public final class ServiceManager implements CallTreatment {
+public final class ServiceManager implements HttpCallTreatment {
 	public static final String ActionAttribName = "SOAPAction";
 
 	private Treatment defaultTreatment;
@@ -44,11 +44,11 @@ public final class ServiceManager implements CallTreatment {
 		register(servlet.getRequestedPath(), servlet);
 	}
 
-	public void registerDefault(CallTreatment treatment) {
+	public void registerDefault(HttpCallTreatment treatment) {
 		registerDefault(new Treatment(treatment));
 	}
 
-	public void registerDefault(Class<? extends CallTreatment> treatment) {
+	public void registerDefault(Class<? extends HttpCallTreatment> treatment) {
 		registerDefault(new Treatment(treatment));
 	}
 
@@ -66,11 +66,11 @@ public final class ServiceManager implements CallTreatment {
 		this.defaultTreatment = treatment;
 	}
 
-	public void register(String path, CallTreatment treatment) {
+	public void register(String path, HttpCallTreatment treatment) {
 		register(path, new Treatment(treatment));
 	}
 
-	public void register(String path, Class<? extends CallTreatment> treatment) {
+	public void register(String path, Class<? extends HttpCallTreatment> treatment) {
 		register(path, new Treatment(treatment));
 	}
 
@@ -99,11 +99,11 @@ public final class ServiceManager implements CallTreatment {
 		return;
 	}
 
-	public void register(Pattern pattern, CallTreatment treatment) {
+	public void register(Pattern pattern, HttpCallTreatment treatment) {
 		register(pattern, new Treatment(treatment));
 	}
 
-	public void register(Pattern pattern, Class<? extends CallTreatment> treatment) {
+	public void register(Pattern pattern, Class<? extends HttpCallTreatment> treatment) {
 		register(pattern, new Treatment(treatment));
 	}
 
@@ -167,7 +167,7 @@ public final class ServiceManager implements CallTreatment {
 		logger.info("Received call for \"" + request.getRequestURI().toString() + "\", covered by "
 				+ treatment.getTreatmentClassName());
 
-		CallTreatment servlet = treatment.getCallTreatment();
+		HttpCallTreatment servlet = treatment.getCallTreatment();
 		if (servlet == null) {
 			logger.severe("CallTreatment for " + request.getRequestURI().toString()
 					+ " was registered but could not be instanced");

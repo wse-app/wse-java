@@ -34,10 +34,10 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-import wse.utils.IOptions;
 import wse.utils.collections.Occurances;
 import wse.utils.exception.WseXMLParsingException;
 import wse.utils.internal.IParser;
+import wse.utils.options.IOptions;
 import wse.utils.writable.StreamCatcher;
 import wse.utils.writable.StreamWriter;
 

@@ -9,4 +9,5 @@ public interface IOConnection extends Closeable {
 	InputStream getInputStream() throws IOException;
 	OutputStream getOutputStream() throws IOException;
 	void connect() throws IOException;
+	boolean isOpen() throws IOException;
 }

@@ -11,7 +11,7 @@ import wse.utils.writable.StreamCatcher;
 import wse.utils.writable.StreamWriter;
 
 public class StreamUtils {
-	
+
 	/**
 	 * Read from inputstream and write to outputstream
 	 * 
@@ -22,7 +22,8 @@ public class StreamUtils {
 	 * @throws IOException
 	 */
 	public static int write(InputStream from, OutputStream to, int buffsize) throws IOException {
-		if (buffsize == 0) return 0;
+		if (buffsize == 0)
+			return 0;
 		byte[] buff = new byte[buffsize];
 		int p = 0;
 		int c;
@@ -54,7 +55,7 @@ public class StreamUtils {
 	public static int write(InputStream from, byte[] to) throws IOException {
 		return write(from, to, 0, to.length);
 	}
-	
+
 	/**
 	 * Read from inputstream and output into b
 	 * 
@@ -66,7 +67,8 @@ public class StreamUtils {
 	 * @throws IOException
 	 */
 	public static int write(InputStream from, byte[] to, int offset, int maxlen) throws IOException {
-		if (maxlen == 0) return 0;
+		if (maxlen == 0)
+			return 0;
 		int p = 0;
 		int c;
 		while (true) {
@@ -85,10 +87,11 @@ public class StreamUtils {
 		int p = 0;
 		int a;
 //		while ((a = stream.read(buff, p, buff.length - p)) != -1) {}
-		while(true) {
+		while (true) {
 			a = stream.read(buff, p, buff.length - p);
 //			log.finest("read() " + a);
-			if (a == -1) break;
+			if (a == -1)
+				break;
 			p += a;
 			if (p >= buff.length) {
 				arr.append(buff);
@@ -110,4 +113,40 @@ public class StreamUtils {
 	public static byte[] catchAll(StreamWriter writer, Charset charset) {
 		return StreamCatcher.from(writer, charset).toByteArray();
 	}
+
+	public static void clean(InputStream input) throws IOException {
+		clean(input, false);
+	}
+
+	public static void clean(InputStream input, boolean blocking) throws IOException {
+		if (!blocking) {
+			skipAll(input);
+			return;
+		}
+
+		byte[] buff = new byte[4096];
+		int a;
+		while (true) {
+			a = input.read(buff, 0, buff.length);
+			System.out.println("CLEAN " + a);
+			if (a == -1)
+				break;
+		}
+
+	}
+
+	public static void skipAll(InputStream input) throws IOException {
+		int av = input.available();
+		if (av == 0)
+			return;
+
+		input.skip(av);
+		try {
+			while ((av = input.available()) > 0) {
+				input.skip(av);
+			}
+		} catch (IOException ignore) {
+		}
+	}
+
 }

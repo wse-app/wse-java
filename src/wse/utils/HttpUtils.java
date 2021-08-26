@@ -2,6 +2,7 @@ package wse.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import wse.WSE;
@@ -14,6 +15,8 @@ import wse.utils.exception.WseHttpStatusCodeException;
 import wse.utils.exception.WseXMLParsingException;
 import wse.utils.http.HttpBuilder;
 import wse.utils.http.HttpMethod;
+import wse.utils.writer.HttpWriter;
+import wse.utils.writer.SoapXMLWriter;
 import wse.utils.xml.XMLElement;
 import wse.utils.xml.XMLUtils;
 
@@ -23,11 +26,9 @@ public final class HttpUtils extends HttpCodes {
 
 	private static final Logger log = WSE.getLogger();
 
-	protected static final String AUTHORIZATION = "Authorization";
-	protected static final String CONNECTION = "Connection";
-	protected static final String SOAP_ACTION = "SOAPAction";
-	protected static final String CONNECTION_CLOSE = "close";
-	protected static final String CONTENT_TYPE = "Content-Type";
+	public static final String AUTHORIZATION = "Authorization";
+	public static final String SOAP_ACTION = "SOAPAction";
+	
 
 	public static void sendReceive(final HttpCall caller, final ComplexType requestMessage,
 			final ComplexType responseMessage) {
@@ -111,16 +112,17 @@ public final class HttpUtils extends HttpCodes {
 		}
 	}
 
-	public static HttpResult read(IOConnection connection, boolean modifyContent) {
-		InputStream input;
-		try {
-			input = connection.getInputStream();
-		} catch (IOException e) {
-			throw new WseConnectionException(e);
-		}
+	/** Never returns null */
+	public static HttpResult read(IOConnection connection, boolean modifyContent) throws IOException {
+		Objects.requireNonNull(connection, "connection == null");
+		
+		InputStream input = connection.getInputStream();
+		Objects.requireNonNull(input, "connection inputstream == null");
+
 		return read(input, modifyContent);
 	}
 
+	/** Never returns null */
 	public static HttpResult read(InputStream inputStream, boolean modifyContent) {
 		try {
 			return HttpBuilder.read(inputStream, modifyContent);

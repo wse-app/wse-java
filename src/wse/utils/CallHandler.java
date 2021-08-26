@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 import wse.WSE;
 import wse.client.IOConnection;
+import wse.client.PersistantConnectionStore;
 import wse.client.SocketConnection;
 import wse.client.shttp.SHttpManager;
 import wse.server.servlet.ws.WebSocketServlet;
@@ -21,6 +22,7 @@ import wse.utils.exception.WseException;
 import wse.utils.exception.WseHttpParsingException;
 import wse.utils.exception.WseHttpStatusCodeException;
 import wse.utils.exception.WseInitException;
+import wse.utils.exception.WseParsingException;
 import wse.utils.exception.WseSHttpException;
 import wse.utils.http.ContentType;
 import wse.utils.http.HttpAttributeList;
@@ -32,7 +34,10 @@ import wse.utils.http.HttpStatusLine;
 import wse.utils.http.HttpURI;
 import wse.utils.http.StreamUtils;
 import wse.utils.http.TransferEncoding;
-import wse.utils.log.Loggers;
+import wse.utils.options.HasOptions;
+import wse.utils.options.IOptions;
+import wse.utils.options.Option;
+import wse.utils.options.Options;
 import wse.utils.shttp.SKey;
 import wse.utils.ssl.SSLAuth;
 import wse.utils.stream.LayeredOutputStream;
@@ -40,11 +45,18 @@ import wse.utils.stream.LimitedInputStream;
 import wse.utils.stream.ProtectedOutputStream;
 import wse.utils.stream.WseInputStream;
 import wse.utils.writable.StreamCatcher;
+import wse.utils.writer.HttpWriter;
 import wse.utils.xml.XMLElement;
 import wse.utils.xml.XMLUtils;
 
 public class CallHandler implements HasOptions {
 
+	/**
+	 * Option for allowing the use of stored connections, and storing new ones for
+	 * future connections to the same protocol/host/port
+	 */
+	public static final Option<Boolean> PERSISTANT_CONNECTION = new Option<>(CallHandler.class, "PERSISTANT_CONNECTION",
+			true);
 	public static final Option<IOConnection> CONNECTION_OVERRIDE = new Option<>(CallHandler.class,
 			"CONNECTION_OVERRIDE");
 	public static final Option<HttpAttributeList> ADDITIONAL_ATTRIBUTES = new Option<>(CallHandler.class,
@@ -53,7 +65,7 @@ public class CallHandler implements HasOptions {
 	private static final Logger LOG = WSE.getLogger();
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 
-	private CallTimer timer;
+	private final Timer timer;
 
 	/** Call Info */
 	private String host;
@@ -61,9 +73,15 @@ public class CallHandler implements HasOptions {
 	private int usePort; // Port recieved by shttp if using shttp
 	private Protocol protocol;
 
+	private HttpMethod method;
+	private URI uri;
+	private SKey skey;
+	private SSLAuth auth;
+
 	/** Request */
-	private HttpHeader http_header;
-	private HttpHeader shttp_header;
+	private HttpHeader httpHeader;
+	private HttpHeader shttpHeader;
+	private HttpWriter writer;
 
 	/** Connection */
 	private IOConnection connection;
@@ -72,21 +90,11 @@ public class CallHandler implements HasOptions {
 	protected HttpResult responseHttp;
 	private HttpResult responseSHttp;
 
-	private HttpWriter writer;
-	private URI uri;
-	private HttpMethod method;
-	private SSLAuth auth;
-	private SKey skey;
-
 	private OutputStream output;
-
 	private HttpResult result;
-	private String websocket_key;
 
-//	private SocketFactory defSocketFactory;
-//	private Consumer<Socket> socketProcessor;
+	private String webSocketKey;
 
-//	private int soTimeout = 10 * 1000;
 	private boolean sendChunked = false;
 
 	private final Options options = new Options();
@@ -96,11 +104,12 @@ public class CallHandler implements HasOptions {
 	}
 
 	public CallHandler(HttpMethod method, URI uri, HttpWriter writer, SSLAuth auth) {
-		timer = new CallTimer(LOG);
-		this.writer = writer;
-		this.uri = uri;
 		this.method = method;
+		this.uri = uri;
+		this.writer = writer;
 		this.auth = auth;
+
+		this.timer = new Timer(LOG, Level.FINER);
 	}
 
 	public IOptions getOptions() {
@@ -117,7 +126,7 @@ public class CallHandler implements HasOptions {
 	}
 
 	public void setWebSocketControlKey(String key) {
-		this.websocket_key = key;
+		this.webSocketKey = key;
 	}
 
 	/**
@@ -140,9 +149,7 @@ public class CallHandler implements HasOptions {
 				}
 				break;
 			}
-			if (result == null) {
-				throw new WseException("Got null result");
-			}
+
 			return new HttpResult(responseHttp.getHeader(),
 					new ConnectionClosingInputStream(responseHttp.getContent(), connection), false);
 		} catch (SoapFault sf) {
@@ -154,13 +161,15 @@ public class CallHandler implements HasOptions {
 	}
 
 	private void initialize() {
-		options.log(LOG, Level.FINE, "Options");
+		LOG.fine("Target: " + String.valueOf(withHiddenPassword(uri)));
+
+		options.log(LOG, Level.FINER, "Options");
 
 		protocol = Protocol.forName(uri.getScheme());
 		if (protocol == null) {
 			throw new WseInitException("Unknown protocol: " + uri.getScheme());
 		}
-		LOG.fine("Protocol: " + protocol);
+		LOG.finer("Protocol: " + protocol);
 
 		host = uri.getHost();
 
@@ -177,23 +186,24 @@ public class CallHandler implements HasOptions {
 				port = 80;
 		}
 
-		LOG.fine("Target: " + String.valueOf(withHiddenPassword(uri)));
 	}
 
 	private void connect() {
 
 		if (protocol == Protocol.SHTTP) {
-			Loggers.trace(LOG, "shttpSetup()", new Runnable() {
-				@Override
-				public void run() {
-					shttpSetup();
-				}
-			});
+			shttpSetup();
 		} else {
 			usePort = port;
 		}
 
 		this.connection = getConnection();
+
+		try {
+			if (this.connection.isOpen()) {
+				return;
+			}
+		} catch (IOException ignore) {
+		}
 
 		try {
 			timer.begin("Connect");
@@ -207,9 +217,28 @@ public class CallHandler implements HasOptions {
 
 	private IOConnection getConnection() {
 
-		IOConnection override = getOptions().get(CallHandler.CONNECTION_OVERRIDE);
-		if (override != null)
-			return override;
+		IOConnection connection = getOptions().get(CallHandler.CONNECTION_OVERRIDE);
+		if (connection != null)
+			return connection;
+
+		if (persistant()) {
+			connection = PersistantConnectionStore.useConnection(protocol, host, usePort);
+
+			if (connection != null) {
+				// TODO If we did not read all input from previous call, we might want to clear
+				// the input before making another request
+				try {
+					InputStream input = connection.getInputStream();
+					if (input.available() == 0) {
+						LOG.fine("Using persistant connection");
+						return connection;
+					}
+
+					LOG.warning("Persistant connection available but it has leftover data in input");
+				} catch (Throwable ignore) {
+				}
+			}
+		}
 
 		boolean ssl = protocol == Protocol.HTTPS || protocol == Protocol.WEB_SOCKET_SECURE;
 		SocketConnection socketConnection = new SocketConnection(auth, ssl, host, usePort);
@@ -240,36 +269,36 @@ public class CallHandler implements HasOptions {
 				LayeredOutputStream output = new LayeredOutputStream(
 						new ProtectedOutputStream(connection.getOutputStream()));
 
-				StreamCatcher content = new StreamCatcher();
+				StreamCatcher shttpContent = new StreamCatcher();
 
-				LayeredOutputStream contentStream = new LayeredOutputStream(content);
+				LayeredOutputStream shttpLayeredContent = new LayeredOutputStream(shttpContent);
 
-				contentStream.record(LOG, Level.FINEST, "Request:");
-				contentStream.sHttpEncrypt(skey);
+				shttpLayeredContent.record(LOG, Level.FINEST, "Request:");
+				shttpLayeredContent.sHttpEncrypt(skey);
 
-				buildHttpHeader(http_header = new HttpHeader());
+				buildHttpHeader(httpHeader = new HttpHeader());
 
-				http_header.writeToStream(contentStream, UTF8);
+				httpHeader.writeToStream(shttpLayeredContent, UTF8);
 
 				if (sendChunked)
-					contentStream.addChunked(8192);
+					shttpLayeredContent.addChunked(8192);
 
 				if (writer != null) {
-					Charset cs = http_header.getContentCharset();
-					writer.writeToStream(contentStream, cs);
+					Charset cs = httpHeader.getContentCharset();
+					writer.writeToStream(shttpLayeredContent, cs);
 				}
 
-				contentStream.flush();
-				content.flush();
+				shttpLayeredContent.flush();
+				shttpContent.flush();
 
-				shttp_header = SHttp.makeSHttpHeader(skey.getKeyName());
-				shttp_header.setContentLength(content.getSize());
+				shttpHeader = SHttp.makeSHttpHeader(skey.getKeyName());
+				shttpHeader.setContentLength(shttpContent.getSize());
 
 				if (SHttp.LOG_ENCRYPTED_DATA)
 					output.record(LOG, Level.FINEST, "SHttp-Encrypted Request:", true);
 
-				shttp_header.writeToStream(output, UTF8);
-				content.writeToStream(output, UTF8);
+				shttpHeader.writeToStream(output, UTF8);
+				shttpContent.writeToStream(output, UTF8);
 				output.flush();
 
 				this.output = output;
@@ -280,14 +309,16 @@ public class CallHandler implements HasOptions {
 						new ProtectedOutputStream(connection.getOutputStream()));
 
 				output.record(LOG, Level.FINEST, "Request: ");
-				buildHttpHeader(http_header = new HttpHeader());
-				http_header.writeToStream(output, UTF8);
+				buildHttpHeader(httpHeader = new HttpHeader());
+				httpHeader.writeToStream(output, UTF8);
 
 				if (sendChunked)
 					output.addChunked(8192);
 
 				if (writer != null) {
-					Charset cs = http_header.getContentCharset();
+					Charset cs = httpHeader.getContentCharset();
+					if (cs == null)
+						cs = UTF8;
 					writer.writeToStream(output, cs);
 				}
 				output.flush();
@@ -306,7 +337,12 @@ public class CallHandler implements HasOptions {
 
 		timer.begin("Read");
 
-		this.result = HttpUtils.read(this.connection, true);
+		// Never null
+		try {
+			this.result = HttpUtils.read(this.connection, true);
+		} catch (IOException e) {
+			throw new WseParsingException(e.getMessage(), e);
+		}
 
 		timer.end();
 
@@ -322,7 +358,7 @@ public class CallHandler implements HasOptions {
 				} catch (Exception e) {
 					throw new WseSHttpException("Failed to decrypt data: " + e.getMessage(), e);
 				} finally {
-					LOG.finest("InputStream Image:\n" + String.valueOf(responseSHttp.getContent()));
+					LOG.finest("SHttp InputStream Image:\n" + String.valueOf(responseSHttp.getContent()));
 				}
 
 				try {
@@ -336,6 +372,16 @@ public class CallHandler implements HasOptions {
 			}
 		} else {
 			responseHttp = this.result;
+		}
+
+		boolean persistant = persistant();
+		persistant &= responseHttp.getHeader().getConnection(true).contains("keep-alive");
+
+		if (persistant) {
+			try {
+				storePersistant();
+			} catch (IOException ignore) {
+			}
 		}
 
 		if (LOG.isLoggable(Level.FINE)) {
@@ -352,7 +398,29 @@ public class CallHandler implements HasOptions {
 				responseHttp.wrapLogger("Response: ", LOG, Level.FINEST);
 			}
 		}
+	}
 
+	private void storePersistant() throws IOException {
+		boolean hasContent = false;
+
+		hasContent = responseHttp.getHeader().getContentLength() > 0;
+
+		if (!hasContent) {
+			TransferEncoding encoding = responseHttp.getHeader().getTransferEncoding();
+			hasContent = encoding == TransferEncoding.CHUNKED;
+		}
+		if (!hasContent) {
+			InputStream is = responseHttp.getContent();
+			hasContent = is.available() > 0;
+		}
+
+		if (!hasContent) {
+			LOG.fine("Storing persistant connection for: " + protocol + "://" + host + ":" + port);
+			PersistantConnectionStore.storeConnection(protocol, host, port, null, null, connection);
+			return;
+		}
+
+		responseHttp.setContent(new PersistantInputStream(responseHttp.getContent()));
 	}
 
 	private void loadResponse() {
@@ -457,10 +525,14 @@ public class CallHandler implements HasOptions {
 		if (this.protocol.isWebSocket()) {
 			header.setAttribute(WebSocketServlet.ATTRIB_UPGRADE, WebSocketServlet.UPGRADE_VALUE);
 			header.setAttribute(WebSocketServlet.ATTRIB_CONNECTION, WebSocketServlet.CONNECTION_VALUE);
-			header.setAttribute(WebSocketServlet.ATTRIB_KEY, this.websocket_key);
+			header.setAttribute(WebSocketServlet.ATTRIB_KEY, this.webSocketKey);
 			header.setAttribute(WebSocketServlet.ATTRIB_VERSION, "13");
+		}
+
+		if (persistant()) {
+			header.setConnection("keep-alive");
 		} else {
-			header.setAttribute(HttpUtils.CONNECTION, HttpUtils.CONNECTION_CLOSE);
+			header.setConnection("close");
 		}
 
 		HttpAttributeList additional = getOptions().get(ADDITIONAL_ATTRIBUTES);
@@ -471,18 +543,17 @@ public class CallHandler implements HasOptions {
 		if (writer != null)
 			writer.prepareHeader(header);
 
+		Charset cs = header.getContentCharset();
+		if (cs == null)
+			cs = UTF8;
+
 		TransferEncoding enc = header.getTransferEncoding();
 		if (enc == null)
 			enc = TransferEncoding.IDENTITY;
 
 		switch (enc) {
-		case BR: // fall through
-		case COMPRESS: // fall through
-		case DEFLATE: // fall through
-		case GZIP:
-			throw new WseException("Transfer-Encoding '" + enc.name + "' not supported");
 		case IDENTITY:
-			long l = writer != null ? writer.requestContentLength() : (this.protocol.isWebSocket() ? -1 : 0);
+			long l = writer != null ? writer.requestContentLength(cs) : (this.protocol.isWebSocket() ? -1 : 0);
 			header.setSendContentLength(l >= 0);
 			if (l >= 0)
 				header.setContentLength(l);
@@ -492,7 +563,7 @@ public class CallHandler implements HasOptions {
 			header.setSendContentLength(false);
 			break;
 		default:
-			break;
+			throw new WseException("Transfer-Encoding '" + enc.name + "' not supported");
 		}
 	}
 
@@ -536,4 +607,49 @@ public class CallHandler implements HasOptions {
 		}
 	}
 
+	private boolean persistant() {
+		boolean persistant = getOptions().get(CallHandler.PERSISTANT_CONNECTION, true);
+		return persistant && (protocol == Protocol.HTTPS || protocol == Protocol.HTTP);
+	}
+
+	public class PersistantInputStream extends WseInputStream {
+
+		public PersistantInputStream(InputStream readFrom) {
+			super(readFrom);
+		}
+
+		boolean stored = false;
+
+		private void store() throws IOException {
+			if (stored)
+				return;
+			stored = true;
+
+			LOG.fine("Storing persistant connection for: " + protocol + "://" + host + ":" + port);
+			StreamUtils.clean(readFrom);
+			PersistantConnectionStore.storeConnection(protocol, host, port, null, null, connection);
+		}
+
+		@Override
+		public void close() throws IOException {
+			store();
+		}
+
+		@Override
+		public int read() throws IOException {
+			int i = super.read();
+			if (i == -1)
+				store();
+			return i;
+		}
+
+		@Override
+		public int read(byte[] b, int off, int len) throws IOException {
+			int i = super.read(b, off, len);
+			if (i == -1)
+				store();
+			return i;
+		}
+
+	}
 }

@@ -9,12 +9,12 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import wse.utils.IOptions;
 import wse.utils.MimeType;
 import wse.utils.exception.WseBuildingException;
 import wse.utils.exception.WseParsingException;
 import wse.utils.ini.IniUtils;
 import wse.utils.json.JUtils;
+import wse.utils.options.IOptions;
 import wse.utils.xml.XMLUtils;
 
 public class InternalFormat {

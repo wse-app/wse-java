@@ -146,15 +146,4 @@ public class Loggers {
 			size--;
 		}
 	}
-
-	public static void trace(Logger logger, String targetMethod, Runnable run) {
-		try {
-			logger.finer(targetMethod + " BEGINS");
-			run.run();
-			logger.finer(targetMethod + " RETURNS");
-		} catch (Exception e) {
-			throw e;
-		} finally {
-		}
-	}
 }

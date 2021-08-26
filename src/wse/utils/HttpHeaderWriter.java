@@ -1,13 +1,11 @@
 package wse.utils;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
+import wse.utils.http.HttpHeader;
 
-public abstract class HttpHeaderWriter extends HttpWriter {
-	@Override
-	public final long requestContentLength() { return 0; }
-	
-	@Override
-	public final void writeToStream(OutputStream stream, Charset charset) throws IOException {}
+public interface HttpHeaderWriter {
+	/**
+	 * This method is to be overriden if the caller wants to add additional
+	 * attributes such as Content-Type or SOAPAction
+	 */
+	public void prepareHeader(HttpHeader header);
 }

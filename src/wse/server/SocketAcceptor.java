@@ -60,8 +60,12 @@ public class SocketAcceptor implements Runnable{
 				
 				socket.setSoTimeout(5000);
 				
-				Thread handle = new Thread(receiver.getSocketHandler(socket));
+				Runnable handler = receiver.getSocketHandler(socket);
+				
+				Thread handle = new Thread(handler);
 				handle.start();
+				
+				logger.finest("Handled by '" + handle.getName() + "'");
 				
 			}catch(SocketException e)
 			{
