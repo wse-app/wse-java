@@ -105,6 +105,8 @@ public final class SocketHandler implements Runnable {
 			output = new RecordingOutputStream(output, LOG, Level.FINEST, "Response:");
 		}
 		HttpServletResponse response = new HttpServletResponse(output);
+		response.setContentLength(0);
+		
 		HttpHeader responseHeader = response.getHttpHeader();
 
 		boolean keepAlive = requestHeader.getConnection(/* lowerCase: */ true).contains("keep-alive");
@@ -136,7 +138,7 @@ public final class SocketHandler implements Runnable {
 				byte[] header = requestHeader.toByteArray();
 				LOG.finer("Request Header: [" + (header.length) + " bytes]\n" + new String(header));
 			}
-
+			
 			treatment.treatCall(request, response);
 
 			if (!response.isHeaderWritten()) {
