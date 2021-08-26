@@ -27,7 +27,7 @@
 	<target name="init">
 		<!-- Create the time stamp -->
 		<tstamp>
-			<format property="VERSION" pattern="yy.M" locale="en"/>
+			<format property="VERSION" pattern="yy.M.d" locale="en"/>
 		</tstamp>
 		<!-- Create the build directory structure used by compile -->
 		<mkdir dir="${bin}"/>
