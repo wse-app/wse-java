@@ -12,7 +12,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.SecretKeySpec;
 
-import wse.utils.exception.WseSHttpEncryptionException;
+import wse.utils.exception.SHttpEncryptionException;
 import wse.utils.shttp.SKey;
 
 public class EncryptingOutputStream extends WseOutputStream {
@@ -45,9 +45,9 @@ public class EncryptingOutputStream extends WseOutputStream {
 			cipher.init(Cipher.ENCRYPT_MODE, newKey);
 
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-			throw new WseSHttpEncryptionException("Encryption failed: " + e.getMessage(), e);
+			throw new SHttpEncryptionException("Encryption failed: " + e.getMessage(), e);
 		} catch (InvalidKeyException e) {
-			throw new WseSHttpEncryptionException("Failed to encrypt: Invalid encryption key: " + e.getMessage(), e);
+			throw new SHttpEncryptionException("Failed to encrypt: Invalid encryption key: " + e.getMessage(), e);
 		}
 	}
 	
@@ -108,7 +108,7 @@ public class EncryptingOutputStream extends WseOutputStream {
 				writeTo.write(data, 0, l);
 			}
 		} catch (IllegalBlockSizeException | BadPaddingException | ShortBufferException e) {
-			throw new WseSHttpEncryptionException("Failed to encrypt message: " + e.getMessage(), e);
+			throw new SHttpEncryptionException("Failed to encrypt message: " + e.getMessage(), e);
 		}finally {
 			counter = 0;			
 		}

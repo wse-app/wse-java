@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 import wse.WSE;
 import wse.utils.HttpResult;
-import wse.utils.exception.WseHttpException;
+import wse.utils.exception.HttpException;
 import wse.utils.log.Loggers;
 import wse.utils.stream.CombinedInputStream;
 
@@ -100,7 +100,7 @@ public class HttpBuilder {
 			}
 
 			// Send 413 Entity Too Large
-			throw new WseHttpException("Could not find header end", 413);
+			throw new HttpException("Could not find header end", 413);
 		}
 		int content_start = split[1];
 		int content_length = pointer - content_start;

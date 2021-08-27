@@ -9,7 +9,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.ShortBufferException;
 
 import wse.utils.SHttp;
-import wse.utils.exception.WseSHttpDecryptionException;
+import wse.utils.exception.SHttpDecryptionException;
 import wse.utils.shttp.SKey;
 
 public class DecryptingInputStream extends InputStream {
@@ -122,14 +122,14 @@ public class DecryptingInputStream extends InputStream {
 	private void decrypt(int length) {
 
 		if (length % blockSize != 0) {
-			throw new WseSHttpDecryptionException(
+			throw new SHttpDecryptionException(
 					"Can't decrypt length not multiple of blockSize: " + length + " / " + blockSize);
 		}
 
 		try {
 			cipher.doFinal(data, 0, length, data, 0);
 		} catch (ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
-			throw new WseSHttpDecryptionException("Failed to decrypt data: " + e.getMessage(), e);
+			throw new SHttpDecryptionException("Failed to decrypt data: " + e.getMessage(), e);
 		}
 	}
 

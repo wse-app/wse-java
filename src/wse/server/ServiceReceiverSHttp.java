@@ -11,7 +11,7 @@ import wse.utils.HttpCodes;
 import wse.utils.HttpResult;
 import wse.utils.MimeType;
 import wse.utils.SHttp;
-import wse.utils.exception.WseSHttpException;
+import wse.utils.exception.SHttpException;
 import wse.utils.http.HttpBuilder;
 import wse.utils.http.StreamUtils;
 import wse.utils.shttp.SKey;
@@ -85,7 +85,7 @@ public class ServiceReceiverSHttp extends ServiceReceiverHttp {
 		WseInputStream decryptedInput = SHttp.sHttpDecryptData(input, key);
 		input.close();
 		if (decryptedInput == null)
-			throw new WseSHttpException("Failed to decrypt message");
+			throw new SHttpException("Failed to decrypt message");
 		
 		decryptedInput = new RecordingInputStream(decryptedInput, log, Level.FINEST, "Request Content:");
 		

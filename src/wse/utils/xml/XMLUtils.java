@@ -35,7 +35,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import wse.utils.collections.Occurances;
-import wse.utils.exception.WseXMLParsingException;
+import wse.utils.exception.XMLException;
 import wse.utils.internal.IParser;
 import wse.utils.options.IOptions;
 import wse.utils.writable.StreamCatcher;
@@ -92,7 +92,7 @@ public class XMLUtils {
 			try {
 				return XMLUtils.parse(input);
 			} catch (ParserConfigurationException | SAXException | TransformerException e) {
-				throw new WseXMLParsingException(e.getMessage(), e);
+				throw new XMLException(e.getMessage(), e);
 			}
 		}
 

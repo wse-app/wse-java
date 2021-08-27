@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import wse.utils.MimeType;
+import wse.utils.exception.JSONException;
 import wse.utils.internal.IElement;
 import wse.utils.internal.StringGatherer;
 
@@ -156,7 +157,7 @@ public class JObject extends LinkedHashMap<String, Object> implements JValue, IE
 		if (o instanceof JObject)
 			return (JObject) o;
 
-		throw new JException(this, String.format("Child '%s' is not an object", key));
+		throw new JSONException(this, String.format("Child '%s' is not an object", key));
 	}
 
 	@Override
@@ -172,14 +173,14 @@ public class JObject extends LinkedHashMap<String, Object> implements JValue, IE
 			return null;
 
 		if (!(o instanceof JArray))
-			throw new JException(this, String.format("Child '%s' is not an array", key));
+			throw new JSONException(this, String.format("Child '%s' is not an array", key));
 
 		JArray a = (JArray) o;
 		Collection<String> result = new LinkedList<>();
 
 		for (Object ao : a) {
 			if (ao instanceof JValue)
-				throw new JException(this,
+				throw new JSONException(this,
 						String.format("Child '%s' contains invalid element type, expected only raw values", key));
 
 			result.add(String.valueOf(ao));
@@ -201,14 +202,14 @@ public class JObject extends LinkedHashMap<String, Object> implements JValue, IE
 			return null;
 
 		if (!(o instanceof JArray))
-			throw new JException(this, String.format("Child '%s' is not an array", key));
+			throw new JSONException(this, String.format("Child '%s' is not an array", key));
 
 		JArray a = (JArray) o;
 		Collection<IElement> result = new LinkedList<>();
 
 		for (Object ao : a) {
 			if (!(ao instanceof JObject))
-				throw new JException(this,
+				throw new JSONException(this,
 						String.format("Child '%s' contains invalid element type, expected only objects", key));
 			result.add((JObject) ao);
 		}

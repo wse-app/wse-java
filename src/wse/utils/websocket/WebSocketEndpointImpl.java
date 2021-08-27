@@ -13,7 +13,7 @@ import wse.server.servlet.ws.PongListener;
 import wse.utils.SerializationWriter;
 import wse.utils.event.ListenerRegistration;
 import wse.utils.exception.WseException;
-import wse.utils.exception.WseWebSocketException;
+import wse.utils.exception.WebSocketException;
 import wse.utils.http.HttpHeader;
 import wse.utils.stream.WS13OutputStream;
 import wse.utils.websocket.WebSocket.Message;
@@ -85,16 +85,16 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 			}
 		} catch (Exception e) {
 			if (!(this.isCloseRequestedByMe && this.isCloseRequestedByOther && WseException.isCausedBy(e, SocketException.class))) {
-				throw new WseWebSocketException("Exception on read: " + e.getMessage(), e);
+				throw new WebSocketException("Exception on read: " + e.getMessage(), e);
 			}				
 		}
 	}
 
 	public void sendMessage(byte opcode, StreamWriter writer) throws IOException {
 		if (isClosed)
-			throw new WseWebSocketException("WebSocket has been closed");
+			throw new WebSocketException("WebSocket has been closed");
 		if (isCloseRequestedByMe)
-			throw new WseWebSocketException("WebSocket has been requested to close");
+			throw new WebSocketException("WebSocket has been requested to close");
 		synchronized (OUTPUT_LOCK) {
 			output.setOpCode(opcode);
 			if (writer != null) {
@@ -170,7 +170,7 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 		}
 
 		if (this.isCloseRequestedByMe || this.isCloseRequestedByOther)
-			throw new WseWebSocketException(
+			throw new WebSocketException(
 					"Got " + WebSocket.getCodeName(message.getOPCode()) + " after close was requested");
 
 		if (message.getOPCode() == OP_PONG) {

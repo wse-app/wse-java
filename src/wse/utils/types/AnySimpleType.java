@@ -11,6 +11,7 @@ import java.util.Objects;
 
 import wse.WSE;
 import wse.utils.ArrayUtils;
+import wse.utils.exception.SimpleTypeRestrictionException;
 import wse.utils.exception.WseBuildingException;
 import wse.utils.exception.WseException;
 import wse.utils.exception.WseParsingException;

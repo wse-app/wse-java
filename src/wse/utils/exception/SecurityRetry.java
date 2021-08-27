@@ -1,6 +1,6 @@
 package wse.utils.exception;
 
-public class SecurityRetry extends WseSHttpException {
+public class SecurityRetry extends SHttpException {
 	private static final long serialVersionUID = -3705111410121881250L;
 
 	public SecurityRetry() {

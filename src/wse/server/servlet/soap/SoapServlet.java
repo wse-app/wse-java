@@ -11,7 +11,7 @@ import wse.server.servlet.HttpServletResponse;
 import wse.utils.MimeType;
 import wse.utils.exception.SoapFault;
 import wse.utils.exception.WseParsingException;
-import wse.utils.exception.WseXMLParsingException;
+import wse.utils.exception.XMLException;
 import wse.utils.http.ContentType;
 import wse.utils.http.HttpMethod;
 import wse.utils.internal.IElement;
@@ -152,7 +152,7 @@ public abstract class SoapServlet extends HttpServlet {
 	public void validateSoap(XMLElement envelope) {
 		if (!Objects.equals(envelope.getName(), "Envelope")
 				|| !Objects.equals(envelope.getNamespaceURI(), XMLUtils.SOAP_ENVELOPE))
-			throw new WseXMLParsingException("XML Content is not SOAP");
+			throw new XMLException("XML Content is not SOAP");
 
 		XMLElement header = envelope.getChild("Header", XMLUtils.SOAP_ENVELOPE);
 

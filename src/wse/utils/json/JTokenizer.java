@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 
+import wse.utils.exception.JSONException;
 import wse.utils.internal.PushableReader;
 
 public class JTokenizer {
@@ -331,12 +332,12 @@ public class JTokenizer {
 		return new String(chars);
 	}
 
-	private JException syntaxError(String message) {
+	private JSONException syntaxError(String message) {
 		return syntaxError(message, null);
 	}
 
-	private JException syntaxError(String message, Throwable causedBy) {
-		return new JException(getRow(), getColumn(), message, causedBy);
+	private JSONException syntaxError(String message, Throwable causedBy) {
+		return new JSONException(getRow(), getColumn(), message, causedBy);
 	}
 
 	private int getRow() {

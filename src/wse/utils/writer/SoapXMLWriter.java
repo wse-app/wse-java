@@ -7,7 +7,7 @@ import java.nio.charset.Charset;
 import wse.utils.ComplexType;
 import wse.utils.HttpUtils;
 import wse.utils.MimeType;
-import wse.utils.exception.WseXMLBuildingException;
+import wse.utils.exception.XMLException;
 import wse.utils.http.HttpHeader;
 import wse.utils.xml.XMLElement;
 import wse.utils.xml.XMLUtils;
@@ -35,7 +35,7 @@ public class SoapXMLWriter implements HttpWriter {
 			try {
 				requestType.create(body);
 			} catch (Exception e) {
-				throw new WseXMLBuildingException("Failed to create request XML: " + e.getMessage(), e);
+				throw new XMLException("Failed to create request XML: " + e.getMessage(), e);
 			}
 		}
 

@@ -17,7 +17,6 @@ import javax.net.ssl.SSLSocketFactory;
 import wse.WSE;
 import wse.utils.Consumer;
 import wse.utils.Consumers;
-import wse.utils.exception.WseConnectionException;
 import wse.utils.options.HasOptions;
 import wse.utils.options.IOptions;
 import wse.utils.options.Option;
@@ -124,7 +123,7 @@ public class SocketConnection implements IOConnection, HasOptions {
 
 		if (!socket.isConnected() || socket.isClosed()) {
 			LOG.severe("Socket failed to open");
-			throw new WseConnectionException("Socket failed to open");
+			throw new SocketException("Socket failed to open");
 		}
 	}
 
@@ -188,25 +187,18 @@ public class SocketConnection implements IOConnection, HasOptions {
 	}
 
 	@Override
-	public InputStream getInputStream() {
+	public InputStream getInputStream() throws IOException {
 		if (socket == null)
-			throw new IllegalStateException("This SocketConnection is not connected");
-		try {
-			return socket.getInputStream();
-		} catch (IOException e) {
-			throw new WseConnectionException("Failed to retrieve InputStream: " + e.getMessage(), e);
-		}
+			throw new IllegalStateException("This SocketConnection was never connected");
+		return socket.getInputStream();
 	}
 
 	@Override
-	public OutputStream getOutputStream() {
+	public OutputStream getOutputStream() throws IOException {
 		if (socket == null)
-			throw new IllegalStateException("This SocketConnection is not connected");
-		try {
-			return socket.getOutputStream();
-		} catch (IOException e) {
-			throw new WseConnectionException("Failed to retrieve OutputStream: " + e.getMessage(), e);
-		}
+			throw new IllegalStateException("This SocketConnection was never connected");
+
+		return socket.getOutputStream();
 	}
 
 	private SocketAddress getSocketAddress() {

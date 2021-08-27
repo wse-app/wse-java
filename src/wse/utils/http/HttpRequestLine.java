@@ -1,6 +1,6 @@
 package wse.utils.http;
 
-import wse.utils.exception.WseHttpException;
+import wse.utils.exception.HttpException;
 import wse.utils.internal.StringGatherer;
 
 public class HttpRequestLine extends HttpDescriptionLine {
@@ -26,12 +26,12 @@ public class HttpRequestLine extends HttpDescriptionLine {
 		
 		HttpMethod method = HttpMethod.getMethodStrict(parts[0]);
 		if (method == null)
-			throw new WseHttpException("Invalid Method: " + parts[0], 400);
+			throw new HttpException("Invalid Method: " + parts[0], 400);
 		
 		
 		HttpURI uri = HttpURI.fromURI(parts[1]);
 		if (uri == null)
-			throw new WseHttpException("Invalid URI: " + parts[1], 400);
+			throw new HttpException("Invalid URI: " + parts[1], 400);
 		
 
 		return new HttpRequestLine(method, uri, parts[2].trim());

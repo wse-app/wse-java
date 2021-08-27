@@ -16,9 +16,9 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 
 import wse.WSE;
-import wse.utils.exception.WseSHttpDecryptionException;
-import wse.utils.exception.WseSHttpEncryptionException;
-import wse.utils.exception.WseSHttpException;
+import wse.utils.exception.SHttpDecryptionException;
+import wse.utils.exception.SHttpEncryptionException;
+import wse.utils.exception.SHttpException;
 import wse.utils.http.HttpHeader;
 import wse.utils.http.HttpMethod;
 import wse.utils.http.HttpRequestLine;
@@ -51,15 +51,15 @@ public final class SHttp {
 			return cipher;
 
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-			throw new WseSHttpEncryptionException("Encryption failed: " + e.getMessage(), e);
+			throw new SHttpEncryptionException("Encryption failed: " + e.getMessage(), e);
 		} catch (InvalidKeyException e) {
-			throw new WseSHttpEncryptionException("Failed to encrypt: Invalid encryption key: " + e.getMessage(), e);
+			throw new SHttpEncryptionException("Failed to encrypt: Invalid encryption key: " + e.getMessage(), e);
 		}
 	}
 
 	public static byte[] genByteArray(int bitLength) {
 		if (bitLength % 8 != 0)
-			throw new WseSHttpException("Illegal key size: " + bitLength);
+			throw new SHttpException("Illegal key size: " + bitLength);
 
 		random.setSeed(System.nanoTime());
 
@@ -108,7 +108,7 @@ public final class SHttp {
 		try {
 			return cipher.doFinal(data, offset, length);
 		} catch (IllegalBlockSizeException | BadPaddingException e) {
-			throw new WseSHttpDecryptionException("Failed to decrypt: " + e.getMessage(), e);
+			throw new SHttpDecryptionException("Failed to decrypt: " + e.getMessage(), e);
 		}
 	}
 	
@@ -120,7 +120,7 @@ public final class SHttp {
 		try {
 			return cipher.doFinal(data);
 		} catch (IllegalBlockSizeException | BadPaddingException e) {
-			throw new WseSHttpEncryptionException("Failed to encrypt: " + e.getMessage(), e);
+			throw new SHttpEncryptionException("Failed to encrypt: " + e.getMessage(), e);
 		}
 	}
 	
@@ -140,7 +140,7 @@ public final class SHttp {
 				byte[] decrypted_part = decrypt(data, 0, data.length - data.length % key.getBlockSize(), key);
 				log.finest("Decrypted part: " + len + " bytes");
 				Loggers.hexdump(log, Level.FINEST, decrypted_part);
-				throw new WseSHttpDecryptionException("Data not multiple of block length: " + data.length);
+				throw new SHttpDecryptionException("Data not multiple of block length: " + data.length);
 			}
 		}
 		

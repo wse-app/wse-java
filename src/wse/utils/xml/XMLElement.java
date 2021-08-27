@@ -13,7 +13,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 import wse.utils.MimeType;
-import wse.utils.exception.WseXMLBuildingException;
+import wse.utils.exception.XMLException;
 import wse.utils.internal.IElement;
 import wse.utils.internal.StringGatherer;
 import wse.utils.writable.StreamCatcher;
@@ -632,7 +632,7 @@ public class XMLElement extends XMLNode implements IElement {
 	@Override
 	public void setChild(String key, String namespace, IElement child) {
 		if (!(child instanceof XMLElement))
-			throw new WseXMLBuildingException(
+			throw new XMLException(
 					String.format("Tried to add invalid child element type '%s', expected '%s'",
 							child.getClass().getName(), XMLElement.class.getName()));
 

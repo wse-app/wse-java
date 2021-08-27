@@ -15,8 +15,8 @@ import wse.utils.HttpUtils;
 import wse.utils.SHttp;
 import wse.utils.StringUtils;
 import wse.utils.exception.WseConnectionException;
-import wse.utils.exception.WseSHttpException;
-import wse.utils.exception.WseSHttpInitException;
+import wse.utils.exception.SHttpException;
+import wse.utils.exception.SHttpInitException;
 import wse.utils.http.HttpHeader;
 import wse.utils.http.HttpStatusLine;
 import wse.utils.http.StreamUtils;
@@ -159,17 +159,17 @@ public final class SHttpManager {
 			HttpHeader responseHeader = answer.getHeader();
 
 			if (responseHeader == null)
-				throw new WseSHttpInitException("Failed to parse response header");
+				throw new SHttpInitException("Failed to parse response header");
 
 			HttpStatusLine status = responseHeader.getStatusLine();
 
 			if (status == null)
-				throw new WseSHttpInitException("Invalid response header: " + responseHeader.getDescriptionLine());
+				throw new SHttpInitException("Invalid response header: " + responseHeader.getDescriptionLine());
 
 			// Check status code
 
 			if (!status.isSuccessCode())
-				throw new WseSHttpException("Failed to init SHttp session. Got status \"" + status.toString());
+				throw new SHttpException("Failed to init SHttp session. Got status \"" + status.toString());
 
 			/**
 			 * - key name - encryption key, base64 encoded - port number for shttp
@@ -179,7 +179,7 @@ public final class SHttpManager {
 			try {
 				payload = new String(StreamUtils.readAll(answer.getContent()));
 			} catch (IOException e) {
-				throw new WseSHttpException("Failed to read shttp response: " + e.getMessage(), e);
+				throw new SHttpException("Failed to read shttp response: " + e.getMessage(), e);
 			}
 
 			String[] parts = payload.split(" ", 5);
@@ -192,7 +192,7 @@ public final class SHttpManager {
 				exp = Long.parseLong(parts[3]);
 				len = Integer.parseInt(parts[4]) / 8;
 			} catch (NumberFormatException e) {
-				throw new WseSHttpException("Failed to parse shttp response: " + e.getMessage(), e);
+				throw new SHttpException("Failed to parse shttp response: " + e.getMessage(), e);
 			}
 
 			String key_64 = parts[1];

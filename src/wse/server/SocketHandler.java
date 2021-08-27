@@ -14,8 +14,8 @@ import wse.server.servlet.HttpServletRequest;
 import wse.server.servlet.HttpServletResponse;
 import wse.utils.HttpCodes;
 import wse.utils.HttpResult;
-import wse.utils.exception.WseHttpException;
-import wse.utils.exception.WseWebSocketException;
+import wse.utils.exception.HttpException;
+import wse.utils.exception.WebSocketException;
 import wse.utils.http.HttpBuilder;
 import wse.utils.http.HttpHeader;
 import wse.utils.http.HttpMethod;
@@ -63,7 +63,7 @@ public final class SocketHandler implements Runnable {
 
 			readLoop(input, output);
 
-		} catch (SocketException | WseWebSocketException e) {
+		} catch (SocketException | WebSocketException e) {
 			LOG.log(Level.FINEST, e.getClass().getName() + ": " + e.getMessage());
 		} catch (IOException e) {
 			LOG.log(Level.FINER, e.getClass().getName() + ": " + e.getMessage());
@@ -150,7 +150,7 @@ public final class SocketHandler implements Runnable {
 
 			output.flush();
 
-		} catch (WseHttpException e) {
+		} catch (HttpException e) {
 			Integer sendCode = e.getStatusCode();
 			response.sendError(sendCode != null ? sendCode : HttpCodes.BAD_REQUEST, e.getMessage());
 			LOG.log(Level.FINEST, e.getClass().getName() + ": " + e.getMessage(), e);

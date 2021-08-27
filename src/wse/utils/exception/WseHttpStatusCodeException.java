@@ -1,6 +1,6 @@
 package wse.utils.exception;
 
-public class WseHttpStatusCodeException extends WseHttpException {
+public class WseHttpStatusCodeException extends HttpException {
 
 	private static final long serialVersionUID = -2126925313175637910L;
 

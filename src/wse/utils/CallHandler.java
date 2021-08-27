@@ -21,9 +21,8 @@ import wse.utils.exception.WseConnectionException;
 import wse.utils.exception.WseException;
 import wse.utils.exception.WseHttpParsingException;
 import wse.utils.exception.WseHttpStatusCodeException;
-import wse.utils.exception.WseInitException;
 import wse.utils.exception.WseParsingException;
-import wse.utils.exception.WseSHttpException;
+import wse.utils.exception.SHttpException;
 import wse.utils.http.ContentType;
 import wse.utils.http.HttpAttributeList;
 import wse.utils.http.HttpBuilder;
@@ -167,7 +166,7 @@ public class CallHandler implements HasOptions {
 
 		protocol = Protocol.forName(uri.getScheme());
 		if (protocol == null) {
-			throw new WseInitException("Unknown protocol: " + uri.getScheme());
+			throw new WseException("Unknown protocol: " + uri.getScheme());
 		}
 		LOG.finer("Protocol: " + protocol);
 
@@ -175,7 +174,7 @@ public class CallHandler implements HasOptions {
 
 		// Only care about host if default connection
 		if (host == null && this.getOptions().get(CallHandler.CONNECTION_OVERRIDE) == null) {
-			throw new WseInitException("Got host == null");
+			throw new WseException("Got host == null");
 		}
 
 		this.port = uri.getPort();
@@ -253,7 +252,7 @@ public class CallHandler implements HasOptions {
 		timer.end();
 
 		if (skey == null) {
-			throw new WseSHttpException("sHttp Setup failed: got null key");
+			throw new SHttpException("sHttp Setup failed: got null key");
 		}
 
 		this.usePort = skey.getReachPort();
@@ -356,7 +355,7 @@ public class CallHandler implements HasOptions {
 				try {
 					httpMessage = SHttp.sHttpDecryptData(responseSHttp.getContent(), skey);
 				} catch (Exception e) {
-					throw new WseSHttpException("Failed to decrypt data: " + e.getMessage(), e);
+					throw new SHttpException("Failed to decrypt data: " + e.getMessage(), e);
 				} finally {
 					LOG.finest("SHttp InputStream Image:\n" + String.valueOf(responseSHttp.getContent()));
 				}
@@ -364,7 +363,7 @@ public class CallHandler implements HasOptions {
 				try {
 					this.responseHttp = HttpBuilder.read(httpMessage, true);
 				} catch (IOException e) {
-					throw new WseSHttpException("Failed to read http: " + e.getMessage(), e);
+					throw new SHttpException("Failed to read http: " + e.getMessage(), e);
 				}
 			} else {
 				LOG.fine("SHTTP response was not " + SHttp.SECURE_HTTP14);

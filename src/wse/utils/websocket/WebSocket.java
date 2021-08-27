@@ -21,8 +21,8 @@ import wse.utils.CallHandler;
 import wse.utils.HttpResult;
 import wse.utils.StringUtils;
 import wse.utils.event.ListenerRegistration;
-import wse.utils.exception.WseWebSocketException;
-import wse.utils.exception.WseWebSocketHandshakeException;
+import wse.utils.exception.WebSocketException;
+import wse.utils.exception.WebSocketHandshakeException;
 import wse.utils.http.HeaderAttribute;
 import wse.utils.http.HttpMethod;
 import wse.utils.options.HasOptions;
@@ -149,7 +149,7 @@ public class WebSocket implements WebSocketCodes, HasOptions {
 		
 		byte[] f2 = read(stream, 2);
 		if (f2 == null) {
-			throw new WseWebSocketException("got end of stream");
+			throw new WebSocketException("got end of stream");
 		}
 
 		int first = f2[0];
@@ -166,7 +166,7 @@ public class WebSocket implements WebSocketCodes, HasOptions {
 
 		if (!client && !result.masked) {
 			// Should abort socket: http://tools.ietf.org/html/rfc6455#section-5.1
-			throw new WseWebSocketException("Server got unmasked websocket message");
+			throw new WebSocketException("Server got unmasked websocket message");
 		}
 
 		// Read payload length
@@ -217,7 +217,7 @@ public class WebSocket implements WebSocketCodes, HasOptions {
 			try {
 				Frame f = readNextFrame(stream, client);
 				if (f == null) {
-					throw new WseWebSocketException("Got null");
+					throw new WebSocketException("Got null");
 				}
 				m.frames.add(f);
 
@@ -225,7 +225,7 @@ public class WebSocket implements WebSocketCodes, HasOptions {
 					return m;
 				}
 			} catch (Exception e) {
-				throw new WseWebSocketException("Could not read next frame: " + e.getMessage(), e);
+				throw new WebSocketException("Could not read next frame: " + e.getMessage(), e);
 			}
 
 		}
@@ -258,7 +258,7 @@ public class WebSocket implements WebSocketCodes, HasOptions {
 		this.registerListener(listener);
 
 		if (this.handler != null) {
-			throw new WseWebSocketException("WebSocket has already been opened");
+			throw new WebSocketException("WebSocket has already been opened");
 		}
 
 		thread = new Thread(new Runnable() {
@@ -287,7 +287,7 @@ public class WebSocket implements WebSocketCodes, HasOptions {
 		try {
 			doHandshake();
 		} catch (Exception e) {
-			throw new WseWebSocketException("Error during WebSocket handshake: " + e.getMessage(), e);
+			throw new WebSocketException("Error during WebSocket handshake: " + e.getMessage(), e);
 		}
 
 		this.input = handshakeResult.getContent();
@@ -317,7 +317,7 @@ public class WebSocket implements WebSocketCodes, HasOptions {
 
 		HeaderAttribute acc = this.handshakeResult.getHeader().getAttribute("Sec-WebSocket-Accept");
 		if (acc == null || !acc.hasValue() || !expectedResponseKey.equals(acc.value)) {
-			throw new WseWebSocketHandshakeException("Server responded with invalid accept key");
+			throw new WebSocketHandshakeException("Server responded with invalid accept key");
 		}
 
 		// notifications.js:28 WebSocket connection to 'ws://localhost:8505/chat'
@@ -326,11 +326,11 @@ public class WebSocket implements WebSocketCodes, HasOptions {
 
 		HeaderAttribute connection = this.handshakeResult.getHeader().getAttribute("Connection");
 		if (connection == null || !connection.hasValue() || !"Upgrade".equals(connection.value))
-			throw new WseWebSocketHandshakeException("'Connection' response header value must contain 'Upgrade'");
+			throw new WebSocketHandshakeException("'Connection' response header value must contain 'Upgrade'");
 
 		HeaderAttribute upgrade = this.handshakeResult.getHeader().getAttribute("Upgrade");
 		if (upgrade == null || !upgrade.hasValue() || !"websocket".equals(upgrade.value))
-			throw new WseWebSocketHandshakeException("'Upgrade' response header value must contain 'websocket'");
+			throw new WebSocketHandshakeException("'Upgrade' response header value must contain 'websocket'");
 	}
 
 	private String controlKey() {

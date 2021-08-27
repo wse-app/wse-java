@@ -12,7 +12,7 @@ import wse.utils.exception.WseConnectionException;
 import wse.utils.exception.WseException;
 import wse.utils.exception.WseHttpParsingException;
 import wse.utils.exception.WseHttpStatusCodeException;
-import wse.utils.exception.WseXMLParsingException;
+import wse.utils.exception.XMLException;
 import wse.utils.http.HttpBuilder;
 import wse.utils.http.HttpMethod;
 import wse.utils.writer.HttpWriter;
@@ -74,7 +74,7 @@ public final class HttpUtils extends HttpCodes {
 				responseFile = XMLUtils.parseSimple(content);
 				content.close();
 			} catch (Exception e) {
-				throw new WseXMLParsingException("Failed to parse xml: " + e.getMessage(), e);
+				throw new XMLException("Failed to parse xml: " + e.getMessage(), e);
 			} finally {
 				try {
 					result.getContent().close();
@@ -84,19 +84,19 @@ public final class HttpUtils extends HttpCodes {
 
 			if (responseFile == null) {
 				log.severe("Failed to parse xml");
-				throw new WseXMLParsingException("Failed to parse xml");
+				throw new XMLException("Failed to parse xml");
 			}
 			XMLElement soap_body = responseFile.getChild("Body", XMLUtils.SOAP_ENVELOPE);
 			if (soap_body == null) {
 				log.severe("Soap body is missing");
-				throw new WseXMLParsingException("Soap body is missing");
+				throw new XMLException("Soap body is missing");
 			}
 
 			if (responseMessage != null) {
 				try {
 					responseMessage.load(soap_body);
 				} catch (Exception e) {
-					throw new WseXMLParsingException("Failed to load response XML: " + e.getMessage(), e);
+					throw new XMLException("Failed to load response XML: " + e.getMessage(), e);
 				}
 			}
 
