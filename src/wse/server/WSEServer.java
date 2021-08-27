@@ -47,7 +47,7 @@ public class WSEServer {
 
 			if ((r = this.getReceiverByPort(port)) instanceof ServiceReceiverHttps) {
 				p = (ServiceReceiverHttps) r;
-				
+
 			} else {
 				logger.severe("Port " + port + " is already in use");
 				return null;
@@ -113,7 +113,7 @@ public class WSEServer {
 				logger.severe("Can't have more than one SSLAuth on one port. (" + initializer.getProtocol() + ")");
 				return null;
 			}
-			
+
 			if (initializer.getSSLAuth() == null)
 				initializer.bindToSSLStore(auth);
 			initializer.setAcceptSHttp(true);
@@ -121,7 +121,7 @@ public class WSEServer {
 
 		ServiceReceiverSHttp receiver = new ServiceReceiverSHttp(this.callManager, shttp_port, restrictions);
 		receiver.setSHttpSessionStore(initializer.getSHttpSessionStore());
-		
+
 		initializer.addAvailableSHttpPort(shttp_port);
 		listeners.put(shttp_port, receiver);
 
@@ -131,10 +131,10 @@ public class WSEServer {
 	public ServiceReceiver getReceiverByPort(int port) {
 		return listeners.get(port);
 	}
-	
+
 	public SHttpSessionStore getSHttpSessionStore(int port) {
 		ServiceReceiver sr = getReceiverByPort(port);
-		
+
 		if (sr instanceof ServiceReceiverHttps)
 			return ((ServiceReceiverHttps) sr).getSHttpSessionStore();
 		if (sr instanceof ServiceReceiverSHttp)

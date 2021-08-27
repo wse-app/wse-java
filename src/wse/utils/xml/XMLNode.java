@@ -13,8 +13,6 @@ public abstract class XMLNode implements PrettyPrinter {
 	protected XMLTree tree = new XMLTree();
 	protected XMLElement parent;
 	protected String prefix, name, namespace;
-	
-	
 
 	public XMLNode(String name) {
 		this(name, null);
@@ -37,19 +35,18 @@ public abstract class XMLNode implements PrettyPrinter {
 	public void setPrefix(String prefix) {
 		setPrefix(prefix, false);
 	}
-	
+
 	public boolean setPrefix(String prefix, boolean solveNamespaceURI) {
 		this.prefix = prefix == null ? null : prefix.trim();
 		if (this.prefix != null && this.prefix.isEmpty())
 			this.prefix = null;
-		
+
 		if (solveNamespaceURI) {
 			return solveNamespace();
-		}else {
+		} else {
 			return false;
 		}
 	}
-	
 
 	public String getName() {
 		return this.name;
@@ -79,7 +76,7 @@ public abstract class XMLNode implements PrettyPrinter {
 	}
 
 	public boolean solvePrefix() {
-		String p = findPrefix(this.namespace); 
+		String p = findPrefix(this.namespace);
 		setPrefix(p);
 		return p != null;
 	}
@@ -89,9 +86,12 @@ public abstract class XMLNode implements PrettyPrinter {
 		setNamespaceURI(ns, false);
 		return ns != null;
 	}
-	
+
 	/**
-	 * Will traverse namespace declarations of this node and parents and return the closest that matches the given prefix, or the closest default namespace if given prefix is null
+	 * Will traverse namespace declarations of this node and parents and return the
+	 * closest that matches the given prefix, or the closest default namespace if
+	 * given prefix is null
+	 * 
 	 * @param prefix
 	 * @return
 	 */
@@ -101,19 +101,20 @@ public abstract class XMLNode implements PrettyPrinter {
 		return null;
 	}
 
-
 	/**
 	 * Will traverse namespace declarations of this node and parents
 	 * 
 	 * @param namespaceURI
-	 * @return An empty string if the closest default namespace matches, the prefix of a matching namespace declaration, or null if there was no matching namespace, in that order. 
+	 * @return An empty string if the closest default namespace matches, the prefix
+	 *         of a matching namespace declaration, or null if there was no matching
+	 *         namespace, in that order.
 	 */
 	public String findPrefix(String namespaceURI) {
 		if (parent != null)
 			return parent.findPrefix(namespaceURI);
 		return null;
 	}
-	
+
 	public String getNamespaceURI() {
 		return this.namespace;
 	}
@@ -144,7 +145,7 @@ public abstract class XMLNode implements PrettyPrinter {
 		}
 		__orphan();
 	}
-	
+
 	public XMLTree getTree() {
 		return this.tree;
 	}
@@ -152,17 +153,17 @@ public abstract class XMLNode implements PrettyPrinter {
 	public void propagateTree(XMLTree tree) {
 		this.tree = tree;
 	}
-	
+
 	@Override
 	public String toString() {
 		return prettyPrint().toString();
 	}
-	
+
 	@Override
 	public StringGatherer prettyPrint() {
 		return prettyPrint(0);
 	}
-	
+
 	@Override
 	public StringGatherer prettyPrint(int level) {
 		StringGatherer gs = new StringGatherer();

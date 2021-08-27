@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-public class PushableInputStream extends WseInputStream implements IsPushableInputStream{
+public class PushableInputStream extends WseInputStream implements IsPushableInputStream {
 
 	private ArrayList<InputStream> first = new ArrayList<>(10);
 
@@ -23,19 +23,18 @@ public class PushableInputStream extends WseInputStream implements IsPushableInp
 
 	@Override
 	public int available() throws IOException {
-		
+
 		long res = 0;
 		synchronized (first) {
-			for (InputStream is : first)
-			{
+			for (InputStream is : first) {
 				res += is.available();
 			}
 		}
-		
+
 		res += super.available();
 		return (int) Math.min(res, Integer.MAX_VALUE);
 	}
-	
+
 	@Override
 	public long skip(long n) throws IOException {
 		long skipped = 0;
@@ -55,7 +54,7 @@ public class PushableInputStream extends WseInputStream implements IsPushableInp
 		skipped += super.skip(n - skipped);
 		return skipped;
 	}
-	
+
 	@Override
 	public int read() throws IOException {
 		InputStream is;

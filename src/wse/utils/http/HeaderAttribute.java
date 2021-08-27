@@ -53,7 +53,7 @@ public class HeaderAttribute implements StreamWriter {
 		return name.length() + (value != null ? (2 + value.length() + (value.split("\n").length - 1)) : 0) + 2; // \r\n
 
 	}
-	
+
 	public StringGatherer prettyPrint() {
 		return prettyPrint(0);
 	}
@@ -66,7 +66,7 @@ public class HeaderAttribute implements StreamWriter {
 
 	public void prettyPrint(StringGatherer builder, int level) {
 		builder.add(name);
-		
+
 		if (value != null) {
 			builder.add(": ");
 
@@ -76,7 +76,7 @@ public class HeaderAttribute implements StreamWriter {
 				parts[i] = parts[i].trim();
 
 				builder.add(parts[i]);
-				
+
 				if (i < parts.length - 1) {
 					builder.add("\r\n ");
 				}
@@ -88,7 +88,7 @@ public class HeaderAttribute implements StreamWriter {
 	public void writeToStream(OutputStream stream, Charset charset) throws IOException {
 		prettyPrint().writeToStream(stream, charset);
 	}
-	
+
 	@Deprecated
 	protected int write(byte[] data, int off) {
 		int p = off;

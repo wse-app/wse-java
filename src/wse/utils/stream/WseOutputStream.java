@@ -16,7 +16,7 @@ public abstract class WseOutputStream extends OutputStream {
 	public void setTarget(OutputStream target) {
 		this.writeTo = target;
 	}
-	
+
 	public OutputStream getTarget() {
 		return this.writeTo;
 	}
@@ -84,7 +84,7 @@ public abstract class WseOutputStream extends OutputStream {
 	public void reset() {
 		this.total_write = 0;
 	}
-	
+
 	/**
 	 * Disables all LoggingOutputStreams in the output stack
 	 */

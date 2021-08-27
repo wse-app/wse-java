@@ -34,7 +34,7 @@ public abstract class WrappedOperation<I extends ComplexType, IU extends Complex
 	protected abstract I wrapInput(IU input);
 
 	protected abstract OU unwrapOutput(O output);
-	
+
 	public OU call(IU input) throws WseException {
 		try {
 			O o = wrappedOutputClass.newInstance();
@@ -65,9 +65,9 @@ public abstract class WrappedOperation<I extends ComplexType, IU extends Complex
 			@Override
 			public void run() {
 				try {
-					OU result = call(input);					
+					OU result = call(input);
 					callback.consume(new OperationResult<OU>(result));
-				}catch(Throwable e) {
+				} catch (Throwable e) {
 					callback.consume(new OperationResult<OU>(e));
 				}
 			}

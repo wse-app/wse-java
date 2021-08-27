@@ -14,19 +14,19 @@ public class Protocol {
 	public static final Protocol SHTTP = new Protocol("shttp", true);
 	public static final Protocol HTTPS = new Protocol("https", true);
 	public static final Protocol HTTP = new Protocol("http", false);
-	
+
 	public static void register(Protocol protocol) {
 		register(protocol.name, protocol);
 	}
-	
+
 	public static void register(String name, Protocol protocol) {
 		Objects.requireNonNull(name, "name == null");
 		Objects.requireNonNull(protocol, "protocol == null");
-		
+
 		name = name.toLowerCase();
 		values.put(name, protocol);
 	}
-	
+
 	static {
 		register(WEB_SOCKET_SECURE);
 		register(WEB_SOCKET);
@@ -70,9 +70,9 @@ public class Protocol {
 		return Collections.unmodifiableCollection(values.values());
 	}
 
-
 	public static Protocol forName(String name) {
-		if (name == null) return null;
+		if (name == null)
+			return null;
 		name = name.toLowerCase();
 		return values.get(name);
 	}

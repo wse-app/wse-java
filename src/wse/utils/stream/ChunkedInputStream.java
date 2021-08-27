@@ -15,7 +15,7 @@ public class ChunkedInputStream extends WseInputStream {
 	public ChunkedInputStream(InputStream readFrom) {
 		super(readFrom);
 	}
-	
+
 	@Override
 	public int read() throws IOException {
 		if (header_split == null) {
@@ -60,26 +60,24 @@ public class ChunkedInputStream extends WseInputStream {
 	public int read(byte[] b, int off, int len) throws IOException {
 //		if (true)
 //			return super.read(b, off, len);
-		
+
 //		System.out.println("==== READ ===");
-		
+
 //		System.out.println("Is null b: " + (header_split == null));
 		if (header_split == null) {
 			if (!getHeader()) {
 //				System.out.println("==== READ END ===");
-				return -1;				
+				return -1;
 			}
 		}
 //		System.out.println("Is null a: " + (header_split == null));
-		
 
 		int left_in_chunk = (int) (current_chunk_size - current_counter);
 //		System.out.println("left_in_chunk: " + left_in_chunk);
 		if (left_in_chunk <= 0) {
-			if (!getHeader())
-			{
+			if (!getHeader()) {
 //				System.out.println("==== READ END ===");
-				return -1;				
+				return -1;
 			}
 //			System.out.println("==== READ CONTINUE ===");
 			return read(b, off, len);
@@ -104,11 +102,11 @@ public class ChunkedInputStream extends WseInputStream {
 		if (read != -1) {
 			current_counter += read;
 		}
-		
+
 //		System.out.println("==== READ END ===");
 		return read;
 	}
-	
+
 	private void shiftHeader(int shiftAmount, int length) {
 //		System.out.println("Shifting2 " + shiftAmount);
 		System.arraycopy(header_buff, shiftAmount, header_buff, 0, length);
@@ -119,26 +117,26 @@ public class ChunkedInputStream extends WseInputStream {
 //		System.out.println("reading header");
 		if (header_split != null) {
 //			System.out.println("looking for header in left-over data buffer");
-			
+
 			int curr_pos = (int) (header_split[1] + current_counter);
 //			System.out.println(current_counter);
-			
+
 			int left_in_header = header_counter - curr_pos;
-			
+
 //			System.out.println("Left in header: " + left_in_header);
 			if (left_in_header > 0) {
-				
+
 //				System.out.println("Shifting: " + curr_pos + ", " + left_in_header);
 				shiftHeader(curr_pos, left_in_header);
 				header_counter -= curr_pos;
-				
+
 				header_split = searchCRLF(header_buff, 0, header_counter - 1);
-				
+
 				if (header_split != null) {
 					return true;
 				}
 				// Fill up header
-			}else {
+			} else {
 				header_counter = 0;
 			}
 		} else {
@@ -187,23 +185,22 @@ public class ChunkedInputStream extends WseInputStream {
 			end = data.length - 1;
 		int n = '\n', r = '\r';
 		int[] res = { 0, 0 };
-		
+
 //		System.out.println("searching crlf 1: -->" + new String(data, start, (end + 1) - start).replace("\n", "\\n").replace("\r", "\\r") + "<--");
 //		try {
 //			throw new WseException("?");
 //		}catch(WseException e) {
 //			e.printStackTrace(System.out);
 //		}
-		
-		
+
 		try {
 			for (int i = start; i <= end; i++) {
 				if (i == 0)
 					continue;
-				
-				if (i == 1 && data[i] == n && data[i-1] == r)
+
+				if (i == 1 && data[i] == n && data[i - 1] == r)
 					continue;
-				
+
 				if (data[i] == n) {
 					res[0] = i;
 					res[1] = i + 1;

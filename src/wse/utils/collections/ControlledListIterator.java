@@ -6,7 +6,7 @@ public class ControlledListIterator<E> extends ControlledIterator<E> implements 
 
 	private ListIterator<E> internal;
 	private CollectionController<E> controller;
-	
+
 	public ControlledListIterator(ListIterator<E> internal, CollectionController<E> controller) {
 		super(internal, controller);
 		this.internal = internal;
@@ -46,7 +46,5 @@ public class ControlledListIterator<E> extends ControlledIterator<E> implements 
 		internal.add(e);
 		controller.onEntryAdded(e);
 	}
-	
-	
 
 }

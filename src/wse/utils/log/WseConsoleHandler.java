@@ -16,7 +16,7 @@ public abstract class WseConsoleHandler extends WseStreamHandler {
 		super(out, formatter);
 		setLevel(Level.OFF);
 	}
-	
+
 	public static class Err extends WseConsoleHandler {
 		public Err() {
 			super(System.err);

@@ -16,7 +16,7 @@ class PersistantConnection implements IOConnection {
 	public PersistantConnection(IOConnection connection) {
 		this(connection, null, null);
 	}
-	
+
 	public PersistantConnection(IOConnection connection, Integer timeout, Integer max) {
 		super();
 		this.timeout = timeout;
@@ -66,7 +66,7 @@ class PersistantConnection implements IOConnection {
 	public boolean isValid() throws IOException {
 		if (!isOpen())
 			return false;
-		
+
 		if (timeout != null) {
 			long age = System.currentTimeMillis() - creTime;
 			age /= 1000;

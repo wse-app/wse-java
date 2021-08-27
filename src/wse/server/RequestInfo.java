@@ -6,32 +6,29 @@ import java.net.Socket;
 
 import javax.net.ssl.SSLSocket;
 
-public class RequestInfo
-{
+public class RequestInfo {
 	private InetAddress inetAddress;
 	private int fromPort;
 	private boolean usingSSL;
-	
+
 	private int reachPort;
-	
-	
-	private RequestInfo() { }
-	
-	public static final RequestInfo fromSocket(Socket socket, ServerSocket server)
-	{
+
+	private RequestInfo() {
+	}
+
+	public static final RequestInfo fromSocket(Socket socket, ServerSocket server) {
 		RequestInfo result = new RequestInfo();
-		
+
 		result.inetAddress = socket.getInetAddress();
 		result.fromPort = socket.getPort();
 		result.usingSSL = (socket instanceof SSLSocket);
-		
+
 		result.reachPort = server.getLocalPort();
-		
+
 		return result;
 	}
-	
-	public String toString()
-	{
+
+	public String toString() {
 		return inetAddress.getHostAddress() + ":" + fromPort + "|SSL=" + usingSSL;
 	}
 
@@ -46,9 +43,9 @@ public class RequestInfo
 	public boolean isUsingSSL() {
 		return usingSSL;
 	}
-	
+
 	public int getReachPort() {
 		return reachPort;
 	}
-	
+
 }

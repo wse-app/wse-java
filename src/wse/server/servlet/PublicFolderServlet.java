@@ -26,7 +26,7 @@ public class PublicFolderServlet extends AuthenticationServlet {
 	private boolean allow_write = true;
 
 	private int max_depth = 10;
-	
+
 	private File defaultFile;
 
 	public PublicFolderServlet() {
@@ -94,10 +94,10 @@ public class PublicFolderServlet extends AuthenticationServlet {
 	public PublicFolderServlet setDefaultPath(String defaultFilePath) {
 		for (File file : public_folder) {
 			File f = new File(file, defaultFilePath);
-			
-			if (!f.exists() || !f.canRead() || f.isHidden() || !f.isFile() ) {
+
+			if (!f.exists() || !f.canRead() || f.isHidden() || !f.isFile()) {
 				continue;
-			}else {
+			} else {
 				this.defaultFile = f;
 				return this;
 			}
@@ -105,13 +105,13 @@ public class PublicFolderServlet extends AuthenticationServlet {
 		log.warning("PublicFolderServlet could not find specified default path " + defaultFilePath);
 		return this;
 	}
-	
+
 	public PublicFolderServlet setDefaultPath(File defaultFilePath) {
 		log.warning("PublicFolderServlet could not find specified default path " + defaultFilePath);
 		this.defaultFile = defaultFilePath;
 		return this;
 	}
-	
+
 	public void setMaxDepth(int max_depth) {
 		this.max_depth = max_depth;
 	}
@@ -132,28 +132,26 @@ public class PublicFolderServlet extends AuthenticationServlet {
 		File f;
 		if ((f = getValidDestination(request, response)) == null)
 			return;
-		
+
 		if (!f.exists() || !f.canRead() || f.isHidden() || !f.isFile()) {
-			response.sendError(HttpCodes.NOT_FOUND, "File not found: (" + f.getAbsolutePath() + "): " + f.exists() + " / " + f.canRead() + " / " + !f.isHidden() + " / " + f.isFile() );
+			response.sendError(HttpCodes.NOT_FOUND, "File not found: (" + f.getAbsolutePath() + "): " + f.exists()
+					+ " / " + f.canRead() + " / " + !f.isHidden() + " / " + f.isFile());
 			return;
 		}
-		
-		
 
 		String path = f.getAbsolutePath();
 		String extension = path.substring(path.lastIndexOf('.') + 1);
-		
+
 		MimeType mt = MimeType.getByExtension(extension);
-		
 
 		response.setContentLength((int) f.length());
-		
+
 		if (mt == null) {
 			response.setContentType(getMimeType(extension));
-		}else {
+		} else {
 			response.setContentType(mt);
 		}
-		
+
 		if (mt == null || isAttachment(mt)) {
 			response.setContentDisposition(ContentDisposition.attachment(f.getName()));
 		}
@@ -174,11 +172,11 @@ public class PublicFolderServlet extends AuthenticationServlet {
 			throw new WseException(e.getMessage(), e);
 		}
 	}
-	
+
 	public String getMimeType(String extension) {
 		return null;
 	}
-	
+
 	public boolean isAttachment(MimeType type) {
 		return false;
 	}
@@ -224,7 +222,7 @@ public class PublicFolderServlet extends AuthenticationServlet {
 	@Override
 	public void getOptions(HttpHeader header) {
 		super.getOptions(header);
-		
+
 		header.setAccept(MimeType.any);
 		header.setAcceptEncoding(TransferEncoding.IDENTITY);
 	}
@@ -260,32 +258,31 @@ public class PublicFolderServlet extends AuthenticationServlet {
 			return null;
 		}
 
-		
 		File f = null;
 		for (File root : public_folder) {
 			File t = new File(root.getPath() + path);
-			
-			if (!t.exists() || !t.canRead() || t.isHidden() || !t.isFile() ) 
+
+			if (!t.exists() || !t.canRead() || t.isHidden() || !t.isFile())
 				continue;
-			
+
 			if (t.equals(root)) {
-				if (this.defaultFile != null) 
+				if (this.defaultFile != null)
 					return this.defaultFile;
-				
+
 			}
-			
+
 			if (!ensureIsChildOf(root, t, Math.max(this.max_depth, 1))) {
-				
+
 				if (this.defaultFile != null) {
 					return this.defaultFile;
 				}
 				response.sendError(HttpCodes.NOT_FOUND);
 				return null;
 			}
-			
+
 			f = t;
 		}
-		
+
 		if (f == null) {
 			if (this.defaultFile != null) {
 				return this.defaultFile;
@@ -293,7 +290,7 @@ public class PublicFolderServlet extends AuthenticationServlet {
 			response.sendError(HttpCodes.NOT_FOUND);
 			return null;
 		}
-		
+
 		return f;
 	}
 

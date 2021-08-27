@@ -3,7 +3,7 @@ package wse.utils.collections;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class ControlledCollection<E> implements Collection<E>{
+public class ControlledCollection<E> implements Collection<E> {
 
 	private CollectionController<E> controller;
 	protected Collection<E> internal;
@@ -59,7 +59,8 @@ public class ControlledCollection<E> implements Collection<E>{
 			E e = null;
 			try {
 				e = (E) o;
-			} catch(ClassCastException e1) {}
+			} catch (ClassCastException e1) {
+			}
 			controller.onEntryRemoved(e);
 			return true;
 		}
@@ -107,8 +108,5 @@ public class ControlledCollection<E> implements Collection<E>{
 		}
 		internal.clear();
 	}
-	
-	
-	
 
 }

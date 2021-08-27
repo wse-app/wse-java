@@ -19,12 +19,12 @@ public class SoapXMLWriter implements HttpWriter {
 
 	private final ComplexType requestType;
 	private final String soapAction;
-	
+
 	public SoapXMLWriter(String soapAction, ComplexType requestType) {
 		this.soapAction = soapAction;
 		this.requestType = requestType;
 	}
-	
+
 	private void getData() {
 		if (data != null)
 			return;

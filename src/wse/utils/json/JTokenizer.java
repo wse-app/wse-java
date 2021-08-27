@@ -242,7 +242,8 @@ public class JTokenizer {
 			case 0:
 			case '\n':
 			case '\r':
-				if (end == 0) return sb.toString();
+				if (end == 0)
+					return sb.toString();
 				throw this.syntaxError("Unterminated string");
 			case '\\':
 				c = next();

@@ -19,8 +19,7 @@ public class WebSocketException extends WseException {
 		super(message, cause);
 	}
 
-	public WebSocketException(String message, Throwable cause, boolean enableSuppression,
-			boolean writableStackTrace) {
+	public WebSocketException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 	}
 

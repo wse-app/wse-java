@@ -13,9 +13,9 @@ public abstract class AuthenticationServlet extends HttpServlet {
 
 	private static Set<Credentials> globallyTrusted = Collections.synchronizedSet(new HashSet<Credentials>());
 	private Set<Credentials> trusted = new HashSet<>();
-	
+
 	private boolean authorizationEnabled;
-	
+
 	public AuthenticationServlet() {
 		this(true);
 	}
@@ -24,7 +24,7 @@ public abstract class AuthenticationServlet extends HttpServlet {
 		super();
 		this.authorizationEnabled = authorizationEnabled;
 	}
-	
+
 	@Override
 	public void doAny(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		if (authorizationEnabled && !isAuthorized(request, request.getAuthorization())) {
@@ -34,11 +34,11 @@ public abstract class AuthenticationServlet extends HttpServlet {
 		}
 		super.doAny(request, response);
 	}
-	
+
 	public boolean isAuthorized(HttpHeader request, Credentials credentials) {
 		return globallyTrusted.contains(credentials) || trusted.contains(credentials);
 	}
-	
+
 	public void trust(Credentials cred) {
 		trusted.add(cred);
 	}
@@ -46,7 +46,7 @@ public abstract class AuthenticationServlet extends HttpServlet {
 	public static void globalTrust(Credentials cred) {
 		globallyTrusted.add(cred);
 	}
-	
+
 	public static boolean isAuthorized(AuthenticationServlet servlet, HttpHeader request, Credentials credentials) {
 		return globallyTrusted.contains(credentials) || (servlet != null && servlet.trusted.contains(credentials));
 	}

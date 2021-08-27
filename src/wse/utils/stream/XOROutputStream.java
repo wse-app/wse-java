@@ -20,11 +20,11 @@ public class XOROutputStream extends WseOutputStream {
 	public void setKey(byte[] key) {
 		this.key = key;
 	}
-	
+
 	public void reset() {
 		this.pointer = 0;
 	}
-	
+
 	@Override
 	public void write(int b) throws IOException {
 		super.write(b ^ key[pointer % 4]);

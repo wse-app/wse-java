@@ -46,12 +46,12 @@ public class JUtils {
 			builder.add(String.valueOf(value));
 			return;
 		}
-		
+
 		builder.add("\"");
 		builder.add(escape(String.valueOf(value)));
 		builder.add("\"");
 	}
-	
+
 	public static final IParser<JObject> JSON_PARSER = new IParser<JObject>() {
 		public JObject parse(InputStream input, Charset cs, IOptions options) throws IOException {
 			return JObject.parse(input, cs);

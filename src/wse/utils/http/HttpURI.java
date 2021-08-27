@@ -116,8 +116,6 @@ public class HttpURI implements StreamWriter, PrettyPrinter {
 			stream.write(fragment.getBytes());
 		}
 	}
-	
-	
 
 	@Override
 	public String toString() {
@@ -132,13 +130,13 @@ public class HttpURI implements StreamWriter, PrettyPrinter {
 
 		if (query.size() > 0) {
 			for (Entry<String, String> e : query.entrySet()) {
-				
+
 				result++; // ?|&
-				
+
 				result += WSE.urlEncode(e.getKey()).getBytes().length;
 				result++; // =
 				result += WSE.urlEncode(e.getValue()).getBytes().length;
-				
+
 			}
 		}
 
@@ -220,6 +218,6 @@ public class HttpURI implements StreamWriter, PrettyPrinter {
 	@Override
 	public void prettyPrint(StringGatherer builder, int level) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

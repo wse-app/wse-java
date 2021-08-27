@@ -11,7 +11,7 @@ public class LimitedOutputStream extends WseOutputStream {
 	public LimitedOutputStream(long limit) {
 		this(null, limit);
 	}
-	
+
 	public LimitedOutputStream(OutputStream writeTo, long limit) {
 		super(writeTo);
 		this.limit = limit;

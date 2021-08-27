@@ -9,12 +9,13 @@ import wse.utils.writable.StreamWriter;
 public interface ILeaf extends HasRowColumn, StreamWriter, PrettyPrinter {
 
 	public MimeType getMimeType();
+
 	public Charset preferredCharset();
-	
+
 	public void preparePrint();
-	
-	// Values 
-	
+
+	// Values
+
 	public String getValue(String key);
 
 	public String getValue(String key, String namespace);
@@ -24,7 +25,7 @@ public interface ILeaf extends HasRowColumn, StreamWriter, PrettyPrinter {
 	public void setValue(String key, String namespace, Object value);
 
 	/// Array
-	
+
 	public Collection<String> getValueArray(String key);
 
 	public Collection<String> getValueArray(String key, String namespace);
@@ -34,7 +35,7 @@ public interface ILeaf extends HasRowColumn, StreamWriter, PrettyPrinter {
 	public void setValueArray(String key, String namespace, Iterable<Object> value);
 
 	// Attributes
-	
+
 	public String getAttributeValue(String key);
 
 	public String getAttributeValue(String key, String namespace);
@@ -44,7 +45,7 @@ public interface ILeaf extends HasRowColumn, StreamWriter, PrettyPrinter {
 	public void setAttributeValue(String key, String namespace, Object value);
 
 	/// Array
-	
+
 	public Collection<String> getAttributeValueArray(String key);
 
 	public Collection<String> getAttributeValueArray(String key, String namespace);

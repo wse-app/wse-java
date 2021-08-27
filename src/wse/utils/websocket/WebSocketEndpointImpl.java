@@ -20,15 +20,15 @@ import wse.utils.websocket.WebSocket.Message;
 import wse.utils.writable.StreamWriter;
 
 public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes {
-	
+
 	private static Charset UTF8 = Charset.forName("UTF-8");
-	
+
 	private boolean isCloseRequestedByMe = false;
 	private boolean isCloseRequestedByOther = false;
 	private boolean isClosed = false;
 
 	private InputStream input;
-	
+
 	private final Object OUTPUT_LOCK = new Object();
 	private WS13OutputStream output;
 
@@ -84,9 +84,10 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 				}
 			}
 		} catch (Exception e) {
-			if (!(this.isCloseRequestedByMe && this.isCloseRequestedByOther && WseException.isCausedBy(e, SocketException.class))) {
+			if (!(this.isCloseRequestedByMe && this.isCloseRequestedByOther
+					&& WseException.isCausedBy(e, SocketException.class))) {
 				throw new WebSocketException("Exception on read: " + e.getMessage(), e);
-			}				
+			}
 		}
 	}
 

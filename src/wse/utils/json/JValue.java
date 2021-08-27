@@ -12,7 +12,7 @@ public interface JValue extends StreamWriter {
 	StringGatherer prettyPrint();
 
 	StringGatherer prettyPrint(int level);
-	
+
 	void prettyPrint(StringGatherer builder, int level);
 
 }

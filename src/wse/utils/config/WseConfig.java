@@ -50,7 +50,7 @@ public class WseConfig extends Config {
 		try (InputStream input = WseConfig.class.getResourceAsStream("default.ini")) {
 			result = saveDefault(target, input);
 		}
-		
+
 		log.info("Edit '" + target.getName() + "' and start the server again.");
 
 		return result;

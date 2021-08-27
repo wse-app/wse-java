@@ -4,15 +4,16 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-public class ControlledMap<K, V> implements Map<K, V>{
+public class ControlledMap<K, V> implements Map<K, V> {
 
 	private MapController<K, V> controller;
 	private Map<K, V> internal;
+
 	public ControlledMap(Map<K, V> internal, MapController<K, V> controller) {
 		this.internal = internal;
 		this.controller = controller;
 	}
-	
+
 	@Override
 	public int size() {
 		return internal.size();
@@ -46,9 +47,6 @@ public class ControlledMap<K, V> implements Map<K, V>{
 		internal.clear();
 	}
 
-	
-	
-	
 	@Override
 	public V put(K key, V value) {
 		if (internal.containsKey(key)) {
@@ -57,14 +55,14 @@ public class ControlledMap<K, V> implements Map<K, V>{
 		controller.onEntryPut(key, value);
 		return internal.put(key, value);
 	}
-	
+
 	@Override
 	public void putAll(Map<? extends K, ? extends V> m) {
 		for (Map.Entry<? extends K, ? extends V> e : m.entrySet()) {
 			this.put(e.getKey(), e.getValue());
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public V remove(Object key) {
@@ -80,7 +78,7 @@ public class ControlledMap<K, V> implements Map<K, V>{
 		}
 		return internal.remove(key);
 	}
-	
+
 	@Override
 	public Set<Map.Entry<K, V>> entrySet() {
 		return new ControlledSet<Map.Entry<K, V>>(internal.entrySet(), new CollectionController<Map.Entry<K, V>>() {
@@ -95,7 +93,7 @@ public class ControlledMap<K, V> implements Map<K, V>{
 			}
 		});
 	}
-	
+
 	@Override
 	public Set<K> keySet() {
 		return new ControlledSet<K>(internal.keySet(), new CollectionController<K>() {
@@ -103,13 +101,14 @@ public class ControlledMap<K, V> implements Map<K, V>{
 			public void onEntryAdded(K key) {
 				controller.onEntryPut(key, get(key));
 			}
+
 			@Override
 			public void onEntryRemoved(K removed) {
 				controller.onEntryRemoved(removed, get(removed));
 			}
 		});
 	}
-	
+
 	@Override
 	public Collection<V> values() {
 		return new ControlledCollection<V>(internal.values(), new CollectionController<V>() {
@@ -117,6 +116,7 @@ public class ControlledMap<K, V> implements Map<K, V>{
 			public void onEntryAdded(V entry) {
 				controller.onEntryPut(null, entry);
 			}
+
 			@Override
 			public void onEntryRemoved(V removed) {
 				controller.onEntryRemoved(null, removed);

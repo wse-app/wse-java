@@ -15,11 +15,11 @@ public class JArray extends LinkedList<Object> implements JValue {
 	public JArray() {
 		super();
 	}
-	
+
 	public JArray(Object... elements) {
 		this(Arrays.asList(elements));
 	}
-	
+
 	public JArray(Iterable<Object> elements) {
 		super();
 		for (Object o : elements) {

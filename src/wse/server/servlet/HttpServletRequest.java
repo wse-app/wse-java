@@ -37,11 +37,10 @@ public final class HttpServletRequest extends HttpHeader {
 			throw new WseParsingException("Got null header");
 		return new HttpServletRequest(info, header, content);
 	}
-	
+
 	/*
 	 * Parameters for REST API
 	 */
-
 
 	/*
 	 * Http Message
@@ -91,6 +90,5 @@ public final class HttpServletRequest extends HttpHeader {
 //	public Map<String, String> getCookies() {
 //		return getStringMap("Cookie");
 //	}
-
 
 }

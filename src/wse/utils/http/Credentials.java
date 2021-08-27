@@ -11,34 +11,34 @@ public class Credentials {
 
 	public final byte[] user_id, password;
 
-	
 	public Credentials(String user_id, String password) {
 		this(user_id.getBytes(Charset.forName("UTF-8")), password.getBytes(Charset.forName("UTF-8")));
 	}
+
 	public Credentials(byte[] user_id, byte[] password) {
 		this.user_id = user_id;
 		this.password = password;
 	}
-	
+
 	public String toString() {
 		return new String(user_id) + ":" + new String(password);
 	}
-	
+
 	public String getUserID() {
 		return new String(user_id);
 	}
-	
+
 	public String getPassword() {
 		return new String(password);
 	}
-	
+
 	public byte[] toByteArray() {
 		byte[] result = new byte[user_id.length + password.length + 1];
 		System.arraycopy(user_id, 0, result, 0, user_id.length);
 		result[user_id.length] = ':';
 		System.arraycopy(password, 0, result, user_id.length + 1, password.length);
 		return result;
-		
+
 	}
 
 	public static Credentials fromHeader(HttpAttributeList header) {
@@ -49,9 +49,10 @@ public class Credentials {
 		String value = attrib.value;
 		if (value == null)
 			return null;
-		
+
 		String[] split = value.split(" ");
-		if (split.length < 2) return null;
+		if (split.length < 2)
+			return null;
 		String cred = split[1].trim();
 		byte[] array = WSE.parseBase64Binary(cred);
 		byte[][] val = ArrayUtils.split(array, (byte) ':', 2, true);
@@ -85,8 +86,5 @@ public class Credentials {
 			return false;
 		return true;
 	}
-	
-	
-	
-	
+
 }

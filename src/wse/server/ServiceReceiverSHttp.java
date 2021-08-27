@@ -29,7 +29,7 @@ import wse.utils.writable.StreamCatcher;
  *
  */
 public class ServiceReceiverSHttp extends ServiceReceiverHttp {
-	
+
 	private SHttpSessionStore storeRef;
 
 	public ServiceReceiverSHttp(ServiceManager manager, int port, Restrictions restrictions) {
@@ -39,7 +39,7 @@ public class ServiceReceiverSHttp extends ServiceReceiverHttp {
 	public void setSHttpSessionStore(SHttpSessionStore store) {
 		this.storeRef = store;
 	}
-	
+
 	public SHttpSessionStore getSHttpSessionStore() {
 		return this.storeRef;
 	}
@@ -71,29 +71,29 @@ public class ServiceReceiverSHttp extends ServiceReceiverHttp {
 			response.sendError(HttpCodes.SECURITY_RETRY);
 			return;
 		}
-		
-		if (key.hasExpired())
-		{
+
+		if (key.hasExpired()) {
 			response.sendError(HttpCodes.SECURITY_RETRY);
 			return;
 		}
-		
+
 		InputStream input = request.getContent();
-		if (SHttp.LOG_ENCRYPTED_DATA) 
+		if (SHttp.LOG_ENCRYPTED_DATA)
 			input = new RecordingInputStream(input, log, Level.FINEST, "SHttp-Encrypted Input Content:", true);
-		
+
 		WseInputStream decryptedInput = SHttp.sHttpDecryptData(input, key);
 		input.close();
 		if (decryptedInput == null)
 			throw new SHttpException("Failed to decrypt message");
-		
+
 		decryptedInput = new RecordingInputStream(decryptedInput, log, Level.FINEST, "Request Content:");
-		
+
 		HttpResult decrypted = HttpBuilder.read(decryptedInput, true);
 		decryptedInput.close();
-		
-		HttpServletRequest decryptedRequest = HttpServletRequest.make(decrypted.getHeader(), request.getRequestInfo(), decrypted.getContent());
-		
+
+		HttpServletRequest decryptedRequest = HttpServletRequest.make(decrypted.getHeader(), request.getRequestInfo(),
+				decrypted.getContent());
+
 		// Create new response
 		StreamCatcher catcher = new StreamCatcher();
 		LayeredOutputStream output = new LayeredOutputStream(catcher);
@@ -101,20 +101,20 @@ public class ServiceReceiverSHttp extends ServiceReceiverHttp {
 		output.sHttpEncrypt(key);
 		if (SHttp.LOG_ENCRYPTED_DATA)
 			output.record(log, Level.FINEST, "SHttp-Encrypted Response Content:", true);
-		
+
 		HttpServletResponse decryptedResponse = new HttpServletResponse(output);
 		super.treatCall(decryptedRequest, decryptedResponse);
-		
+
 		output.flush();
 		output.close();
-		
+
 		response.getHttpHeader().setDescriptionLine(SHttp.makeStatusLine(200));
 		response.setContentLength(catcher.getSize());
 		response.setContentType(MimeType.message.http);
 		response.setAttribute("Prearranged-Key-Info", "outband:" + key.getKeyName());
-		
+
 		StreamUtils.write(catcher.asInputStream(), response, catcher.getSize());
-		
+
 		response.flush();
 		response.close();
 	}

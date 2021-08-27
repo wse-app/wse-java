@@ -47,9 +47,8 @@ public abstract class xsd_union extends AnySimpleType<Object> {
 				continue;
 			}
 		}
-		throw new WseParsingException(
-				"Union input '" + input + "' did not match any restrictions of any of the memberTypes: "
-						+ ArrayUtils.join(simpleTypes, ", "));
+		throw new WseParsingException("Union input '" + input
+				+ "' did not match any restrictions of any of the memberTypes: " + ArrayUtils.join(simpleTypes, ", "));
 	}
 
 	public final void validateValueSpace(Object value) {

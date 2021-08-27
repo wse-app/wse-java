@@ -67,11 +67,10 @@ public class WseFormatter extends Formatter {
 			}
 
 			return builder.toString();
-		}catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
-		
-		
+
 	}
 }

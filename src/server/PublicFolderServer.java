@@ -22,7 +22,7 @@ public class PublicFolderServer extends WSEServer {
 
 		WSE.initDefaultStandaloneLogging();
 		WSE.setLogLevel(Level.FINEST);
-		
+
 		log.info("Version: " + WSE.getVersion());
 
 		File jarFile = ClassUtils.getJarFile(PublicFolderServer.class);
@@ -77,12 +77,12 @@ public class PublicFolderServer extends WSEServer {
 
 	public PublicFolderServer(Config ini) {
 		boolean useful = WseConfig.load(this, root, ini);
-		
+
 		if (!useful) {
 			log.severe("PublicFolderServer does not have any servlets registered and will terminate.");
 			return;
 		}
-		
+
 		start();
 	}
 

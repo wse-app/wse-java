@@ -63,17 +63,18 @@ public final class PemReader {
 
 		KeyStore keyStore = KeyStore.getInstance("JKS");
 		keyStore.load(null, null);
-		
+
 		loadKeyStore(keyStore, "key", certificateChainFile, privateKeyFile, keyPhrase);
-		
+
 		return keyStore;
 	}
+
 	@Deprecated
-	public static void loadKeyStore(KeyStore keyStore, String alias, InputStream certificateChainFile, InputStream privateKeyFile, char[] keyPhrase)
-			throws IOException, GeneralSecurityException {
-		
+	public static void loadKeyStore(KeyStore keyStore, String alias, InputStream certificateChainFile,
+			InputStream privateKeyFile, char[] keyPhrase) throws IOException, GeneralSecurityException {
+
 		throw new UnsupportedOperationException("Not supported, please load in complete keystores instead");
-		
+
 //		PrivateKey key;
 //		try {
 //			key = readKey(privateKeyFile, keyPhrase);
@@ -138,10 +139,11 @@ public final class PemReader {
 
 	@SuppressWarnings("unused")
 	@Deprecated
-	private static PrivateKey readKey(InputStream stream, char[] keyPhrase) throws KeyStoreException, IOException/*, OperatorCreationException, PKCSException */{
+	private static PrivateKey readKey(InputStream stream, char[] keyPhrase)
+			throws KeyStoreException, IOException/* , OperatorCreationException, PKCSException */ {
 
 		throw new UnsupportedOperationException("Not supported, please load in complete keystores instead");
-		
+
 //		String content = readFile(stream);
 //
 //		Matcher matcher = KEY_PATTERN.matcher(content);

@@ -31,7 +31,7 @@ import wse.utils.stream.RIMInputStream;
 import wse.utils.stream.WseInputStream;
 
 public final class SHttp {
-	
+
 	public static boolean LOG_ENCRYPTED_DATA = false;
 	public static final String SECURE_HTTP14 = "Secure-HTTP/1.4";
 	public static final String INIT_PATH = "/InitShttpSession";
@@ -40,7 +40,7 @@ public final class SHttp {
 	private static Random random = new Random();
 
 	private static final Logger log = WSE.getLogger();
-	
+
 	public static Cipher getCipher(SKey key, int opmode) {
 		try {
 			SecretKeySpec newKey = new SecretKeySpec(key.getKey(), 0, key.getKey().length, "AES");
@@ -103,6 +103,7 @@ public final class SHttp {
 	public static byte[] decrypt(byte[] data, SKey key) {
 		return decrypt(data, 0, data.length, key);
 	}
+
 	public static byte[] decrypt(byte[] data, int offset, int length, SKey key) {
 		Cipher cipher = getCipher(key, Cipher.DECRYPT_MODE);
 		try {
@@ -111,10 +112,11 @@ public final class SHttp {
 			throw new SHttpDecryptionException("Failed to decrypt: " + e.getMessage(), e);
 		}
 	}
-	
+
 	public static byte[] encrypt(byte[] data, SKey key) {
 		return encrypt(data, 0, data.length, key);
 	}
+
 	public static byte[] encrypt(byte[] data, int offset, int length, SKey key) {
 		Cipher cipher = getCipher(key, Cipher.ENCRYPT_MODE);
 		try {
@@ -123,17 +125,17 @@ public final class SHttp {
 			throw new SHttpEncryptionException("Failed to encrypt: " + e.getMessage(), e);
 		}
 	}
-	
+
 	public static WseInputStream sHttpDecryptData(InputStream stream, SKey key) throws IOException {
 		return sHttpDecryptData(StreamUtils.readAll(stream), key);
 	}
-	
+
 	public static WseInputStream sHttpDecryptData(byte[] data, SKey key) throws IOException {
 		log.finest("Decrypting " + data.length + " bytes");
 		if (SHttp.LOG_ENCRYPTED_DATA) {
 			Loggers.hexdump(log, Level.FINEST, data);
 		}
-		
+
 		if (data.length % key.getBlockSize() != 0) {
 			int len = data.length - data.length % key.getBlockSize();
 			if (len > 0) {
@@ -143,7 +145,7 @@ public final class SHttp {
 				throw new SHttpDecryptionException("Data not multiple of block length: " + data.length);
 			}
 		}
-		
+
 		byte[] decrypted = decrypt(data, key);
 		return new RIMInputStream(new ByteArrayInputStream(decrypted), key.getBlockSize(), key.getInjectionSize());
 	}
@@ -151,7 +153,7 @@ public final class SHttp {
 	public static HttpRequestLine makeRequestLine() {
 		return new HttpRequestLine(HttpMethod.SECURE, HttpURI.raw("*"), SHttp.SECURE_HTTP14);
 	}
-	
+
 	public static HttpStatusLine makeStatusLine(int code) {
 		HttpStatusLine r = new HttpStatusLine(code);
 		r.setHttpVersion(SECURE_HTTP14);

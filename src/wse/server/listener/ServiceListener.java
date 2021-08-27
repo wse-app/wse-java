@@ -9,12 +9,12 @@ import wse.server.servlet.HttpServletResponse;
 import wse.utils.ComplexType;
 
 public abstract class ServiceListener<T extends ComplexType, L extends ComplexType> implements HttpCallTreatment {
-	
+
 	@Override
 	public void treatCall(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		
+
 	}
-	
+
 	public abstract void treatServiceASync(T request, L response);
 
 	public static final Method treatServiceMethod;

@@ -9,7 +9,7 @@ public enum OperationType {
 	SolicitResponse,
 	/** output */
 	Notification;
-	
+
 	public boolean clientInitiated() {
 		return this == RequestResponse || this == OneWay;
 	}

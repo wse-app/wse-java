@@ -84,7 +84,7 @@ public class XMLUtils {
 		}
 		nullTransformer = t;
 	}
-	
+
 	public static final IParser<XMLElement> XML_PARSER = new IParser<XMLElement>() {
 
 		@Override
@@ -305,8 +305,6 @@ public class XMLUtils {
 			{ '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t' },
 			{ '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t', '\t' } };
 
-	
-
 	protected static byte[] level(int i) {
 		return levels[i % levels.length];
 	}
@@ -349,7 +347,7 @@ public class XMLUtils {
 			String def = occurances.getMostCommon();
 			prefixMap.put(def, null);
 		}
-		
+
 		for (XMLElement element : root.treeIterable()) {
 			element.setPrefix(prefixMap.get(element.getNamespaceURI()));
 			for (XMLAttribute a : element.getAttributes())

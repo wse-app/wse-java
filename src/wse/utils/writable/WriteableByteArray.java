@@ -4,26 +4,21 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-public class WriteableByteArray implements StreamWriter
-{
+public class WriteableByteArray implements StreamWriter {
 
 	public byte[] value;
-	
-	public WriteableByteArray(byte[] data)
-	{
+
+	public WriteableByteArray(byte[] data) {
 		this.value = data;
 	}
 
 	@Override
-	public void writeToStream(OutputStream stream, Charset charset)
-	{
+	public void writeToStream(OutputStream stream, Charset charset) {
 		if (value == null)
 			return;
-		try
-		{
+		try {
 			stream.write(value);
-		} catch (IOException e)
-		{
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}

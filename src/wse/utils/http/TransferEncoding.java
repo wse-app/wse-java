@@ -9,13 +9,13 @@ public enum TransferEncoding {
 	COMPRESS(false, "compress"),
 
 	DEFLATE(false, "deflate"),
-	
+
 	BR(false, "br"),
 
 	GZIP(false, "gzip", "x-gzip");
 
 	public static final String KEY = "Transfer-Encoding";
-	
+
 	public final String name;
 	public final String[] alias;
 	public final boolean supported;
@@ -42,7 +42,7 @@ public enum TransferEncoding {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public String toString() {
 		return name;

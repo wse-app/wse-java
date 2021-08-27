@@ -3,7 +3,7 @@ package wse.utils.stream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public abstract class WseInputStream extends InputStream implements IsInputStream{
+public abstract class WseInputStream extends InputStream implements IsInputStream {
 
 	protected InputStream readFrom;
 
@@ -15,7 +15,7 @@ public abstract class WseInputStream extends InputStream implements IsInputStrea
 	public void setTarget(InputStream target) {
 		this.readFrom = target;
 	}
-	
+
 	public InputStream getSource() {
 		return this.readFrom;
 	}
@@ -45,20 +45,20 @@ public abstract class WseInputStream extends InputStream implements IsInputStrea
 	public int available() throws IOException {
 		return readFrom.available();
 	}
-	
+
 	@Override
 	public long skip(long n) throws IOException {
 		return readFrom.skip(n);
 	}
 
-	protected String[] layers = new String[] {"\n", "\n\t", "\n\t\t", "\n\t\t\t", "\n\t\t\t\t", "\n\t\t\t\t\t",
+	protected String[] layers = new String[] { "\n", "\n\t", "\n\t\t", "\n\t\t\t", "\n\t\t\t\t", "\n\t\t\t\t\t",
 			"\n\t\t\t\t\t\t", "\n\t\t\t\t\t\t\t", "\n\t\t\t\t\t\t\t\t", "\n\t\t\t\t\t\t\t\t\t" };
 
 	@Override
 	public String toString() {
 		return layerInfo(0);
 	}
-	
+
 	public String infoName() {
 		return this.getClass().getName();
 	}
@@ -77,7 +77,7 @@ public abstract class WseInputStream extends InputStream implements IsInputStrea
 
 		return b.toString();
 	}
-	
+
 	@Override
 	public InputStream asInputStream() {
 		return this;

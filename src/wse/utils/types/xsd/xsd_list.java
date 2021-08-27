@@ -30,8 +30,7 @@ public abstract class xsd_list<F, T extends AnySimpleType<F>> extends AnySimpleT
 		try {
 			type = simpleType.newInstance();
 		} catch (Exception e) {
-			throw new WseParsingException("Failed to instantiate " + simpleType.getName() + ": " + e.getMessage(),
-					e);
+			throw new WseParsingException("Failed to instantiate " + simpleType.getName() + ": " + e.getMessage(), e);
 		}
 		List<F> result = new LinkedList<>();
 		for (String v : split)
@@ -52,8 +51,7 @@ public abstract class xsd_list<F, T extends AnySimpleType<F>> extends AnySimpleT
 		try {
 			type = simpleType.newInstance();
 		} catch (Exception e) {
-			throw new WseParsingException("Failed to instantiate " + simpleType.getName() + ": " + e.getMessage(),
-					e);
+			throw new WseParsingException("Failed to instantiate " + simpleType.getName() + ": " + e.getMessage(), e);
 		}
 		List<String> result = new LinkedList<>();
 		for (F f : output) {
@@ -66,7 +64,7 @@ public abstract class xsd_list<F, T extends AnySimpleType<F>> extends AnySimpleT
 	public Object validateOutputGeneric(Object output) {
 		return validateOutput(output);
 	}
-	
+
 	@Override
 	public Class<F> getBaseType() {
 		return baseType;

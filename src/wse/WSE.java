@@ -18,16 +18,16 @@ import wse.utils.log.WseFileHandler;
 import wse.utils.source.Source;
 
 public final class WSE extends WSEUtils {
-	
+
 	private WSE() {
 	}
-	
+
 	public static final String NS = "https://wse.app/ns/wse";
 	public static final String LOG_FAMILY = "wse";
 	public static final String VERSION;
-	
+
 	public static final boolean runningAndroid;
-	
+
 	static {
 		String val = System.getProperty("java.runtime.name");
 		if ("android runtime".equalsIgnoreCase(val)) {
@@ -35,7 +35,7 @@ public final class WSE extends WSEUtils {
 		} else {
 			runningAndroid = false;
 		}
-		
+
 		String v = "?";
 		try {
 			v = Source.getContainingText(WSE.class.getResourceAsStream("/version"));
@@ -44,7 +44,7 @@ public final class WSE extends WSEUtils {
 		}
 		VERSION = v;
 	}
-	
+
 	private static String applicationName = "WebServiceEngine Application/" + VERSION;
 
 	public static final PrintStream out = new LogPrintStream(getLogger(), Level.INFO);
@@ -53,15 +53,15 @@ public final class WSE extends WSEUtils {
 	public static String getVersion() {
 		return VERSION;
 	};
-	
+
 	public static Logger getLogger() {
 		return Logger.getLogger(LOG_FAMILY);
 	}
-	
+
 	public static Logger getLogger(Class<?> clazz) {
 		return Logger.getLogger(clazz.getName());
 	}
-	
+
 	public static Logger getLogger(String child) {
 		return Logger.getLogger(LOG_FAMILY + "." + child);
 	}
@@ -71,15 +71,15 @@ public final class WSE extends WSEUtils {
 		log.setUseParentHandlers(false);
 		WseConsoleHandler.addToLogger(log);
 	}
-	
+
 	public static void initFileLogging() throws SecurityException, FileNotFoundException {
 		initFileLogging(WSE.class);
 	}
-	
+
 	public static void initFileLogging(Class<?> clazz) {
 		initFileLogging(new File(ClassUtils.getJarFile(clazz).getParentFile(), "logs"));
 	}
-	
+
 	public static void initFileLogging(File parentDirectory) {
 		Logger log = getLogger();
 		try {
@@ -145,7 +145,8 @@ public final class WSE extends WSEUtils {
 	}
 
 	public static String urlEncode(String src) {
-		if (src == null) throw new NullPointerException();
+		if (src == null)
+			throw new NullPointerException();
 		try {
 			return URLEncoder.encode(src, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
@@ -155,7 +156,8 @@ public final class WSE extends WSEUtils {
 	}
 
 	public static String urlDecode(String src) {
-		if (src == null) throw new NullPointerException();
+		if (src == null)
+			throw new NullPointerException();
 		try {
 			return URLDecoder.decode(src, "UTF-8");
 		} catch (UnsupportedEncodingException e) {

@@ -12,8 +12,7 @@ import java.util.Random;
  * @author WSE
  *
  */
-public class DataCatcherRIM extends OutputStream
-{
+public class DataCatcherRIM extends OutputStream {
 
 	Random random = new Random();
 
@@ -24,8 +23,7 @@ public class DataCatcherRIM extends OutputStream
 	final int blockSize;
 	final int vBlockSize;
 
-	public DataCatcherRIM(int blockSize, int injectionIndex, final int bufferSize)
-	{
+	public DataCatcherRIM(int blockSize, int injectionIndex, final int bufferSize) {
 		this.injectionIndex = Math.max(0, Math.min(blockSize - 1, injectionIndex)); // Clamp
 		this.blockSize = blockSize;
 		this.vBlockSize = blockSize - 1;
@@ -35,10 +33,8 @@ public class DataCatcherRIM extends OutputStream
 		int dataSize = bufferSize;
 		int finalSize = bufferSize;
 
-		if (blockSize > 1)
-		{
-			if ((bufferSize % (vBlockSize)) != 0)
-			{
+		if (blockSize > 1) {
+			if ((bufferSize % (vBlockSize)) != 0) {
 				// Add padding
 				paddingSize = bufferSize + (vBlockSize - bufferSize % vBlockSize);
 				// Padding size like normal as without RIM
@@ -53,40 +49,33 @@ public class DataCatcherRIM extends OutputStream
 		buffer = new byte[finalSize];
 	}
 
-	public DataCatcherRIM(Charset charset, StreamWriter... wa)
-	{
+	public DataCatcherRIM(Charset charset, StreamWriter... wa) {
 		this(-1, 0, charset, wa);
 	}
 
-	public DataCatcherRIM(int blockSize, int injectionIndex, Charset charset, StreamWriter... wa)
-	{
+	public DataCatcherRIM(int blockSize, int injectionIndex, Charset charset, StreamWriter... wa) {
 		this(blockSize, injectionIndex, SizeCatcher.getSize(charset, wa));
 
 		for (StreamWriter w : wa)
-			try
-			{
+			try {
 				w.writeToStream(this, charset);
-			} catch (IOException e)
-			{
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 	}
 
-	public DataCatcherRIM(int blockSize, int injectionIndex, byte[] array)
-	{
+	public DataCatcherRIM(int blockSize, int injectionIndex, byte[] array) {
 		this(blockSize, injectionIndex, array.length);
 		write(array);
 	}
 
-	private void insertRandom()
-	{
+	private void insertRandom() {
 		// buffer[pointer++] = (byte) (random.nextInt(256) - 128);
 		buffer[pointer++] = -128;
 	}
 
 	@Override
-	public void write(int b) throws IOException
-	{
+	public void write(int b) throws IOException {
 		if (pointer % blockSize == injectionIndex)
 			insertRandom();
 
@@ -95,21 +84,18 @@ public class DataCatcherRIM extends OutputStream
 	}
 
 	@Override
-	public void write(byte[] b)
-	{
+	public void write(byte[] b) {
 		write(b, 0, b.length);
 	}
 
 	@Override
-	public void write(byte[] b, int off, int len)
-	{
+	public void write(byte[] b, int off, int len) {
 		int blockPos = pointer % blockSize;
 		int L = (blockSize - blockPos + injectionIndex) % blockSize;
 
 		// Add everything up to random insertion
 
-		if (L >= b.length)
-		{
+		if (L >= b.length) {
 			System.arraycopy(b, off, buffer, pointer, b.length);
 			pointer += b.length;
 			return;
@@ -122,8 +108,7 @@ public class DataCatcherRIM extends OutputStream
 		len -= L;
 
 		// Add insertion and another vBlockSize bytes
-		for (; len >= (vBlockSize);)
-		{
+		for (; len >= (vBlockSize);) {
 			insertRandom();
 			System.arraycopy(b, off, buffer, pointer, vBlockSize);
 			pointer += (vBlockSize);
@@ -133,8 +118,7 @@ public class DataCatcherRIM extends OutputStream
 
 		}
 
-		if (len != 0)
-		{
+		if (len != 0) {
 			// There are still leftovers that are to be in the new block, these
 			// are fewer than vBlockSize, meaning not a full block
 			insertRandom();
@@ -144,21 +128,17 @@ public class DataCatcherRIM extends OutputStream
 
 	}
 
-	public static byte[] getValue(int blockSize, int injectionIndex, Charset charset, StreamWriter... wa)
-	{
+	public static byte[] getValue(int blockSize, int injectionIndex, Charset charset, StreamWriter... wa) {
 		DataCatcherRIM c = new DataCatcherRIM(blockSize, injectionIndex, charset, wa);
-		try
-		{
+		try {
 			c.close();
-		} catch (IOException e)
-		{
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return c.getValue();
 	}
 
-	public byte[] getValue()
-	{
+	public byte[] getValue() {
 		return buffer;
 	}
 }

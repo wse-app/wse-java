@@ -11,7 +11,7 @@ public class BufferedInputStream extends WseInputStream {
 	protected byte[][] data;
 	protected int ptr = 0;
 	protected int available = 0;
-	
+
 	protected boolean gotEndOfStream = false;
 
 	public BufferedInputStream(InputStream readFrom, int bufferSize) {
@@ -36,8 +36,6 @@ public class BufferedInputStream extends WseInputStream {
 		data[data.length - 1] = b;
 		System.arraycopy(clear, 0, b, 0, clear.length);
 	}
-	
-	
 
 	protected void shift() {
 		shiftSilent();
@@ -121,22 +119,22 @@ public class BufferedInputStream extends WseInputStream {
 	 * @return
 	 */
 	public int find(byte[] sub) {
-		
+
 		if (sub.length > bufferSize)
 			return -1;
-		
+
 		int[] at = null;
 		int quick_increase = Math.max(3, sub.length / 5);
-		
+
 		boolean foundLast = false;
 		int lastOffset = 0;
 		int start = ptr;
-		
+
 		for (int i = 0; i < data.length; i++, start = 0) {
 			if (foundLast) {
-				
+
 //				System.out.println("found start of \"" + new String(sub) + "\" in \"" + new String(data[i-1]) + "\", " + lastOffset );
-				
+
 				boolean equals = true;
 				for (int k = 0; k < sub.length - lastOffset; k++) {
 //					System.out.println("looking for '" + (char)sub[k + lastOffset] + "' at " + k + ": '" + (char) data[i][k] + "'");
@@ -156,7 +154,7 @@ public class BufferedInputStream extends WseInputStream {
 //				if (j == start) System.out.println("looking at: \"" + new String(data[i], j, 5) + "\"");
 				boolean equals = true;
 				// quick check
-				
+
 				for (int k = 0; k < sub.length; k += quick_increase) {
 					if (data[i][j + k] != sub[k]) {
 						equals = false;
@@ -213,7 +211,7 @@ public class BufferedInputStream extends WseInputStream {
 
 		return (at[0] * bufferSize + at[1]) - ptr;
 	}
-	
+
 	public String getData() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("\"").append(new String(data[0])).append("\"");
@@ -254,9 +252,9 @@ public class BufferedInputStream extends WseInputStream {
 		public void mark(int readAheadLimit) {
 		}
 	}
-	
+
 	@Override
-	public int available(){
+	public int available() {
 		return gotEndOfStream ? available : Math.max(1, available);
 	}
 }

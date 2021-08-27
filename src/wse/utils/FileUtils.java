@@ -20,28 +20,28 @@ public class FileUtils {
 				consumer.consume(first);
 		}
 	}
-	
+
 	public static void forEachFileInTree(File parent, Consumer<File> consumer) {
 		if (parent == null)
 			return;
 		consumer.consume(parent);
-		
+
 		if (parent.isDirectory()) {
-			for(File f : parent.listFiles())
+			for (File f : parent.listFiles())
 				forEachFileInTree(f, consumer);
 		}
 	}
-	
+
 	public static void write(File target, boolean append, byte[] source) throws IOException {
 		write(target, append, new ByteArrayInputStream(source), source.length);
 	}
-	
+
 	public static void write(File target, boolean append, InputStream source, int buffsize) throws IOException {
 		FileOutputStream output = new FileOutputStream(target, append);
 		StreamUtils.write(source, output, buffsize);
 		output.close();
 	}
-	
+
 	public static File getAbsolute(File root, String relative) {
 		File tmp = new File(relative);
 		if (tmp.isAbsolute())

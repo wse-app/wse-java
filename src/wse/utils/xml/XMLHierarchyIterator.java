@@ -6,14 +6,14 @@ public class XMLHierarchyIterator {
 
 	public static Iterable<XMLElement> iterable(final XMLElement root) {
 		return new Iterable<XMLElement>() {
-			
+
 			@Override
 			public Iterator<XMLElement> iterator() {
 				return XMLHierarchyIterator.iterator(root);
 			}
 		};
 	}
-	
+
 	public static Iterator<XMLElement> iterator(final XMLElement root) {
 
 		return new Iterator<XMLElement>() {
@@ -49,15 +49,16 @@ public class XMLHierarchyIterator {
 				if (!children.hasNext())
 					return null;
 				XMLElement next = children.next();
-				if (next == null) return this.next();
-				
+				if (next == null)
+					return this.next();
+
 				currentChild = iterator(next);
 				return this.next();
 			}
 
 			@Override
 			public void remove() {
-				
+
 			}
 		};
 

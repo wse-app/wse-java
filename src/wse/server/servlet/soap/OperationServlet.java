@@ -44,9 +44,10 @@ public class OperationServlet extends SoapServlet {
 		this.instance = null;
 		loadReceivers(listener);
 	}
-	
+
 	public OperationListener getInstance() {
-		if (instance != null) return instance;
+		if (instance != null)
+			return instance;
 		try {
 			return listenerClass.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -71,9 +72,8 @@ public class OperationServlet extends SoapServlet {
 				receiver.put(h.value(), new Receiver(m, params, h));
 			}
 		}
-		LOG.info("OperationServlet of " + this.listenerClass.getSimpleName() + " listenening for "
-				+ receiver.size() + " operation" + (receiver.size() == 1 ? "" : "s")
-				+ (LOG.isLoggable(Level.FINE) ? ":" : ""));
+		LOG.info("OperationServlet of " + this.listenerClass.getSimpleName() + " listenening for " + receiver.size()
+				+ " operation" + (receiver.size() == 1 ? "" : "s") + (LOG.isLoggable(Level.FINE) ? ":" : ""));
 		if (LOG.isLoggable(Level.FINE)) {
 			for (Entry<String, Receiver> e : receiver.entrySet()) {
 				LOG.fine("    '" + e.getKey() + "' - " + e.getValue().method.toGenericString());
@@ -97,7 +97,7 @@ public class OperationServlet extends SoapServlet {
 		OperationListener instance = getInstance();
 		instance.request = request;
 		instance.response = response;
-		
+
 		ComplexType result;
 		try {
 			result = m.invoke(instance, content);
@@ -159,12 +159,12 @@ public class OperationServlet extends SoapServlet {
 			this.soapAction = handler.value();
 		}
 
-		public ComplexType invoke(OperationListener instance, IElement e) throws InstantiationException, IllegalAccessException,
-				IllegalArgumentException, InvocationTargetException {
+		public ComplexType invoke(OperationListener instance, IElement e) throws InstantiationException,
+				IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 			ComplexType i = input.newInstance();
 			ComplexType o = output.newInstance();
 			i.load(e);
-			
+
 			method.invoke(instance, i, o);
 			return o;
 		}

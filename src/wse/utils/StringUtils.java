@@ -153,7 +153,7 @@ public final class StringUtils {
 	public static List<String> split(String source, char split) {
 		return split(source, split, -1);
 	}
-	
+
 	public static List<String> split(String source, char split, int max) {
 		if (source == null || source.length() == 0)
 			return Collections.emptyList();

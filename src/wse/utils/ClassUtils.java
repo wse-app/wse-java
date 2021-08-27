@@ -201,7 +201,7 @@ public final class ClassUtils {
 	public static Object valueOfPrimitive(Class<?> primitiveClass, String value) {
 		if (!primitiveClass.isPrimitive())
 			return null;
-		
+
 		@SuppressWarnings("rawtypes")
 		Constructor c = map.get(primitiveClass);
 		if (c == null)

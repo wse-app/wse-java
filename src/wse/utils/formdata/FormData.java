@@ -52,7 +52,8 @@ public class FormData {
 			}
 			if (log.isLoggable(Level.FINEST)) {
 				log.finest("FormData: parsing part, length: " + b.length);
-				log.finest("FormData: part: \n" + (new String(b, 0, Math.min(512, b.length)) + (b.length > 512 ? "[...]" : "")));
+				log.finest("FormData: part: \n"
+						+ (new String(b, 0, Math.min(512, b.length)) + (b.length > 512 ? "[...]" : "")));
 			}
 			result.add(new Input(b));
 		}

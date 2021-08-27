@@ -18,8 +18,7 @@ public class RecordingOutputStream extends SplittingOutputStream {
 		this(original, logger, level, title, false);
 	}
 
-	public RecordingOutputStream(OutputStream original, Logger logger, Level level, String title,
-			boolean hex) {
+	public RecordingOutputStream(OutputStream original, Logger logger, Level level, String title, boolean hex) {
 		super(original, new LoggingOutputStream(logger, level, title, hex));
 	}
 }

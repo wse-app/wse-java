@@ -111,23 +111,23 @@ public class XMLAttribute extends XMLNode {
 		}
 		stream.write('"');
 	}
-	
+
 	@Override
 	public void prettyPrint(StringGatherer builder, int level) {
 		builder.add(XMLUtils.level_str(level));
-		
+
 		if (isDefaultNamespace()) {
 			builder.add("xmlns");
 		} else {
 			builder.add(getQualifiedName());
 		}
-		
+
 		builder.add("=\"");
 		if (value != null) {
 			builder.add(XMLUtils.escape(value));
 		}
 		builder.add("\"");
-		
+
 	}
 
 	public void writeQualifiedName(OutputStream stream, Charset charset) throws IOException {
@@ -166,5 +166,4 @@ public class XMLAttribute extends XMLNode {
 		return new String[] { isDefaultNamespace() ? null : name, value };
 	}
 
-	
 }

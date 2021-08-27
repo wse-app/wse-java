@@ -19,7 +19,7 @@ public class WseFileHandler extends WseStreamHandler {
 
 	private final static SimpleDateFormat SUBDIR_FORMAT = new SimpleDateFormat("yyyy-MM");
 	private final static SimpleDateFormat FILENAME_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-	
+
 	private final File current;
 	private int lastDayOfYear = -1;
 
@@ -35,14 +35,14 @@ public class WseFileHandler extends WseStreamHandler {
 		init();
 		setCurrentOutput();
 	}
-	
+
 	private boolean ensureTarget() {
 		Calendar c = Calendar.getInstance();
 		Date now = new Date();
 		c.setTime(now);
-		
+
 		int today = c.get(Calendar.DAY_OF_YEAR);
-		
+
 		if (today != lastDayOfYear) {
 			lastDayOfYear = today;
 			try {
@@ -61,17 +61,17 @@ public class WseFileHandler extends WseStreamHandler {
 				throw new WseException("Failed to create necessesary log directories");
 			}
 		}
-		
+
 		if (current.exists()) {
 			String c = FILENAME_FORMAT.format(new Date());
 			String h = FILENAME_FORMAT.format(new Date(current.lastModified()));
-			
+
 			if (!c.equals(h)) {
 				moveToHistory();
 			}
 		}
 	}
-	
+
 	public void setCurrentOutput() {
 		close();
 		try {
@@ -84,7 +84,7 @@ public class WseFileHandler extends WseStreamHandler {
 	}
 
 	static long start = System.currentTimeMillis();
-	
+
 	private void moveToHistory() throws SecurityException, FileNotFoundException {
 		if (!current.exists())
 			return;
@@ -109,9 +109,7 @@ public class WseFileHandler extends WseStreamHandler {
 		File file = new File(subDir, FILENAME_FORMAT.format(new Date(when)) + ".log");
 		return file;
 	}
-	
-	
-	
+
 	@Override
 	public synchronized void publish(LogRecord record) {
 		if (!ensureTarget())

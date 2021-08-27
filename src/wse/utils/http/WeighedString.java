@@ -52,13 +52,13 @@ public final class WeighedString implements Comparable<WeighedString> {
 		this.q = q_;
 		this.v = v_;
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		
+
 		sb.append(string);
-		
+
 		return sb.toString();
 	}
 

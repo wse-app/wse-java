@@ -11,7 +11,7 @@ public class LimitedInputStream extends WseInputStream {
 	public LimitedInputStream(long limit) {
 		this(null, limit);
 	}
-	
+
 	public LimitedInputStream(InputStream readFrom, long limit) {
 		super(readFrom);
 		this.limit = limit;
@@ -21,9 +21,9 @@ public class LimitedInputStream extends WseInputStream {
 	public int read() throws IOException {
 		if (counter >= limit)
 			return -1;
-		
+
 		int b = super.read();
-		if (b != -1) {			
+		if (b != -1) {
 			counter++;
 		}
 		return b;
@@ -36,17 +36,17 @@ public class LimitedInputStream extends WseInputStream {
 			return -1;
 		}
 		int max = (int) Math.min(len, left);
-		int actual = super.read(b,  off, max);
+		int actual = super.read(b, off, max);
 		if (actual != -1)
 			counter += actual;
 		return actual;
 	}
-	
+
 	@Override
 	public int available() throws IOException {
 		return (int) Math.min(limit - counter, readFrom.available());
 	}
-	
+
 	@Override
 	public String infoName() {
 		return super.infoName() + " (" + this.counter + "/" + this.limit + ")";

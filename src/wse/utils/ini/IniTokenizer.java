@@ -182,7 +182,7 @@ public class IniTokenizer implements HasRowColumn {
 					sb.append(c);
 					break;
 				default: {
-					
+
 					log.warning("Escape character not recognized: '" + c + "'");
 					sb.append(c);
 					break;
@@ -197,7 +197,6 @@ public class IniTokenizer implements HasRowColumn {
 				sb.append(c);
 			}
 		}
-		
 
 	}
 

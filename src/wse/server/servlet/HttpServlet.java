@@ -79,7 +79,7 @@ public abstract class HttpServlet extends AbstractHttpServlet {
 			response.setAttribute("Allow", allow);
 			response.setAttribute("Access-Control-Allow-Origin", "*");
 			response.setAttribute("Access-Control-Allow-Methods", allow);
-			
+
 			HeaderAttribute acrh = request.getAttribute("Access-Control-Request-Headers");
 			if (acrh != null) {
 				response.setAttribute("Access-Control-Allow-Headers", acrh.value);

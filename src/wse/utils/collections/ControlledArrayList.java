@@ -56,7 +56,7 @@ public class ControlledArrayList<E> extends ArrayList<E> {
 				controller.onEntryRemoved(e);
 
 	}
-	
+
 	@Override
 	public E set(int index, E element) {
 		E e = get(index);
@@ -88,14 +88,18 @@ public class ControlledArrayList<E> extends ArrayList<E> {
 	@Override
 	public boolean addAll(Collection<? extends E> c) {
 		boolean added = super.addAll(c);
-		if (added) for (E e : c) controller.onEntryAdded(e);
+		if (added)
+			for (E e : c)
+				controller.onEntryAdded(e);
 		return added;
 	}
 
 	@Override
 	public boolean addAll(int index, Collection<? extends E> c) {
 		boolean added = super.addAll(index, c);
-		if (added) for (E e : c) controller.onEntryAdded(e);
+		if (added)
+			for (E e : c)
+				controller.onEntryAdded(e);
 		return added;
 	}
 }

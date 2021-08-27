@@ -73,7 +73,7 @@ public final class HttpServletResponse extends WseOutputStream {
 		headerWritten = true;
 		header.writeToStream(this, UTF8);
 	}
-	
+
 	public boolean isHeaderWritten() {
 		return headerWritten;
 	}

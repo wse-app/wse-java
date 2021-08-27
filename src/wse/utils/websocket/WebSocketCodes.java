@@ -80,5 +80,4 @@ public interface WebSocketCodes {
 
 	public static final byte MASKED = (byte) 0b10000000;
 
-	
 }

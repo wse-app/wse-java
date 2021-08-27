@@ -14,7 +14,7 @@ public class JSONSoapFaultErrorFormatter extends SoapFaultErrorFormatter {
 
 		JObject response = new JObject();
 		response.put("Fault", faultObj);
-		
+
 		attributes.setContentType(MimeType.application.json);
 
 		return StreamUtils.catchAll(response, response.preferredCharset());

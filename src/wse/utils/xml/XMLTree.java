@@ -6,20 +6,19 @@ import java.nio.charset.Charset;
 
 import wse.utils.writable.StreamWriter;
 
-public class XMLTree implements StreamWriter{
+public class XMLTree implements StreamWriter {
 	private String version;
 	private String encoding;
 	private boolean standalone;
 	private Charset charset;
-	
-	public XMLTree()
-	{
+
+	public XMLTree() {
 		version = "1.0";
 		encoding = "UTF-8";
 		standalone = false;
 		charset = Charset.forName(this.encoding);
 	}
-	
+
 	public XMLTree(XMLTree copy) {
 		version = copy.version;
 		encoding = copy.encoding;
@@ -27,18 +26,14 @@ public class XMLTree implements StreamWriter{
 		standalone = copy.standalone;
 	}
 
-	public String getVersion()
-	{
+	public String getVersion() {
 		return version;
 	}
 
-	public void setVersion(String version)
-	{
+	public void setVersion(String version) {
 		this.version = version;
 	}
 
-	
-	
 	public boolean isStandalone() {
 		return standalone;
 	}
@@ -47,17 +42,15 @@ public class XMLTree implements StreamWriter{
 		this.standalone = standalone;
 	}
 
-	public String getEncoding()
-	{
+	public String getEncoding() {
 		return encoding;
 	}
-	
+
 	public Charset getCharset() {
 		return charset;
 	}
 
-	public void setEncoding(String encoding)
-	{
+	public void setEncoding(String encoding) {
 		this.encoding = encoding;
 		this.charset = Charset.forName(encoding);
 	}
@@ -66,9 +59,9 @@ public class XMLTree implements StreamWriter{
 	public void writeToStream(OutputStream stream, Charset charset) throws IOException {
 		write(stream, charset, 0);
 	}
-	
+
 	public void write(OutputStream stream, Charset charset, int level) throws IOException {
-		
+
 		stream.write(XMLUtils.level(level));
 		stream.write("<?xml version=\"".getBytes(charset));
 		stream.write(version.getBytes(charset));

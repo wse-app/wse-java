@@ -3,7 +3,6 @@ package wse.utils;
 import wse.server.listener.ServiceListener;
 import wse.utils.ssl.SSLAuth;
 
-
 public class Service<T extends HttpCall> extends HttpCall {
 	public Class<? extends ServiceListener<? extends ComplexType, ? extends ComplexType>> listener;
 	public Class<T> caller;
@@ -23,7 +22,8 @@ public class Service<T extends HttpCall> extends HttpCall {
 		this(caller, null);
 	}
 
-	public Service(Class<T> caller, Class<? extends ServiceListener<? extends ComplexType, ? extends ComplexType>> listener) {
+	public Service(Class<T> caller,
+			Class<? extends ServiceListener<? extends ComplexType, ? extends ComplexType>> listener) {
 		if (caller == null)
 			throw new IllegalArgumentException("Caller can not be null");
 
@@ -31,7 +31,7 @@ public class Service<T extends HttpCall> extends HttpCall {
 		this.caller = caller;
 
 		default_call = makeCall();
-		
+
 		this.setTarget(default_call.getTarget());
 	}
 
@@ -91,9 +91,8 @@ public class Service<T extends HttpCall> extends HttpCall {
 	public String getSoapAction() {
 		return default_call.getSoapAction();
 	}
-	
-	public Class<? extends HttpCall> getServiceClass()
-	{
+
+	public Class<? extends HttpCall> getServiceClass() {
 		return default_call.getClass();
 	}
 }

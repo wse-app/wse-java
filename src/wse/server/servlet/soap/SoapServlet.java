@@ -21,7 +21,7 @@ import wse.utils.xml.XMLElement;
 import wse.utils.xml.XMLUtils;
 
 public abstract class SoapServlet extends HttpServlet {
-	
+
 	@Override
 	public final void doAny(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		CORSAllowAll(response);
@@ -56,7 +56,7 @@ public abstract class SoapServlet extends HttpServlet {
 	public final void doSecure(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		response.sendMethodNotAllowed(HttpMethod.POST);
 	}
-	
+
 	@Override
 	public final void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		ContentType ct = request.getContentType();
@@ -74,24 +74,24 @@ public abstract class SoapServlet extends HttpServlet {
 
 		if (cs == null)
 			cs = Charset.forName("UTF-8");
-		
+
 		if (mt == MimeType.application.xml || mt == MimeType.text.xml) {
 			response.setErrorFormatter(new XMLSoapFaultErrorFormatter());
 		} else if (mt == MimeType.application.json) {
 			response.setErrorFormatter(new JSONSoapFaultErrorFormatter());
 		}
-		
+
 		IElement ie;
 		try {
 			ILeaf il = InternalFormat.parse(mt, request.getContent(), cs);
-			
+
 			if (!(il instanceof IElement)) {
 				// TODO Support ILeaf structure for very simple requests?
 				throw new WseParsingException("Only tree-based content types are supported.");
 			}
-			
+
 			ie = (IElement) il;
-			
+
 		} catch (Exception e) {
 			response.sendError(400, e);
 			log.log(Level.FINEST, e.getClass().getName() + ": " + e.getMessage(), e);
@@ -135,19 +135,19 @@ public abstract class SoapServlet extends HttpServlet {
 
 		if (!(ie instanceof XMLElement))
 			return ie;
-		
+
 		XMLElement soap = XMLUtils.createSOAPFrame(false);
-		
+
 		soap.setChild("Body", XMLUtils.SOAP_ENVELOPE, ie);
-		
+
 		XMLUtils.resetNamespaces(soap);
-		
+
 		return soap;
 
 	}
 
-	public abstract void doSoap(HttpServletRequest request, MimeType contentType, IElement content, HttpServletResponse response)
-			throws IOException;
+	public abstract void doSoap(HttpServletRequest request, MimeType contentType, IElement content,
+			HttpServletResponse response) throws IOException;
 
 	public void validateSoap(XMLElement envelope) {
 		if (!Objects.equals(envelope.getName(), "Envelope")

@@ -14,7 +14,8 @@ import wse.utils.writable.StreamWriter;
  */
 public abstract class HttpDescriptionLine implements StreamWriter, PrettyPrinter {
 
-	private static final Pattern ResponsePattern = Pattern.compile("(Secure-)?HTTP/1.([0-2]|4) [1-9][0-9][0-9]( .*)?", Pattern.DOTALL);
+	private static final Pattern ResponsePattern = Pattern.compile("(Secure-)?HTTP/1.([0-2]|4) [1-9][0-9][0-9]( .*)?",
+			Pattern.DOTALL);
 //	private static final Pattern RequestPattern = Pattern.compile("(" + HttpMethod.toPattern("|") + ") [^ ]* (Secure-)?HTTP/1.([0-2]|4)");
 
 	public static final String HTTP11 = "HTTP/1.1";
@@ -78,7 +79,7 @@ public abstract class HttpDescriptionLine implements StreamWriter, PrettyPrinter
 	public boolean isResponse() {
 		return (this instanceof HttpStatusLine);
 	}
-	
+
 	public StringGatherer prettyPrint() {
 		return prettyPrint(0);
 	}
@@ -88,12 +89,12 @@ public abstract class HttpDescriptionLine implements StreamWriter, PrettyPrinter
 		prettyPrint(builder, level);
 		return builder;
 	}
-	
+
 	@Override
 	public void writeToStream(OutputStream stream, Charset charset) throws IOException {
 		prettyPrint().writeToStream(stream, charset);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public <T extends HttpDescriptionLine> T cast() {
 		return (T) this;

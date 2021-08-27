@@ -36,7 +36,7 @@ public final class SocketHandler implements Runnable {
 
 	private static final Object LOCK = new Object();
 	private static final Logger LOG = WSE.getLogger();
-	
+
 	/** Persistant socket timeout in milliseconds */
 	public static int PERSISTANT_SOCKET_TIMEOUT = 60000;
 
@@ -86,7 +86,7 @@ public final class SocketHandler implements Runnable {
 			boolean keepAlive = readHttp(count, input, output);
 			if (!keepAlive)
 				break;
-			
+
 			count++;
 			LOG.fine("Persistant socket, count=" + count);
 		}
@@ -106,14 +106,14 @@ public final class SocketHandler implements Runnable {
 		}
 		HttpServletResponse response = new HttpServletResponse(output);
 		response.setContentLength(0);
-		
+
 		HttpHeader responseHeader = response.getHttpHeader();
 
 		boolean keepAlive = requestHeader.getConnection(/* lowerCase: */ true).contains("keep-alive");
 
 		if (keepAlive) {
 			responseHeader.setConnection("keep-alive");
-			
+
 			if (PERSISTANT_SOCKET_TIMEOUT > 0) {
 				// Keep-Alive timeout is in seconds
 				responseHeader.setKeepAlive(PERSISTANT_SOCKET_TIMEOUT / 1000, null);
@@ -138,7 +138,7 @@ public final class SocketHandler implements Runnable {
 				byte[] header = requestHeader.toByteArray();
 				LOG.finer("Request Header: [" + (header.length) + " bytes]\n" + new String(header));
 			}
-			
+
 			treatment.treatCall(request, response);
 
 			if (!response.isHeaderWritten()) {
@@ -167,7 +167,7 @@ public final class SocketHandler implements Runnable {
 			if (input.available() > 0) {
 				LOG.severe("Connection: keep-alive, but input contains left-over data. Persistant socket may fail.");
 			}
-			
+
 			socket.setSoTimeout(PERSISTANT_SOCKET_TIMEOUT);
 		}
 

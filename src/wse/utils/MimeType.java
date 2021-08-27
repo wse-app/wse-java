@@ -693,7 +693,7 @@ public class MimeType {
 
 		String fileName = file.getName();
 		String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
-		
+
 		return getByExtension(extension);
 	}
 

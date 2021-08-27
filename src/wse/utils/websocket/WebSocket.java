@@ -146,7 +146,6 @@ public class WebSocket implements WebSocketCodes, HasOptions {
 
 	public static Frame readNextFrame(InputStream stream, boolean client) throws IOException {
 
-		
 		byte[] f2 = read(stream, 2);
 		if (f2 == null) {
 			throw new WebSocketException("got end of stream");
@@ -230,11 +229,11 @@ public class WebSocket implements WebSocketCodes, HasOptions {
 
 		}
 	}
-	
+
 	public static String getWebSocketAcceptFromKey(String key) {
 		try {
-			return StringUtils.printBase64Binary(
-					MessageDigest.getInstance("SHA-1").digest((key + WebSocket.WEB_SOCKET_MAGIC_STR).getBytes("UTF-8")));
+			return StringUtils.printBase64Binary(MessageDigest.getInstance("SHA-1")
+					.digest((key + WebSocket.WEB_SOCKET_MAGIC_STR).getBytes("UTF-8")));
 		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return null;
@@ -296,7 +295,7 @@ public class WebSocket implements WebSocketCodes, HasOptions {
 		this.endpoint.setOutputStream(this.output);
 
 		this.endpoint.onInit(this.handshakeResult.getHeader());
-		
+
 		try {
 			endpoint.readLoop();
 		} catch (Exception e) {
@@ -307,7 +306,7 @@ public class WebSocket implements WebSocketCodes, HasOptions {
 	private void doHandshake() throws IOException {
 		this.handler = new CallHandler(HttpMethod.GET, this.uri, null, this.auth);
 		this.handler.setOptions(this);
-		
+
 		String controlKey = controlKey();
 		this.handler.setWebSocketControlKey(controlKey);
 
@@ -379,7 +378,6 @@ public class WebSocket implements WebSocketCodes, HasOptions {
 		});
 	}
 
-	
 	@Override
 	public IOptions getOptions() {
 		return options;

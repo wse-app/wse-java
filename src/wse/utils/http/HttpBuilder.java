@@ -87,10 +87,10 @@ public class HttpBuilder {
 			split = searchHeaderEnd2(buff, 0, pointer - 1);
 
 		if (split == null || split[0] == -1) {
-			
+
 			if (pointer == 0) {
 				// nothing was sent
-				
+
 				throw new SocketException("Got 0 bytes");
 			}
 

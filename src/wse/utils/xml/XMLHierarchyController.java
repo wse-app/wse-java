@@ -2,10 +2,10 @@ package wse.utils.xml;
 
 import wse.utils.collections.CollectionController;
 
-public class XMLHierarchyController<T extends XMLNode> implements CollectionController<T>{
+public class XMLHierarchyController<T extends XMLNode> implements CollectionController<T> {
 
-	
 	protected XMLElement parentNode;
+
 	public XMLHierarchyController(XMLElement parentNode) {
 		this.parentNode = parentNode;
 	}
@@ -21,11 +21,11 @@ public class XMLHierarchyController<T extends XMLNode> implements CollectionCont
 		if (removed != null)
 			onNodeRemoved(removed);
 	}
-	
+
 	protected void onNodeRemoved(T node) {
 		node.__orphan();
 	}
-	
+
 	protected void onNodeAdded(T node) {
 		node.parent = this.parentNode;
 		node.propagateTree(this.parentNode.tree);

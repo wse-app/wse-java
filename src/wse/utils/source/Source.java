@@ -16,7 +16,7 @@ public final class Source {
 	public final static byte[] read(File file) throws IOException {
 		return StreamUtils.readAll(new FileInputStream(file));
 	}
-	
+
 	public final static String getContainingText(File file) {
 		LinkedByteArray lba = toByteArray(file);
 		if (lba == null)

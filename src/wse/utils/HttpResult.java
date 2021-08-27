@@ -13,27 +13,27 @@ import wse.utils.stream.LimitedInputStream;
 import wse.utils.stream.RecordingInputStream;
 
 public class HttpResult {
-	
+
 	private final HttpHeader header;
-	
+
 	private final InputStream content_raw;
 	private InputStream content;
 
 	public HttpResult(HttpHeader header, InputStream content) {
 		this(header, content, true);
 	}
-	
+
 	public HttpResult(HttpHeader header, InputStream content, boolean modifyContent) {
 		super();
 		this.header = header;
 		this.content_raw = content;
-		
+
 		if (modifyContent) {
 			TransferEncoding enc = header.getTransferEncoding();
 			if (enc == null)
 				enc = TransferEncoding.IDENTITY;
-			
-			switch(enc) {
+
+			switch (enc) {
 			case BR:
 			case COMPRESS:
 			case DEFLATE:
@@ -45,7 +45,7 @@ public class HttpResult {
 			case IDENTITY:
 				long cl = header.getContentLength();
 				if (cl >= 0) {
-					this.content = new LimitedInputStream(content, (int) cl);				
+					this.content = new LimitedInputStream(content, (int) cl);
 					break;
 				}
 				// fall through
@@ -53,16 +53,16 @@ public class HttpResult {
 				this.content = content;
 				break;
 			}
-		}else {
+		} else {
 			this.content = content;
 		}
-		
+
 	}
-	
+
 	protected void wrapLogger(String title, Logger logger, Level level) {
 		this.content = new RecordingInputStream(this.content, logger, level, title);
 	}
-	
+
 	protected void setContent(InputStream inputStream) {
 		this.content = inputStream;
 	}
@@ -74,11 +74,11 @@ public class HttpResult {
 	public InputStream getContent() {
 		return content;
 	}
-	
+
 	public InputStream getContentRaw() {
 		return content_raw;
 	}
-	
+
 	public void closeInput() {
 		if (content != null) {
 			try {

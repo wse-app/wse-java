@@ -29,7 +29,7 @@ public class Option<T> {
 		this.name = name;
 		this.defValue = defValue;
 	}
-	
+
 	public Option(String name, Supplier<T> defValueSupplier) {
 		this.name = name;
 		this.defSupplier = defValueSupplier;

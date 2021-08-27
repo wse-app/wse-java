@@ -39,25 +39,23 @@ public class SplittingOutputStream extends WseOutputStream {
 			os.flush();
 		super.flush();
 	}
-	
+
 	public String layerInfo(int level) {
 		StringBuilder b = new StringBuilder();
 		if (level != 0)
 			b.append(layers[level % layers.length]);
 		b.append(infoName());
 
-		
-		
 		for (OutputStream copy : copyTo) {
 			if (copy instanceof WseOutputStream) {
-				b.append(((WseOutputStream)copy).layerInfo(level + 1));
+				b.append(((WseOutputStream) copy).layerInfo(level + 1));
 			} else {
 				b.append(layers[(level + 1) % layers.length] + copy.getClass().getName());
 			}
 		}
-		
+
 		if (writeTo instanceof WseOutputStream) {
-			b.append(((WseOutputStream)writeTo).layerInfo(level + 1));
+			b.append(((WseOutputStream) writeTo).layerInfo(level + 1));
 		} else {
 			b.append(layers[(level + 1) % layers.length] + writeTo.getClass().getName());
 		}
@@ -72,5 +70,5 @@ public class SplittingOutputStream extends WseOutputStream {
 			if (s instanceof WseOutputStream)
 				((WseOutputStream) s).disableOutputLogging();
 	}
-	
+
 }

@@ -103,18 +103,16 @@ public class HttpCodes {
 	public static String getCodeMessage(int code) {
 		return HTTP_CODES.get(code);
 	}
-	
-	public static boolean validCodeMessage(int code)
-	{
+
+	public static boolean validCodeMessage(int code) {
 		return HTTP_CODES.containsKey(code);
 	}
-	
-	
+
 	// Informational
 	public static final int CONTINUE = 100;
 	public static final int SWITCHING_PROTOCOLS = 101;
 	public static final int PROCESSING = 102;
-	
+
 	// Success
 	public static final int OK = 200;
 	public static final int CREATED = 201;
@@ -126,7 +124,7 @@ public class HttpCodes {
 	public static final int MULTI_STATUS = 207;
 	public static final int ALREADY_REPORTED = 208;
 	public static final int IM_USED = 226;
-	
+
 	// Redirection
 	public static final int MULTIPLE_CHOICES = 300;
 	public static final int MOVED_PERMANENTLY = 301;
@@ -137,7 +135,7 @@ public class HttpCodes {
 	public static final int SWITCH_PROXY = 306;
 	public static final int TEMPORARY_REDIRECT = 307;
 	public static final int PERMANENT_REDIRECT = 308;
-	
+
 	// Client Error
 	public static final int BAD_REQUEST = 400;
 	public static final int UNAUTHORIZED = 401;
@@ -167,8 +165,7 @@ public class HttpCodes {
 	public static final int PRECONDITION_REQUIRED = 428;
 	public static final int TOO_MANY_REQUESTS = 429;
 	public static final int REQUEST_HEADER_FIELDS_TOO_LARGE = 431;
-	
-	
+
 	// Server Error
 	public static final int INTERNAL_SERVER_ERROR = 500;
 	public static final int NOT_IMPLEMENTED = 501;
@@ -181,19 +178,19 @@ public class HttpCodes {
 	public static final int LOOP_DETECTED = 508;
 	public static final int NOT_EXTENDED = 510;
 	public static final int NETWORK_AUTHENTICATION_REQUIRED = 511;
-	
+
 	// Internet information services
 	public static final int LOGIN_TIME_OUT = 440;
 	public static final int RETRY_WITH = 449;
 	public static final int UNAVAILABLE_FOR_LEGAL_REASONS = 451;
-	
+
 	// nginx
 	public static final int NO_RESPONSE = 444;
 	public static final int SSL_CERTIFICATE_ERROR = 495;
 	public static final int SSL_CERTIFICATE_REQUIRED = 496;
 	public static final int HTTP_REQUEST_SEND_TO_HTTPS_PORT = 497;
 	public static final int CLIENT_CLOSED_REQUEST = 499;
-	
+
 	// Cloudflare
 	public static final int UNKNOWN_ERROR = 520;
 	public static final int WEB_SERVER_IS_DOWN = 521;
@@ -203,24 +200,20 @@ public class HttpCodes {
 	public static final int SSL_HANSHAKE_FAILED = 525;
 	public static final int INVALID_SSL_CERTIFICATE = 526;
 	public static final int RAILGUN_ERROR = 527;
-	
-	public static boolean isSuccessCode(int code)
-	{
+
+	public static boolean isSuccessCode(int code) {
 		return (code >= 200 && code < 300);
 	}
-	
-	public static boolean isRedirectionCode(int code)
-	{
+
+	public static boolean isRedirectionCode(int code) {
 		return (code >= 300 && code < 400);
 	}
-	
-	public static boolean isClientError(int code)
-	{
+
+	public static boolean isClientError(int code) {
 		return (code >= 400 && code <= 431);
 	}
-	
-	public static boolean isServerError(int code)
-	{
+
+	public static boolean isServerError(int code) {
 		return (code >= 500 && code <= 511);
 	}
 }

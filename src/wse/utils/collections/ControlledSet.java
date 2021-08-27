@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
-public class ControlledSet<E> implements Set<E>{
-	
+public class ControlledSet<E> implements Set<E> {
+
 	private Set<E> internal;
 	private CollectionController<E> controller;
-	
+
 	public ControlledSet(Set<E> internal, CollectionController<E> controller) {
 		this.internal = internal;
 		this.controller = controller;
@@ -46,7 +46,7 @@ public class ControlledSet<E> implements Set<E>{
 
 	@Override
 	public boolean add(E e) {
-		
+
 		if (internal.add(e)) {
 			controller.onEntryAdded(e);
 			return true;
@@ -61,7 +61,8 @@ public class ControlledSet<E> implements Set<E>{
 			E e = null;
 			try {
 				e = (E) o;
-			} catch(ClassCastException e1) {}
+			} catch (ClassCastException e1) {
+			}
 			controller.onEntryRemoved(e);
 			return internal.remove(o);
 		}
@@ -90,8 +91,9 @@ public class ControlledSet<E> implements Set<E>{
 				E e = null;
 				try {
 					e = (E) o;
-				} catch(ClassCastException e1) {}
-				controller.onEntryRemoved(e);	
+				} catch (ClassCastException e1) {
+				}
+				controller.onEntryRemoved(e);
 			}
 		return internal.retainAll(c);
 	}
@@ -104,8 +106,9 @@ public class ControlledSet<E> implements Set<E>{
 				E e = null;
 				try {
 					e = (E) o;
-				} catch(ClassCastException e1) {}
-				controller.onEntryRemoved(e);	
+				} catch (ClassCastException e1) {
+				}
+				controller.onEntryRemoved(e);
 			}
 		return internal.removeAll(c);
 	}
@@ -117,5 +120,5 @@ public class ControlledSet<E> implements Set<E>{
 		}
 		internal.clear();
 	}
-	
+
 }

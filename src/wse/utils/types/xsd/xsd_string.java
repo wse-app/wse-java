@@ -12,6 +12,5 @@ public class xsd_string extends AnySimpleType<String> {
 	public String parse(String input) {
 		return input;
 	}
-	
-	
+
 }

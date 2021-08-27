@@ -23,17 +23,17 @@ public class Loggers {
 			return;
 		}
 		logger.log(level, "[" + length + " bytes]");
-		
+
 		int len;
 		int si = 0;
-		while(length > 0) {		
+		while (length > 0) {
 			len = Math.min(512, length);
-			logger.log(level, si + "-" + (si + len -1) + "\n" + hexdump(src, srcIndex, len, si));
+			logger.log(level, si + "-" + (si + len - 1) + "\n" + hexdump(src, srcIndex, len, si));
 			length -= len;
 			srcIndex += len;
 			si += len;
 		}
-		
+
 	}
 
 	public static String hexdump(byte[] src) {
@@ -43,7 +43,7 @@ public class Loggers {
 	public static String hexdump(byte[] src, int srcIndex, int length) {
 		return hexdump(src, srcIndex, length, 0);
 	}
-	
+
 	private static String hexdump(byte[] src, int srcIndex, int length, int siOffset) {
 		if (length == 0) {
 			return "";
@@ -58,14 +58,14 @@ public class Loggers {
 		int ci = 0;
 
 		boolean first = true;
-		
+
 		do {
 			if (!first) {
 				NL.getChars(0, NL_LENGTH, c, ci);
 				ci += NL_LENGTH;
 			}
 			first = false;
-			
+
 			toHexChars(si + siOffset, c, ci, 5);
 			ci += 5;
 			c[ci++] = ':';
@@ -93,7 +93,7 @@ public class Loggers {
 			System.arraycopy(d, 0, c, ci, 16);
 			ci += 16;
 			c[ci++] = '|';
-			
+
 		} while (si < length);
 
 		return String.valueOf(c);

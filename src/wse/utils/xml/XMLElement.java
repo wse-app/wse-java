@@ -65,6 +65,7 @@ public class XMLElement extends XMLNode implements IElement {
 	public byte[] getRawValue() {
 		return value;
 	}
+
 	public XMLElement setValue(String value) {
 		return setValue(value, false);
 	}
@@ -486,7 +487,6 @@ public class XMLElement extends XMLNode implements IElement {
 		}
 	}
 
-
 	public static XMLElement parseNode(Node node) {
 		if (node.getNodeType() != Node.ELEMENT_NODE)
 			throw new IllegalStateException(
@@ -525,7 +525,7 @@ public class XMLElement extends XMLNode implements IElement {
 	public Iterable<XMLElement> treeIterable() {
 		return XMLHierarchyIterator.iterable(this);
 	}
-	
+
 	//
 	// IElement compatible
 	//
@@ -632,9 +632,8 @@ public class XMLElement extends XMLNode implements IElement {
 	@Override
 	public void setChild(String key, String namespace, IElement child) {
 		if (!(child instanceof XMLElement))
-			throw new XMLException(
-					String.format("Tried to add invalid child element type '%s', expected '%s'",
-							child.getClass().getName(), XMLElement.class.getName()));
+			throw new XMLException(String.format("Tried to add invalid child element type '%s', expected '%s'",
+					child.getClass().getName(), XMLElement.class.getName()));
 
 		XMLElement xmlChild = (XMLElement) child;
 		xmlChild.setName(key);

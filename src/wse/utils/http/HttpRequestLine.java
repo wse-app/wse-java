@@ -10,41 +10,39 @@ public class HttpRequestLine extends HttpDescriptionLine {
 	public HttpRequestLine(HttpRequestLine copy) {
 		if (copy == null)
 			throw new NullPointerException("Can't copy null object");
-		
+
 		this.method = copy.method;
 		this.uri = new HttpURI(copy.uri);
 	}
-	
+
 	public static HttpRequestLine fromString(String requestLine) {
-		
+
 		if (requestLine == null)
 			return null;
 
 		String[] parts = requestLine.split(" ");
 		if (parts == null || parts.length != 3)
 			return null;
-		
+
 		HttpMethod method = HttpMethod.getMethodStrict(parts[0]);
 		if (method == null)
 			throw new HttpException("Invalid Method: " + parts[0], 400);
-		
-		
+
 		HttpURI uri = HttpURI.fromURI(parts[1]);
 		if (uri == null)
 			throw new HttpException("Invalid URI: " + parts[1], 400);
-		
 
 		return new HttpRequestLine(method, uri, parts[2].trim());
 	}
 
 	public HttpRequestLine(HttpMethod method, HttpURI uri) {
 		this(method, uri, HttpDescriptionLine.HTTP11);
-		
+
 	}
 
 	public HttpRequestLine(HttpMethod method, HttpURI uri, String httpVersion) {
 		super(httpVersion);
-		
+
 		if (method == null)
 			throw new IllegalArgumentException("Method can't be null");
 		if (uri == null)
@@ -52,7 +50,7 @@ public class HttpRequestLine extends HttpDescriptionLine {
 
 		setMethod(method);
 		setUri(uri);
-		
+
 	}
 
 	public HttpMethod getMethod() {
@@ -75,8 +73,6 @@ public class HttpRequestLine extends HttpDescriptionLine {
 		setUri(HttpURI.fromURI(uri));
 	}
 
-	
-	
 	public void prettyPrint(StringGatherer builder, int level) {
 		builder.add(method.toString());
 		builder.add(" ");
@@ -89,7 +85,6 @@ public class HttpRequestLine extends HttpDescriptionLine {
 		return method.length() + uri.length() + httpVersion.length() + 2;
 	}
 
-	
 	public byte[] toByteArray() {
 		byte[] b = new byte[length()];
 		write(b, 0);

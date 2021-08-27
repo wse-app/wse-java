@@ -8,15 +8,14 @@ public class JSONException extends WseException {
 	public JSONException(HasRowColumn pos, String message) {
 		this(pos.getRow(), pos.getColumn(), message);
 	}
-	
+
 	public JSONException(int row, int column, String message) {
 		this(row, column, message, null);
 	}
-	
+
 	public JSONException(int row, int column, String message, Throwable t) {
 		this(String.format("%d;%d; %s", row, column, message), t);
 	}
-
 
 	public JSONException(String message, Throwable cause) {
 		super(message, cause);

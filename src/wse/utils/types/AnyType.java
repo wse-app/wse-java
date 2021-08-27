@@ -6,5 +6,5 @@ package wse.utils.types;
  * @author WSE
  */
 public interface AnyType {
-	
+
 }

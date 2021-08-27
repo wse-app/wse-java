@@ -30,7 +30,7 @@ public class DecryptingInputStream extends InputStream {
 		if (bulkSize % blockSize != 0)
 			throw new IllegalArgumentException(
 					"Invalid bulkSize: " + bulkSize + ", must be multiple of blockSize: " + blockSize);
-		
+
 		cipher = SHttp.getCipher(key, Cipher.DECRYPT_MODE);
 
 		this.readFrom = readFrom;

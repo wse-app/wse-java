@@ -39,7 +39,7 @@ public class LayeredOutputStream extends WseOutputStream {
 			stream.setTarget(writeTo);
 		} else {
 			stream.setTarget(first);
-			first = stream;			
+			first = stream;
 		}
 
 		return this;
@@ -72,11 +72,11 @@ public class LayeredOutputStream extends WseOutputStream {
 	public void record(Logger log, Level level, String title) {
 		record(log, level, title, false);
 	}
-	
+
 	public void record(Logger log, Level level, String title, boolean hex) {
 		this.then(new RecordingOutputStream(log, level, title, hex));
 	}
-	
+
 	public void sHttpEncrypt(SKey skey) {
 		then(new RIMOutputStream(skey.getBlockSize(), skey.getInjectionSize()));
 		then(new EncryptingOutputStream(skey, skey.getBlockSize(), skey.getBlockSize() * 512));

@@ -97,7 +97,7 @@ public class SuffixedInputStream extends BufferedInputStream {
 		}
 
 		if (found) {
-			
+
 			if (before_skip > 0) {
 				int leftInCurrent = Math.min(available, bufferSize - ptr);
 				int maxWrite = Math.min(leftInCurrent, before_skip);
@@ -116,7 +116,7 @@ public class SuffixedInputStream extends BufferedInputStream {
 //					System.out.println("###### Skipping with " + before_skip + " left");
 					available -= maxWrite;
 //					if (before_skip == 0)
-						justSkipped = true;
+					justSkipped = true;
 					return maxWrite;
 				}
 
@@ -158,12 +158,12 @@ public class SuffixedInputStream extends BufferedInputStream {
 	protected void fill() throws IOException {
 		int prev = this.available;
 		super.fill();
-		
+
 		if (this.available - prev != 0) {
 //			System.out.println("Data: " + this.getData());
 		}
 //		System.err.println("Filled: " + (this.available - prev) + " at " + prev + ", " + this.available);			
-		
+
 		int found = find(suffix);
 		if (found >= 0) {
 			this.found = true;

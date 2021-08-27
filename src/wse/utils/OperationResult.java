@@ -1,7 +1,7 @@
 package wse.utils;
 
 public class OperationResult<O extends ComplexType> {
-	
+
 	private O result;
 	private Throwable cause;
 

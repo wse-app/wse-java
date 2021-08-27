@@ -15,6 +15,6 @@ public interface IsInputStream {
 	int available() throws IOException;
 
 	void close() throws IOException;
-	
+
 	InputStream asInputStream();
 }

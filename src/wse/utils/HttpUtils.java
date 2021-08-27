@@ -28,7 +28,6 @@ public final class HttpUtils extends HttpCodes {
 
 	public static final String AUTHORIZATION = "Authorization";
 	public static final String SOAP_ACTION = "SOAPAction";
-	
 
 	public static void sendReceive(final HttpCall caller, final ComplexType requestMessage,
 			final ComplexType responseMessage) {
@@ -115,7 +114,7 @@ public final class HttpUtils extends HttpCodes {
 	/** Never returns null */
 	public static HttpResult read(IOConnection connection, boolean modifyContent) throws IOException {
 		Objects.requireNonNull(connection, "connection == null");
-		
+
 		InputStream input = connection.getInputStream();
 		Objects.requireNonNull(input, "connection inputstream == null");
 

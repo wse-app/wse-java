@@ -27,7 +27,7 @@ public abstract class ServiceReceiver implements HttpCallTreatment {
 	private Restrictions restrictions;
 
 	private final Set<String> banned;
-	
+
 	protected final static Logger log = WSE.getLogger();
 
 	public ServiceReceiver(ServiceManager manager, int port, Restrictions restrictions) {
@@ -42,25 +42,25 @@ public abstract class ServiceReceiver implements HttpCallTreatment {
 		initSocket();
 
 		SocketAcceptor acceptor = getSocketAcceptor();
-		
+
 		this.listenerThread = new Thread(acceptor, getProtocol() + ":" + this.port);
 		this.listenerThread.start();
-		
+
 		log.info(getProtocol() + " listener started on " + getServerSocket().getInetAddress().toString() + ":" + port);
 	}
 
 	protected abstract void initSocket() throws IOException;
-	protected SocketAcceptor getSocketAcceptor()
-	{
+
+	protected SocketAcceptor getSocketAcceptor() {
 		if (this.acceptor == null)
-			this.acceptor =  new SocketAcceptor(this, getServerSocket());		
+			this.acceptor = new SocketAcceptor(this, getServerSocket());
 		return this.acceptor;
 	}
-	protected Runnable getSocketHandler(Socket socket)
-	{
+
+	protected Runnable getSocketHandler(Socket socket) {
 		return new SocketHandler(socket, getServerSocket(), this);
 	}
-	
+
 	public abstract String getProtocol();
 
 	public void close() throws IOException {
@@ -76,15 +76,14 @@ public abstract class ServiceReceiver implements HttpCallTreatment {
 			this.restrictions = new Restrictions();
 		return this.restrictions;
 	}
-	
-	protected static ServerSocket makeSocket(int port, Restrictions r, ServerSocketFactory factory) throws UnknownHostException, IOException
-	{
+
+	protected static ServerSocket makeSocket(int port, Restrictions r, ServerSocketFactory factory)
+			throws UnknownHostException, IOException {
 		ServerSocket socket = factory.createServerSocket();
-		
+
 		socket.setReuseAddress(true);
-		
-		switch(r.getAcceptPolicy())
-		{
+
+		switch (r.getAcceptPolicy()) {
 		case LOCAL:
 			socket.bind(new InetSocketAddress(InetAddress.getByName("0.0.0.0"), port), r.getBacklog());
 			break;
@@ -98,7 +97,7 @@ public abstract class ServiceReceiver implements HttpCallTreatment {
 			socket.bind(new InetSocketAddress(port), r.getBacklog());
 			break;
 		}
-		
+
 		return socket;
 	}
 
@@ -130,7 +129,7 @@ public abstract class ServiceReceiver implements HttpCallTreatment {
 		return this.banned.contains(host);
 	}
 
-	public void treatCall(HttpServletRequest request, HttpServletResponse response)  throws IOException{
+	public void treatCall(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		manager.treatCall(request, response);
 	}
 }

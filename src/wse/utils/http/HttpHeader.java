@@ -103,9 +103,9 @@ public class HttpHeader extends HttpAttributeList implements StreamWriter {
 	/**
 	 * Get all query parameter names as an immutable set
 	 * 
-	 * @return If this is a request: an immutable set containing the query parameter names, or empty set
-	 *         if there are no parameters
-	 *         If this is a response: an empty set is returned
+	 * @return If this is a request: an immutable set containing the query parameter
+	 *         names, or empty set if there are no parameters If this is a response:
+	 *         an empty set is returned
 	 */
 	public Set<String> getQueryNames() {
 		if (this.isRequest())
@@ -249,5 +249,4 @@ public class HttpHeader extends HttpAttributeList implements StreamWriter {
 		return descLine.isResponse();
 	}
 
-	
 }
