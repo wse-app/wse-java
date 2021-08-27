@@ -6,7 +6,7 @@ import java.util.logging.Level;
 
 import wse.server.servlet.HttpServletRequest;
 import wse.server.servlet.HttpServletResponse;
-import wse.server.shttp.SHttpSessionStore;
+import wse.server.shttp.SHttpServerSessionStore;
 import wse.utils.HttpCodes;
 import wse.utils.HttpResult;
 import wse.utils.MimeType;
@@ -30,17 +30,17 @@ import wse.utils.writable.StreamCatcher;
  */
 public class ServiceReceiverSHttp extends ServiceReceiverHttp {
 
-	private SHttpSessionStore storeRef;
+	private SHttpServerSessionStore storeRef;
 
 	public ServiceReceiverSHttp(ServiceManager manager, int port, Restrictions restrictions) {
 		super(manager, port, restrictions);
 	}
 
-	public void setSHttpSessionStore(SHttpSessionStore store) {
+	public void setSHttpSessionStore(SHttpServerSessionStore store) {
 		this.storeRef = store;
 	}
 
-	public SHttpSessionStore getSHttpSessionStore() {
+	public SHttpServerSessionStore getSHttpSessionStore() {
 		return this.storeRef;
 	}
 

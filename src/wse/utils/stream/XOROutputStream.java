@@ -27,7 +27,7 @@ public class XOROutputStream extends WseOutputStream {
 
 	@Override
 	public void write(int b) throws IOException {
-		super.write(b ^ key[pointer % 4]);
+		super.write(b ^ key[pointer % key.length]);
 		pointer++;
 	}
 

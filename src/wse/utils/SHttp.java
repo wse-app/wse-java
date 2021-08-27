@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,7 +17,6 @@ import javax.crypto.spec.SecretKeySpec;
 import wse.WSE;
 import wse.utils.exception.SHttpDecryptionException;
 import wse.utils.exception.SHttpEncryptionException;
-import wse.utils.exception.SHttpException;
 import wse.utils.http.HttpHeader;
 import wse.utils.http.HttpMethod;
 import wse.utils.http.HttpRequestLine;
@@ -37,7 +35,6 @@ public final class SHttp {
 	public static final String INIT_PATH = "/InitShttpSession";
 	public static int[] SUPPORTED_KEY_LENGTHS = new int[] { 128 };
 	public static final String KEY_NAME_ATTRIBUTE = "Prearranged-Key-Info";
-	private static Random random = new Random();
 
 	private static final Logger log = WSE.getLogger();
 
@@ -51,21 +48,10 @@ public final class SHttp {
 			return cipher;
 
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-			throw new SHttpEncryptionException("Encryption failed: " + e.getMessage(), e);
+			throw new SHttpEncryptionException("Failed to encrypt: " + e.getMessage(), e);
 		} catch (InvalidKeyException e) {
 			throw new SHttpEncryptionException("Failed to encrypt: Invalid encryption key: " + e.getMessage(), e);
 		}
-	}
-
-	public static byte[] genByteArray(int bitLength) {
-		if (bitLength % 8 != 0)
-			throw new SHttpException("Illegal key size: " + bitLength);
-
-		random.setSeed(System.nanoTime());
-
-		byte[] result = new byte[bitLength / 8];
-		random.nextBytes(result);
-		return result;
 	}
 
 	public static boolean keyLengthSupported(int bitLength) {

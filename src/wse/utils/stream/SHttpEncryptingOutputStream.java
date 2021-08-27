@@ -15,7 +15,7 @@ import javax.crypto.spec.SecretKeySpec;
 import wse.utils.exception.SHttpEncryptionException;
 import wse.utils.shttp.SKey;
 
-public class EncryptingOutputStream extends WseOutputStream {
+public class SHttpEncryptingOutputStream extends WseOutputStream {
 
 	private int blockSize;
 
@@ -24,11 +24,11 @@ public class EncryptingOutputStream extends WseOutputStream {
 
 	private Cipher cipher;
 
-	public EncryptingOutputStream(SKey key, int blockSize, int bulkSize) {
+	public SHttpEncryptingOutputStream(SKey key, int blockSize, int bulkSize) {
 		this(null, key, blockSize, bulkSize);
 	}
 
-	public EncryptingOutputStream(OutputStream writeTo, SKey key, int blockSize, int bulkSize) {
+	public SHttpEncryptingOutputStream(OutputStream writeTo, SKey key, int blockSize, int bulkSize) {
 		super(writeTo);
 		this.writeTo = writeTo;
 		this.blockSize = blockSize;

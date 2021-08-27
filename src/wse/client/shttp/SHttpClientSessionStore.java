@@ -23,7 +23,7 @@ import wse.utils.http.StreamUtils;
 import wse.utils.shttp.SKey;
 import wse.utils.ssl.SSLAuth;
 
-public final class SHttpManager {
+public final class SHttpClientSessionStore {
 
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 	public static final int CIPHER_KEY_SIZE = 128;
@@ -33,7 +33,7 @@ public final class SHttpManager {
 	// 0x00, 0x00, 0x00, 0x00 };
 	// private static AlgorithmParameterSpec ivSpec = new IvParameterSpec(iv);
 
-	private SHttpManager() {
+	private SHttpClientSessionStore() {
 	}
 
 	private static HashMap<String, SKey> store = new HashMap<String, SKey>();

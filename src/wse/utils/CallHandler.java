@@ -13,7 +13,7 @@ import wse.WSE;
 import wse.client.IOConnection;
 import wse.client.PersistantConnectionStore;
 import wse.client.SocketConnection;
-import wse.client.shttp.SHttpManager;
+import wse.client.shttp.SHttpClientSessionStore;
 import wse.server.servlet.ws.WebSocketServlet;
 import wse.utils.exception.SecurityRetry;
 import wse.utils.exception.SoapFault;
@@ -248,7 +248,7 @@ public class CallHandler implements HasOptions {
 	private void shttpSetup() {
 
 		timer.begin("getSHttpKey()");
-		skey = SHttpManager.getKey(auth, host, port, LOG);
+		skey = SHttpClientSessionStore.getKey(auth, host, port, LOG);
 		timer.end();
 
 		if (skey == null) {
@@ -446,7 +446,7 @@ public class CallHandler implements HasOptions {
 		} else if (!line.isSuccessCode()) {
 
 			if (line.getStatusCode() == 420) {
-				SHttpManager.invalidate(skey);
+				SHttpClientSessionStore.invalidate(skey);
 				throw new SecurityRetry();
 			}
 

@@ -11,7 +11,7 @@ import javax.net.ssl.SSLServerSocketFactory;
 import wse.WSE;
 import wse.server.servlet.HttpServletRequest;
 import wse.server.servlet.HttpServletResponse;
-import wse.server.shttp.SHttpSessionStore;
+import wse.server.shttp.SHttpServerSessionStore;
 import wse.utils.HttpCodes;
 import wse.utils.SHttp;
 import wse.utils.http.HttpMethod;
@@ -26,7 +26,7 @@ public class ServiceReceiverHttps extends ServiceReceiver {
 	private boolean acceptHttps = true;
 	private boolean acceptShttp = false;
 
-	private SHttpSessionStore store;
+	private SHttpServerSessionStore store;
 
 	private Random random = new Random();
 	private List<Integer> shttpRedirect = new ArrayList<>();
@@ -76,7 +76,7 @@ public class ServiceReceiverHttps extends ServiceReceiver {
 
 	public void setAcceptSHttp(boolean acceptSHttp) {
 		if (!this.acceptShttp && acceptSHttp && store == null) {
-			store = new SHttpSessionStore();
+			store = new SHttpServerSessionStore();
 		}
 		this.acceptShttp = acceptSHttp;
 	}
@@ -85,7 +85,7 @@ public class ServiceReceiverHttps extends ServiceReceiver {
 		shttpRedirect.add(port);
 	}
 
-	public SHttpSessionStore getSHttpSessionStore() {
+	public SHttpServerSessionStore getSHttpSessionStore() {
 		return store;
 	}
 
@@ -161,8 +161,8 @@ public class ServiceReceiverHttps extends ServiceReceiver {
 			return;
 		}
 
-		SKey key = SHttpSessionStore.generateKey(keyLen);
-		store.store(key);
+		SKey key = SHttpServerSessionStore.generateKey(keyLen);
+		store.storeKey(key);
 
 		int redirectPort = getRandomSHttpRedirectPort();
 

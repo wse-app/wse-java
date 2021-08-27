@@ -79,7 +79,7 @@ public class LayeredOutputStream extends WseOutputStream {
 
 	public void sHttpEncrypt(SKey skey) {
 		then(new RIMOutputStream(skey.getBlockSize(), skey.getInjectionSize()));
-		then(new EncryptingOutputStream(skey, skey.getBlockSize(), skey.getBlockSize() * 512));
+		then(new SHttpEncryptingOutputStream(skey, skey.getBlockSize(), skey.getBlockSize() * 512));
 	}
 
 	@Override

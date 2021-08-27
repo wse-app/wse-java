@@ -12,7 +12,7 @@ import wse.utils.SHttp;
 import wse.utils.exception.SHttpDecryptionException;
 import wse.utils.shttp.SKey;
 
-public class DecryptingInputStream extends InputStream {
+public class SHttpDecryptingInputStream extends InputStream {
 
 	private InputStream readFrom;
 	private int blockSize;
@@ -26,7 +26,7 @@ public class DecryptingInputStream extends InputStream {
 
 	private boolean reached_end = false;
 
-	public DecryptingInputStream(InputStream readFrom, SKey key, int blockSize, int bulkSize) {
+	public SHttpDecryptingInputStream(InputStream readFrom, SKey key, int blockSize, int bulkSize) {
 		if (bulkSize % blockSize != 0)
 			throw new IllegalArgumentException(
 					"Invalid bulkSize: " + bulkSize + ", must be multiple of blockSize: " + blockSize);

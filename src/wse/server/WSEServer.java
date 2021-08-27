@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import wse.WSE;
-import wse.server.shttp.SHttpSessionStore;
+import wse.server.shttp.SHttpServerSessionStore;
 import wse.utils.exception.WseException;
 import wse.utils.ssl.SSLAuth;
 
@@ -132,7 +132,7 @@ public class WSEServer {
 		return listeners.get(port);
 	}
 
-	public SHttpSessionStore getSHttpSessionStore(int port) {
+	public SHttpServerSessionStore getSHttpSessionStore(int port) {
 		ServiceReceiver sr = getReceiverByPort(port);
 
 		if (sr instanceof ServiceReceiverHttps)
