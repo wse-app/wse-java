@@ -8,7 +8,7 @@ import wse.utils.ArrayUtils;
 import wse.utils.exception.WseParsingException;
 import wse.utils.types.AnySimpleType;
 
-public abstract class xsd_list<F, T extends AnySimpleType<F>> extends AnySimpleType<Collection<F>> {
+public abstract class xsd_list<F, T extends AnySimpleType<F>> extends AnySimpleType<List<F>> {
 
 	private Class<F> baseType;
 	private Class<T> simpleType;
@@ -19,7 +19,7 @@ public abstract class xsd_list<F, T extends AnySimpleType<F>> extends AnySimpleT
 	}
 
 	@Override
-	public String print(Collection<F> value) {
+	public String print(List<F> value) {
 		throw new UnsupportedOperationException();
 	}
 
