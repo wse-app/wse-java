@@ -59,7 +59,7 @@ public class XMLElement extends XMLNode implements IElement {
 	}
 
 	public String getValue() {
-		return new String(value, tree.getCharset());
+		return value == null ? null : new String(value, tree.getCharset());
 	}
 
 	public byte[] getRawValue() {

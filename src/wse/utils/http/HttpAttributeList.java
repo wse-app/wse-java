@@ -18,7 +18,6 @@ import java.util.Set;
 import wse.WSE;
 import wse.utils.ArrayUtils;
 import wse.utils.MimeType;
-import wse.utils.Protocol;
 import wse.utils.StringUtils;
 import wse.utils.Transformer;
 import wse.utils.writable.StreamWriter;
@@ -33,10 +32,10 @@ public class HttpAttributeList implements Map<String, String>, StreamWriter {
 	protected Map<String, HeaderAttribute> attributes = new LinkedHashMap<>();
 
 	public HttpAttributeList(HttpAttributeList copy) {
-		this();
-		for (HeaderAttribute a : copy.attributes.values()) {
-			this.setAttribute(a.name, a.value);
-		}
+		if (copy != null)
+			for (HeaderAttribute a : copy.attributes.values()) {
+				this.setAttribute(a.name, a.value);
+			}
 	}
 
 	public HttpAttributeList() {
@@ -265,14 +264,6 @@ public class HttpAttributeList implements Map<String, String>, StreamWriter {
 
 	public void setUserAgent(String userAgent) {
 		setAttribute(USER_AGENT, userAgent);
-	}
-
-	public void setHost(String host, int port, Protocol protocol) {
-		StringBuilder result = new StringBuilder(host);
-		Integer def = protocol == null ? null : protocol.getDefaultPort();
-		if ((def != null && def != port) || port != -1)
-			result.append(":").append(port);
-		setHost(result.toString());
 	}
 
 	public void setHost(String host) {

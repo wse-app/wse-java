@@ -7,6 +7,9 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import wse.utils.Supplier;
+import wse.utils.Suppliers;
+
 public class Options implements IOptions {
 
 	private Map<Option<?>, Object> options = new HashMap<>();
@@ -16,17 +19,21 @@ public class Options implements IOptions {
 	}
 
 	public <T> T get(Option<T> option) {
-		return get(option, null);
+		return get(option, (Supplier<T>) null);
+	}
+
+	public <T> T get(Option<T> option, T def) {
+		return get(option, Suppliers.ofInstance(def));
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T get(Option<T> option, T def) {
+	public <T> T get(Option<T> option, Supplier<T> def) {
 		if (option == null)
 			return null;
 		Object o = options.get(option);
 		if (o == null) {
 			if (def != null)
-				return def;
+				return def.get();
 			return option.getDefaultValue();
 		}
 		return (T) o;

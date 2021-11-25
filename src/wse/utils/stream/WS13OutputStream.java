@@ -40,7 +40,7 @@ public class WS13OutputStream extends BufferedOutputStream implements WebSocketC
 	}
 
 	private byte[] randomKey() {
-		byte[] res = new byte[] { 0, 0, 0, 0 };
+		byte[] res = new byte[4];
 		if (useRandomKey)
 			random.nextBytes(res);
 		return res;
@@ -48,7 +48,7 @@ public class WS13OutputStream extends BufferedOutputStream implements WebSocketC
 
 	private int opcode() {
 		if (frameCount != 0)
-			return 0;
+			return WebSocketCodes.OP_CONTINUE;
 		return opcode;
 	}
 

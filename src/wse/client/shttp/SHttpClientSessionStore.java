@@ -3,6 +3,7 @@ package wse.client.shttp;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,9 +25,6 @@ import wse.utils.shttp.SKey;
 import wse.utils.ssl.SSLAuth;
 
 public final class SHttpClientSessionStore {
-
-	private static final Charset UTF8 = Charset.forName("UTF-8");
-	public static final int CIPHER_KEY_SIZE = 128;
 
 	// private static byte[] iv =
 	// { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -111,7 +109,7 @@ public final class SHttpClientSessionStore {
 		// Create send file
 		HttpHeader header = new HttpHeader();
 
-		header.setDescriptionLine(SHttp.makeInitRequestLine(CIPHER_KEY_SIZE));
+		header.setDescriptionLine(SHttp.makeInitRequestLine());
 
 		header.setAttribute("From", WSE.getApplicationName());
 		header.setAttribute("User-Agent", "WebServiceEngine/" + WSE.VERSION);
@@ -140,18 +138,20 @@ public final class SHttpClientSessionStore {
 				OutputStream output = connection.getOutputStream();
 
 				// Write
-				header.writeToStream(output, UTF8);
+				header.writeToStream(output, StandardCharsets.UTF_8);
 				output.flush();
 
 				if (log.isLoggable(Level.FINE))
 					log.fine("SHttp Init Request:\n" + header.toString());
 
 				// Read
-				answer = HttpUtils.read(connection.getInputStream(), false);
+				answer = HttpUtils.read(connection.getInputStream(), true);
 
 			} catch (IOException e) {
 				throw new WseConnectionException(e);
 			}
+
+			System.out.println(answer.getContent());
 
 			if (log.isLoggable(Level.FINE))
 				log.fine("SHttp Init Response Header:\n" + answer.getHeader().toPrettyString());

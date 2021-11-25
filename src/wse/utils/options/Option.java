@@ -18,10 +18,14 @@ public class Option<T> {
 	}
 
 	public Option(Class<?> declaringClass, String name) {
-		this(declaringClass, name, null);
+		this(declaringClass, name, (T) null);
 	}
 
 	public Option(Class<?> declaringClass, String name, T defValue) {
+		this(declaringClass != null ? declaringClass.getName() + "." + name : name, defValue);
+	}
+
+	public Option(Class<?> declaringClass, String name, Supplier<T> defValue) {
 		this(declaringClass != null ? declaringClass.getName() + "." + name : name, defValue);
 	}
 

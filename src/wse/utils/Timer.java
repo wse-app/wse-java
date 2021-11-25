@@ -26,6 +26,7 @@ public class Timer {
 	}
 
 	public void begin(String operation, long shouldTake) {
+		logger.log(level, operation + " starting");
 		this.operation = operation;
 		this.shouldTake = shouldTake;
 

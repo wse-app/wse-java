@@ -30,11 +30,12 @@ import wse.utils.stream.WseInputStream;
 
 public final class SHttp {
 
-	public static boolean LOG_ENCRYPTED_DATA = false;
 	public static final String SECURE_HTTP14 = "Secure-HTTP/1.4";
 	public static final String INIT_PATH = "/InitShttpSession";
-	public static int[] SUPPORTED_KEY_LENGTHS = new int[] { 128 };
 	public static final String KEY_NAME_ATTRIBUTE = "Prearranged-Key-Info";
+
+	public static boolean LOG_ENCRYPTED_DATA = false;
+	public static int[] SUPPORTED_KEY_LENGTHS = new int[] { 128 };
 
 	private static final Logger log = WSE.getLogger();
 
@@ -146,8 +147,8 @@ public final class SHttp {
 		return r;
 	}
 
-	public static HttpRequestLine makeInitRequestLine(int keyLength) {
-		return new HttpRequestLine(HttpMethod.GET, HttpURI.fromURI(INIT_PATH + "?method=AES" + keyLength),
+	public static HttpRequestLine makeInitRequestLine() {
+		return new HttpRequestLine(HttpMethod.GET, HttpURI.fromURI(INIT_PATH + "?method=AES" + ArrayUtils.join(SUPPORTED_KEY_LENGTHS, ",")),
 				HttpRequestLine.HTTP11);
 	}
 }

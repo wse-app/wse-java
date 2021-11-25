@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,8 +21,6 @@ import wse.utils.websocket.WebSocket.Message;
 import wse.utils.writable.StreamWriter;
 
 public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes {
-
-	private static Charset UTF8 = Charset.forName("UTF-8");
 
 	private boolean isCloseRequestedByMe = false;
 	private boolean isCloseRequestedByOther = false;
@@ -99,7 +98,7 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 		synchronized (OUTPUT_LOCK) {
 			output.setOpCode(opcode);
 			if (writer != null) {
-				writer.writeToStream(output, UTF8);
+				writer.writeToStream(output, StandardCharsets.UTF_8);
 				if (!output.isReadyForNextMessage()) {
 					output.flush();
 				}

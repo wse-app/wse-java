@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,8 +14,9 @@ import wse.WSE;
 import wse.client.IOConnection;
 import wse.client.PersistantConnectionStore;
 import wse.client.SocketConnection;
+import wse.client.WrappedConnection;
 import wse.client.shttp.SHttpClientSessionStore;
-import wse.server.servlet.ws.WebSocketServlet;
+import wse.utils.exception.SHttpException;
 import wse.utils.exception.SecurityRetry;
 import wse.utils.exception.SoapFault;
 import wse.utils.exception.WseConnectionException;
@@ -22,7 +24,6 @@ import wse.utils.exception.WseException;
 import wse.utils.exception.WseHttpParsingException;
 import wse.utils.exception.WseHttpStatusCodeException;
 import wse.utils.exception.WseParsingException;
-import wse.utils.exception.SHttpException;
 import wse.utils.http.ContentType;
 import wse.utils.http.HttpAttributeList;
 import wse.utils.http.HttpBuilder;
@@ -42,6 +43,7 @@ import wse.utils.ssl.SSLAuth;
 import wse.utils.stream.LayeredOutputStream;
 import wse.utils.stream.LimitedInputStream;
 import wse.utils.stream.ProtectedOutputStream;
+import wse.utils.stream.RecordingOutputStream;
 import wse.utils.stream.WseInputStream;
 import wse.utils.writable.StreamCatcher;
 import wse.utils.writer.HttpWriter;
@@ -62,7 +64,6 @@ public class CallHandler implements HasOptions {
 			"ADDITIONAL_ATTRIBUTES");
 
 	private static final Logger LOG = WSE.getLogger();
-	private static final Charset UTF8 = Charset.forName("UTF-8");
 
 	private final Timer timer;
 
@@ -86,13 +87,12 @@ public class CallHandler implements HasOptions {
 	private IOConnection connection;
 
 	/** Response */
-	protected HttpResult responseHttp;
+	private HttpResult readResult;
 	private HttpResult responseSHttp;
+	protected HttpResult responseHttp;
+	private HttpResult callResult;
 
 	private OutputStream output;
-	private HttpResult result;
-
-	private String webSocketKey;
 
 	private boolean sendChunked = false;
 
@@ -124,10 +124,6 @@ public class CallHandler implements HasOptions {
 		this.writer = writer;
 	}
 
-	public void setWebSocketControlKey(String key) {
-		this.webSocketKey = key;
-	}
-
 	/**
 	 * Call the requested uri, response is never null, an exception is thrown
 	 * instead
@@ -148,9 +144,10 @@ public class CallHandler implements HasOptions {
 				}
 				break;
 			}
-
-			return new HttpResult(responseHttp.getHeader(),
-					new ConnectionClosingInputStream(responseHttp.getContent(), connection), false);
+			
+			
+			this.callResult = new HttpResult(responseHttp.getHeader(), new ConnectionClosingInputStream(responseHttp.getContent(), connection), false);
+			return this.callResult;
 		} catch (SoapFault sf) {
 			throw sf;
 		} catch (Exception e) {
@@ -195,8 +192,10 @@ public class CallHandler implements HasOptions {
 			usePort = port;
 		}
 
+		LOG.finest("Fetching connection");
 		this.connection = getConnection();
-
+		LOG.finest("Got connection: " + this.connection.getClass().getName());
+		
 		try {
 			if (this.connection.isOpen()) {
 				return;
@@ -233,7 +232,7 @@ public class CallHandler implements HasOptions {
 						return connection;
 					}
 
-					LOG.warning("Persistant connection available but it has leftover data in input");
+					LOG.finer("Persistant connection available but it has leftover data in input, ignored.");
 				} catch (Throwable ignore) {
 				}
 			}
@@ -244,10 +243,15 @@ public class CallHandler implements HasOptions {
 		socketConnection.setOptions(this);
 		return socketConnection;
 	}
-
+	
+	public IOConnection getWrappedConnection() throws IOException {
+		if (this.connection == null) return null;
+		return new WrappedConnection(this.connection, this.output);
+	}
+	
 	private void shttpSetup() {
 
-		timer.begin("getSHttpKey()");
+		timer.begin("getSHttpKey");
 		skey = SHttpClientSessionStore.getKey(auth, host, port, LOG);
 		timer.end();
 
@@ -263,6 +267,9 @@ public class CallHandler implements HasOptions {
 	private void write() {
 		timer.begin("Write");
 		try {
+			
+			boolean logContent = logContent(httpHeader.getContentType());
+			
 			if (this.protocol == Protocol.SHTTP) {
 
 				LayeredOutputStream output = new LayeredOutputStream(
@@ -277,7 +284,7 @@ public class CallHandler implements HasOptions {
 
 				buildHttpHeader(httpHeader = new HttpHeader());
 
-				httpHeader.writeToStream(shttpLayeredContent, UTF8);
+				httpHeader.writeToStream(shttpLayeredContent, StandardCharsets.UTF_8);
 
 				if (sendChunked)
 					shttpLayeredContent.addChunked(8192);
@@ -296,8 +303,8 @@ public class CallHandler implements HasOptions {
 				if (SHttp.LOG_ENCRYPTED_DATA)
 					output.record(LOG, Level.FINEST, "SHttp-Encrypted Request:", true);
 
-				shttpHeader.writeToStream(output, UTF8);
-				shttpContent.writeToStream(output, UTF8);
+				shttpHeader.writeToStream(output, StandardCharsets.UTF_8);
+				shttpContent.writeToStream(output, StandardCharsets.UTF_8);
 				output.flush();
 
 				this.output = output;
@@ -307,17 +314,25 @@ public class CallHandler implements HasOptions {
 				LayeredOutputStream output = new LayeredOutputStream(
 						new ProtectedOutputStream(connection.getOutputStream()));
 
-				output.record(LOG, Level.FINEST, "Request: ");
 				buildHttpHeader(httpHeader = new HttpHeader());
-				httpHeader.writeToStream(output, UTF8);
 
+				if (logContent) {					
+					output.record(LOG, Level.FINEST, "Request: ");
+					httpHeader.writeToStream(output, StandardCharsets.UTF_8);
+				} else {
+					RecordingOutputStream ros = new RecordingOutputStream(output, LOG, Level.FINEST, "Request Header: ");
+					httpHeader.writeToStream(ros, StandardCharsets.UTF_8);
+					ros.flush();
+				}
+				
+				
 				if (sendChunked)
 					output.addChunked(8192);
 
 				if (writer != null) {
 					Charset cs = httpHeader.getContentCharset();
 					if (cs == null)
-						cs = UTF8;
+						cs = StandardCharsets.UTF_8;
 					writer.writeToStream(output, cs);
 				}
 				output.flush();
@@ -338,19 +353,19 @@ public class CallHandler implements HasOptions {
 
 		// Never null
 		try {
-			this.result = HttpUtils.read(this.connection, true);
+			this.readResult = HttpUtils.read(this.connection, true);
 		} catch (IOException e) {
 			throw new WseParsingException(e.getMessage(), e);
 		}
 
 		timer.end();
 
-		if (protocol == Protocol.SHTTP && this.result.getHeader() != null) {
-			responseSHttp = this.result;
+		if (protocol == Protocol.SHTTP && this.readResult.getHeader() != null) {
+			responseSHttp = this.readResult;
 
 			LOG.finest("SHttp Response Header:\n" + responseSHttp.getHeader().toPrettyString());
 
-			if (SHttp.SECURE_HTTP14.equals(this.result.getHeader().getStatusLine().getHttpVersion())) {
+			if (SHttp.SECURE_HTTP14.equals(this.readResult.getHeader().getStatusLine().getHttpVersion())) {
 				InputStream httpMessage;
 				try {
 					httpMessage = SHttp.sHttpDecryptData(responseSHttp.getContent(), skey);
@@ -366,11 +381,11 @@ public class CallHandler implements HasOptions {
 					throw new SHttpException("Failed to read http: " + e.getMessage(), e);
 				}
 			} else {
-				LOG.fine("SHTTP response was not " + SHttp.SECURE_HTTP14);
+				LOG.fine("SHTTP response version was not " + SHttp.SECURE_HTTP14);
 				responseHttp = responseSHttp;
 			}
 		} else {
-			responseHttp = this.result;
+			responseHttp = this.readResult;
 		}
 
 		boolean persistant = persistant();
@@ -504,13 +519,22 @@ public class CallHandler implements HasOptions {
 		throw fault;
 	}
 
+	private boolean logContent(ContentType ct) {
+		if (ct == null) return false;
+		MimeType mt = ct.parseType();
+		if (mt == null) return false;
+		if (mt.isText() || mt == MimeType.application.xml || mt == MimeType.application.json)
+			return true;
+		return false;
+	}
+	
 	public void buildHttpHeader(HttpHeader header) {
 		header.setDescriptionLine(new HttpRequestLine(method, HttpURI.fromURI(uri)));
 
 		header.setFrom(WSE.getApplicationName());
 		header.setUserAgent("WebServiceEngine/" + WSE.VERSION);
 		header.setAcceptEncoding(TransferEncoding.IDENTITY);
-		header.setHost(host, port, protocol);
+		header.setHost(host);
 
 		if (uri.getUserInfo() != null) {
 
@@ -519,13 +543,6 @@ public class CallHandler implements HasOptions {
 			}
 			header.setAttribute(HttpUtils.AUTHORIZATION,
 					"Basic " + WSE.printBase64Binary(uri.getUserInfo().getBytes()));
-		}
-
-		if (this.protocol.isWebSocket()) {
-			header.setAttribute(WebSocketServlet.ATTRIB_UPGRADE, WebSocketServlet.UPGRADE_VALUE);
-			header.setAttribute(WebSocketServlet.ATTRIB_CONNECTION, WebSocketServlet.CONNECTION_VALUE);
-			header.setAttribute(WebSocketServlet.ATTRIB_KEY, this.webSocketKey);
-			header.setAttribute(WebSocketServlet.ATTRIB_VERSION, "13");
 		}
 
 		if (persistant()) {
@@ -544,7 +561,7 @@ public class CallHandler implements HasOptions {
 
 		Charset cs = header.getContentCharset();
 		if (cs == null)
-			cs = UTF8;
+			cs = StandardCharsets.UTF_8;
 
 		TransferEncoding enc = header.getTransferEncoding();
 		if (enc == null)
@@ -566,6 +583,9 @@ public class CallHandler implements HasOptions {
 		}
 	}
 
+	/**
+	 * Retrieves the OutputStream associated with this CallHandler. The output stream 
+	 * */
 	public OutputStream getOutput() {
 		return output;
 	}
@@ -611,6 +631,10 @@ public class CallHandler implements HasOptions {
 		return persistant && (protocol == Protocol.HTTPS || protocol == Protocol.HTTP);
 	}
 
+	public HttpResult getCallResult() {
+		return callResult;
+	}
+	
 	public class PersistantInputStream extends WseInputStream {
 
 		public PersistantInputStream(InputStream readFrom) {

@@ -44,6 +44,7 @@ public abstract class AnySimpleType<T> implements AnyType {
 			WSE.getLogger().warning("Multiple instances of " + getClass().getName()
 					+ " detected, use AnySimpleType.getInstance() instead");
 		}
+		restriction();
 	}
 
 	// lexical space
@@ -210,6 +211,7 @@ public abstract class AnySimpleType<T> implements AnyType {
 					any = true;
 					break;
 				}
+				System.out.println("'" + value + "' did not match " + pattern);
 			}
 			if (!any)
 				if (simpleType != null)
@@ -411,13 +413,13 @@ public abstract class AnySimpleType<T> implements AnyType {
 		if (pattern == null)
 			return;
 
-		List<String> step = patterns.get(0);
+		List<String> step = patterns.size() > 0 ? patterns.get(0) : null;
 		if (step == null) {
 			step = new LinkedList<>();
 			patterns.add(0, step);
 		}
 
-		pattern = pattern.replace((CharSequence) "\\c", "(:.-[a-zA-Z0-9])");
+		pattern = pattern.replace((CharSequence) "\\c", "[-._:A-Za-z0-9]");
 		step.add(pattern);
 
 	}

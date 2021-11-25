@@ -17,13 +17,16 @@ import java.util.logging.Logger;
 
 import wse.WSE;
 import wse.server.servlet.ws.PongListener;
+import wse.server.servlet.ws.WebSocketServlet;
 import wse.utils.CallHandler;
 import wse.utils.HttpResult;
 import wse.utils.StringUtils;
+import wse.utils.Suppliers;
 import wse.utils.event.ListenerRegistration;
 import wse.utils.exception.WebSocketException;
 import wse.utils.exception.WebSocketHandshakeException;
 import wse.utils.http.HeaderAttribute;
+import wse.utils.http.HttpAttributeList;
 import wse.utils.http.HttpMethod;
 import wse.utils.options.HasOptions;
 import wse.utils.options.IOptions;
@@ -141,7 +144,6 @@ public class WebSocket implements WebSocketCodes, HasOptions {
 		public boolean getRSV3() {
 			return ((reserved & 0b001) >> 0) == 1;
 		}
-
 	}
 
 	public static Frame readNextFrame(InputStream stream, boolean client) throws IOException {
@@ -305,10 +307,19 @@ public class WebSocket implements WebSocketCodes, HasOptions {
 
 	private void doHandshake() throws IOException {
 		this.handler = new CallHandler(HttpMethod.GET, this.uri, null, this.auth);
-		this.handler.setOptions(this);
 
 		String controlKey = controlKey();
-		this.handler.setWebSocketControlKey(controlKey);
+
+		HttpAttributeList additional = options.get(CallHandler.ADDITIONAL_ATTRIBUTES, Suppliers.ofClass(HttpAttributeList.class));
+
+		additional.setAttribute(WebSocketServlet.ATTRIB_UPGRADE, WebSocketServlet.UPGRADE_VALUE);
+		additional.setAttribute(WebSocketServlet.ATTRIB_CONNECTION, WebSocketServlet.CONNECTION_VALUE);
+		additional.setAttribute(WebSocketServlet.ATTRIB_KEY, controlKey);
+		additional.setAttribute(WebSocketServlet.ATTRIB_VERSION, "13");
+
+		options.set(CallHandler.ADDITIONAL_ATTRIBUTES, additional);
+		this.handler.setOptions(this);
+
 
 		String expectedResponseKey = getWebSocketAcceptFromKey(controlKey);
 

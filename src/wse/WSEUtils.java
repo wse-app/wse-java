@@ -55,7 +55,8 @@ class WSEUtils {
 		return send(HttpMethod.GET, uri, new HttpWriter() {
 			@Override
 			public void prepareHeader(HttpHeader header) {
-				writer.prepareHeader(header);
+				if (writer != null)
+					writer.prepareHeader(header);
 			}
 
 			@Override

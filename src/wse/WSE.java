@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import wse.utils.ClassUtils;
 import wse.utils.StringUtils;
 import wse.utils.exception.WseException;
+import wse.utils.log.AndroidLoggingHandler;
 import wse.utils.log.LogPrintStream;
 import wse.utils.log.WseConsoleHandler;
 import wse.utils.log.WseFileHandler;
@@ -26,14 +27,14 @@ public final class WSE extends WSEUtils {
 	public static final String LOG_FAMILY = "wse";
 	public static final String VERSION;
 
-	public static final boolean runningAndroid;
+	public static final boolean RUNNING_ANDROID;
 
 	static {
 		String val = System.getProperty("java.runtime.name");
 		if ("android runtime".equalsIgnoreCase(val)) {
-			runningAndroid = true;
+			RUNNING_ANDROID = true;
 		} else {
-			runningAndroid = false;
+			RUNNING_ANDROID = false;
 		}
 
 		String v = "?";
@@ -67,8 +68,19 @@ public final class WSE extends WSEUtils {
 	}
 
 	public static void initDefaultStandaloneLogging() {
+
 		Logger log = getLogger();
 		log.setUseParentHandlers(false);
+
+		if (RUNNING_ANDROID) {
+			try {
+				AndroidLoggingHandler.addToLogger(log);
+				return;
+			} catch (Throwable t) {
+				// ignore, TODO return?
+			}
+		}
+
 		WseConsoleHandler.addToLogger(log);
 	}
 

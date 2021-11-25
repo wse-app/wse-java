@@ -79,7 +79,7 @@ public class WseFileHandler extends WseStreamHandler {
 			current.setWritable(true, false);
 			setOutputStream(new PrintStream(new FileOutputStream(current, true)));
 		} catch (SecurityException | FileNotFoundException e) {
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 	}
 

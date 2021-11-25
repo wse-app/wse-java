@@ -3,6 +3,7 @@ package wse.server.servlet;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 
 import wse.WSE;
@@ -17,8 +18,6 @@ import wse.utils.stream.IdentityOutputStream;
 import wse.utils.stream.WseOutputStream;
 
 public final class HttpServletResponse extends WseOutputStream {
-
-	private static final Charset UTF8 = Charset.forName("UTF-8");
 
 	private static final Logger log = WSE.getLogger();
 	private final HttpHeader header;
@@ -71,7 +70,7 @@ public final class HttpServletResponse extends WseOutputStream {
 
 		// order important
 		headerWritten = true;
-		header.writeToStream(this, UTF8);
+		header.writeToStream(this, StandardCharsets.UTF_8);
 	}
 
 	public boolean isHeaderWritten() {

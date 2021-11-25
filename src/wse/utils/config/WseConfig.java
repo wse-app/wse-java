@@ -160,6 +160,7 @@ public class WseConfig extends Config {
 		String defaultPath = config.getValue("DefaultPath", NS_WSE_PUBLICFOLDER);
 		boolean allowRead = config.getBool("AllowRead", NS_WSE_PUBLICFOLDER, true);
 		boolean allowWrite = config.getBool("AllowWrite", NS_WSE_PUBLICFOLDER, false);
+		boolean allowCors = config.getBool("AllowCORS", NS_WSE_PUBLICFOLDER, true);
 
 		if (docRoots == null || docRoots.size() == 0) {
 			return false;
@@ -174,6 +175,7 @@ public class WseConfig extends Config {
 		}
 
 		PublicFolderServlet servlet = new PublicFolderServlet(files.toArray(new File[0]));
+		servlet.setCORSAllowAll(allowCors);
 
 		servlet.setDefaultPath(defaultPath);
 

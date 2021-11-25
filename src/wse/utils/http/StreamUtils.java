@@ -3,6 +3,7 @@ package wse.utils.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
 
 import wse.utils.LinkedByteArray;
@@ -86,12 +87,19 @@ public class StreamUtils {
 		byte[] buff = new byte[32768];
 		int p = 0;
 		int a;
-//		while ((a = stream.read(buff, p, buff.length - p)) != -1) {}
+
 		while (true) {
-			a = stream.read(buff, p, buff.length - p);
-//			log.finest("read() " + a);
+			try {
+				a = stream.read(buff, p, buff.length - p);
+			} catch (SocketTimeoutException e) {
+				if (p == 0)
+					throw e;
+				break;
+			}
+
 			if (a == -1)
 				break;
+
 			p += a;
 			if (p >= buff.length) {
 				arr.append(buff);
