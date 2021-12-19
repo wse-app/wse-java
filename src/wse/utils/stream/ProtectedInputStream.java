@@ -5,8 +5,8 @@ import java.io.InputStream;
 
 public class ProtectedInputStream extends WseInputStream {
 
-	public ProtectedInputStream(InputStream writeTo) {
-		super(writeTo);
+	public ProtectedInputStream(InputStream readFrom) {
+		super(readFrom);
 	}
 
 	@Override

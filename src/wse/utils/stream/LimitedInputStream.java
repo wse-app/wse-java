@@ -44,7 +44,11 @@ public class LimitedInputStream extends WseInputStream {
 
 	@Override
 	public int available() throws IOException {
-		return (int) Math.min(limit - counter, readFrom.available());
+		long left = limit - counter;
+		if (left <= 0) {
+			return 0;
+		}
+		return (int) Math.min(left, readFrom.available());
 	}
 
 	@Override

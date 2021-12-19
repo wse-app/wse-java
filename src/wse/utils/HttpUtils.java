@@ -59,26 +59,22 @@ public final class HttpUtils extends HttpCodes {
 					xml = xml.getChild("Fault", xml.getNamespaceURI());
 				if (xml == null)
 					throw e;
-				SoapFault sf = new SoapFault(xml);
-				throw sf;
+				throw new SoapFault(xml);
 			}
+
+			log.info("HttpUtils.sendReceive() XML PARSING...");
 
 			if (result == null)
 				throw new WseHttpParsingException("Got null result");
 
 			XMLElement responseFile;
-
+			InputStream content = result.getContent();
 			try {
-				InputStream content = result.getContent();
 				responseFile = XMLUtils.parseSimple(content);
-				content.close();
-			} catch (Exception e) {
+				log.info("HttpUtils.sendReceive() XML PARSING DONE");
+			} catch (Throwable e) {
+				log.info("HttpUtils.sendReceive() XML PARSING FAILED");
 				throw new XMLException("Failed to parse xml: " + e.getMessage(), e);
-			} finally {
-				try {
-					result.getContent().close();
-				} catch (Exception e) {
-				}
 			}
 
 			if (responseFile == null) {

@@ -2,10 +2,14 @@ package wse.utils.stream;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import wse.WSE;
 
 public class CountingInputStream extends WseInputStream {
 
-//	private static final Logger log = WSE.getLogger();
+	private static final Logger LOG = WSE.getLogger();
 	private String name;
 	private long count;
 	private boolean done = false;
@@ -22,7 +26,7 @@ public class CountingInputStream extends WseInputStream {
 	@Override
 	public int read() throws IOException {
 		int a = super.read();
-//		log.log(Level.FINEST, name + " read() " + (a != -1 ? 1 : -1));
+		LOG.log(Level.FINEST, name + " read() " + (a != -1 ? 1 : -1));
 		if (a != -1) {
 			count += 1;
 		} else {
@@ -38,7 +42,7 @@ public class CountingInputStream extends WseInputStream {
 	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		int a = super.read(b, off, len);
-//		log.log(Level.FINEST, name + " read() " + a);
+		LOG.log(Level.FINEST, name + " read() " + a);
 		if (a != -1) {
 			count += a;
 		} else {

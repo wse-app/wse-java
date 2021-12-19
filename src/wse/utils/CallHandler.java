@@ -40,6 +40,7 @@ import wse.utils.options.Option;
 import wse.utils.options.Options;
 import wse.utils.shttp.SKey;
 import wse.utils.ssl.SSLAuth;
+import wse.utils.stream.CountingInputStream;
 import wse.utils.stream.LayeredOutputStream;
 import wse.utils.stream.LimitedInputStream;
 import wse.utils.stream.ProtectedOutputStream;
@@ -144,9 +145,9 @@ public class CallHandler implements HasOptions {
 				}
 				break;
 			}
-			
-			
-			this.callResult = new HttpResult(responseHttp.getHeader(), new ConnectionClosingInputStream(responseHttp.getContent(), connection), false);
+
+			this.callResult = new HttpResult(responseHttp.getHeader(),
+					new ConnectionClosingInputStream(responseHttp.getContent(), connection), false);
 			return this.callResult;
 		} catch (SoapFault sf) {
 			throw sf;
@@ -181,7 +182,6 @@ public class CallHandler implements HasOptions {
 			else
 				port = 80;
 		}
-
 	}
 
 	private void connect() {
@@ -195,7 +195,7 @@ public class CallHandler implements HasOptions {
 		LOG.finest("Fetching connection");
 		this.connection = getConnection();
 		LOG.finest("Got connection: " + this.connection.getClass().getName());
-		
+
 		try {
 			if (this.connection.isOpen()) {
 				return;
@@ -214,7 +214,6 @@ public class CallHandler implements HasOptions {
 	}
 
 	private IOConnection getConnection() {
-
 		IOConnection connection = getOptions().get(CallHandler.CONNECTION_OVERRIDE);
 		if (connection != null)
 			return connection;
@@ -243,12 +242,13 @@ public class CallHandler implements HasOptions {
 		socketConnection.setOptions(this);
 		return socketConnection;
 	}
-	
+
 	public IOConnection getWrappedConnection() throws IOException {
-		if (this.connection == null) return null;
+		if (this.connection == null)
+			return null;
 		return new WrappedConnection(this.connection, this.output);
 	}
-	
+
 	private void shttpSetup() {
 
 		timer.begin("getSHttpKey");
@@ -267,9 +267,10 @@ public class CallHandler implements HasOptions {
 	private void write() {
 		timer.begin("Write");
 		try {
-			
+
+			buildHttpHeader(httpHeader = new HttpHeader());
 			boolean logContent = logContent(httpHeader.getContentType());
-			
+
 			if (this.protocol == Protocol.SHTTP) {
 
 				LayeredOutputStream output = new LayeredOutputStream(
@@ -281,8 +282,6 @@ public class CallHandler implements HasOptions {
 
 				shttpLayeredContent.record(LOG, Level.FINEST, "Request:");
 				shttpLayeredContent.sHttpEncrypt(skey);
-
-				buildHttpHeader(httpHeader = new HttpHeader());
 
 				httpHeader.writeToStream(shttpLayeredContent, StandardCharsets.UTF_8);
 
@@ -314,18 +313,16 @@ public class CallHandler implements HasOptions {
 				LayeredOutputStream output = new LayeredOutputStream(
 						new ProtectedOutputStream(connection.getOutputStream()));
 
-				buildHttpHeader(httpHeader = new HttpHeader());
-
-				if (logContent) {					
+				if (logContent) {
 					output.record(LOG, Level.FINEST, "Request: ");
 					httpHeader.writeToStream(output, StandardCharsets.UTF_8);
 				} else {
-					RecordingOutputStream ros = new RecordingOutputStream(output, LOG, Level.FINEST, "Request Header: ");
+					RecordingOutputStream ros = new RecordingOutputStream(output, LOG, Level.FINEST,
+							"Request Header: ");
 					httpHeader.writeToStream(ros, StandardCharsets.UTF_8);
 					ros.flush();
 				}
-				
-				
+
 				if (sendChunked)
 					output.addChunked(8192);
 
@@ -353,7 +350,8 @@ public class CallHandler implements HasOptions {
 
 		// Never null
 		try {
-			this.readResult = HttpUtils.read(this.connection, true);
+			InputStream inputStream = this.connection.getInputStream();
+			this.readResult = HttpUtils.read(new CountingInputStream(inputStream), true);
 		} catch (IOException e) {
 			throw new WseParsingException(e.getMessage(), e);
 		}
@@ -434,6 +432,7 @@ public class CallHandler implements HasOptions {
 			return;
 		}
 
+		System.out.println("GOT CONTENT");
 		responseHttp.setContent(new PersistantInputStream(responseHttp.getContent()));
 	}
 
@@ -520,14 +519,16 @@ public class CallHandler implements HasOptions {
 	}
 
 	private boolean logContent(ContentType ct) {
-		if (ct == null) return false;
+		if (ct == null)
+			return false;
 		MimeType mt = ct.parseType();
-		if (mt == null) return false;
+		if (mt == null)
+			return false;
 		if (mt.isText() || mt == MimeType.application.xml || mt == MimeType.application.json)
 			return true;
 		return false;
 	}
-	
+
 	public void buildHttpHeader(HttpHeader header) {
 		header.setDescriptionLine(new HttpRequestLine(method, HttpURI.fromURI(uri)));
 
@@ -584,8 +585,9 @@ public class CallHandler implements HasOptions {
 	}
 
 	/**
-	 * Retrieves the OutputStream associated with this CallHandler. The output stream 
-	 * */
+	 * Retrieves the OutputStream associated with this CallHandler. The output
+	 * stream
+	 */
 	public OutputStream getOutput() {
 		return output;
 	}
@@ -634,7 +636,11 @@ public class CallHandler implements HasOptions {
 	public HttpResult getCallResult() {
 		return callResult;
 	}
-	
+
+	/**
+	 * Help class to store persistant connection on
+	 *
+	 */
 	public class PersistantInputStream extends WseInputStream {
 
 		public PersistantInputStream(InputStream readFrom) {
@@ -644,17 +650,21 @@ public class CallHandler implements HasOptions {
 		boolean stored = false;
 
 		private void store() throws IOException {
+			System.out.println("CallHandler.PersistantInputStream.store()");
 			if (stored)
 				return;
 			stored = true;
 
-			LOG.fine("Storing persistant connection for: " + protocol + "://" + host + ":" + port);
+			System.out.println("CLEANING INPUT");
 			StreamUtils.clean(readFrom);
+			LOG.fine("Storing persistant connection for: " + protocol + "://" + host + ":" + port);
 			PersistantConnectionStore.storeConnection(protocol, host, port, null, null, connection);
 		}
 
 		@Override
 		public void close() throws IOException {
+			System.out.println("CallHandler.PersistantInputStream.close()");
+			new Exception().printStackTrace(System.out);
 			store();
 		}
 

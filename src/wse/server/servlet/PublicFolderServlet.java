@@ -57,11 +57,11 @@ public class PublicFolderServlet extends AuthenticationServlet {
 			log.info("PublicFolderServlet: " + f);
 		}
 	}
-	
+
 	public void setCORSAllowAll(boolean allowAll) {
 		cors_allowall = allowAll;
 	}
-	
+
 	public boolean getCORSAllowAll() {
 		return cors_allowall;
 	}
@@ -151,7 +151,7 @@ public class PublicFolderServlet extends AuthenticationServlet {
 		if (getCORSAllowAll()) {
 			CORSAllowAll(response);
 		}
-		
+
 		String path = f.getAbsolutePath();
 		String extension = path.substring(path.lastIndexOf('.') + 1);
 

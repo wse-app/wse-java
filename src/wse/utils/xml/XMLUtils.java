@@ -38,6 +38,7 @@ import wse.utils.collections.Occurances;
 import wse.utils.exception.XMLException;
 import wse.utils.internal.IParser;
 import wse.utils.options.IOptions;
+import wse.utils.stream.ProtectedInputStream;
 import wse.utils.writable.StreamCatcher;
 import wse.utils.writable.StreamWriter;
 
@@ -109,10 +110,8 @@ public class XMLUtils {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
 		DocumentBuilder builder = factory.newDocumentBuilder();
-		Document doc = builder.parse(is);
-
+		Document doc = builder.parse(new ProtectedInputStream(is));
 		result = doc;
-
 		return result;
 	}
 

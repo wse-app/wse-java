@@ -1,10 +1,16 @@
 package wse.utils;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import wse.utils.exception.WseException;
 import wse.utils.exception.WseParsingException;
@@ -39,8 +45,105 @@ public abstract class ComplexType implements AnyType, Serializable {
 		return xml;
 	}
 
-	// Generated Code Utils
+	// Dart bridge
 
+	public Map<String, Object> toMap() {
+
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		Class<? extends ComplexType> clazz = getClass();
+		Field[] fields = clazz.getDeclaredFields();
+
+		for (Field f : fields) {
+			if (Modifier.isStatic(f.getModifiers()))
+				continue;
+			try {
+				Object value = f.get(this);
+				if (value == null)
+					continue;
+
+				if (List.class.isAssignableFrom(f.getType())) {
+					List<?> list = (List<?>) value;
+					List<Object> result = new LinkedList<>();
+
+					for (Object o : list) {
+						if (o == null)
+							continue;
+						if (o instanceof ComplexType) {
+							o = ((ComplexType) o).toMap();
+						}
+						result.add(o);
+					}
+					value = result;
+				} else if (ComplexType.class.isAssignableFrom(f.getType())) {
+					value = ((ComplexType) value).toMap();
+				}
+
+				map.put(f.getName(), value);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				continue;
+			}
+		}
+
+		return map;
+
+	}
+
+	@SuppressWarnings("unchecked")
+	public void fromMap(Map<String, Object> map) {
+		Class<? extends ComplexType> clazz = getClass();
+		Field[] fields = clazz.getDeclaredFields();
+
+		for (Field f : fields) {
+			if (Modifier.isStatic(f.getModifiers()))
+				continue;
+			try {
+
+				Object value = map.get(f.getName());
+				if (value == null) {
+					f.set(this, null);
+					continue;
+				}
+
+				if (List.class.isAssignableFrom(f.getType())) {
+
+					List<?> valueList = (List<?>) value;
+					List<Object> resultList = new LinkedList<>();
+
+					// Get generic type, i.e List<ComplexType> -> ComplexType
+					ParameterizedType type = (ParameterizedType) f.getGenericType();
+					Type genericType = type.getActualTypeArguments()[0];
+
+					if (genericType instanceof Class && ComplexType.class.isAssignableFrom((Class<?>) genericType)) {
+						Class<? extends ComplexType> typeClass = (Class<? extends ComplexType>) genericType;
+
+						for (Object o : valueList) {
+							ComplexType ctValue = typeClass.newInstance();
+
+							Map<String, Object> valueMap = (Map<String, Object>) o;
+							ctValue.fromMap(valueMap);
+							resultList.add(ctValue);
+						}
+					} else {
+						resultList.addAll(valueList);
+					}
+
+					value = resultList;
+
+				} else if (ComplexType.class.isAssignableFrom(f.getType())) {
+					ComplexType setValue = (ComplexType) f.getType().newInstance();
+					setValue.fromMap((Map<String, Object>) value);
+					value = setValue;
+				}
+
+				f.set(this, value);
+			} catch (IllegalArgumentException | IllegalAccessException | InstantiationException e) {
+				continue;
+			}
+		}
+	}
+
+	// Generated Code Utils
 	public static <T, F extends AnySimpleType<T>> T parse(String value, String name, Class<F> clazz, boolean mandatory,
 			String default_) {
 		AnySimpleType<T> simpleType = AnySimpleType.getInstance(clazz);

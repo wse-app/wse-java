@@ -13,11 +13,15 @@ public class WrappedConnection implements IOConnection {
 	public WrappedConnection(IOConnection wrapped, InputStream inOverride) {
 		this(wrapped, inOverride, null);
 	}
-	
+
 	public WrappedConnection(IOConnection wrapped, OutputStream outOverride) {
 		this(wrapped, null, outOverride);
 	}
-	
+
+	public WrappedConnection(InputStream inOverride, OutputStream outOverride) {
+		this(null, inOverride, outOverride);
+	}
+
 	public WrappedConnection(IOConnection wrapped, InputStream inOverride, OutputStream outOverride) {
 		this.wrapped = wrapped;
 		this.inOverride = inOverride;
@@ -26,7 +30,14 @@ public class WrappedConnection implements IOConnection {
 
 	@Override
 	public void close() throws IOException {
-		wrapped.close();
+		if (wrapped != null) {
+			wrapped.close();
+		} else {
+			if (inOverride != null)
+				inOverride.close();
+			if (outOverride != null)
+				outOverride.close();
+		}
 	}
 
 	@Override

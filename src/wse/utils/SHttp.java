@@ -148,7 +148,8 @@ public final class SHttp {
 	}
 
 	public static HttpRequestLine makeInitRequestLine() {
-		return new HttpRequestLine(HttpMethod.GET, HttpURI.fromURI(INIT_PATH + "?method=AES" + ArrayUtils.join(SUPPORTED_KEY_LENGTHS, ",")),
+		return new HttpRequestLine(HttpMethod.GET,
+				HttpURI.fromURI(INIT_PATH + "?method=AES" + ArrayUtils.join(SUPPORTED_KEY_LENGTHS, ",")),
 				HttpRequestLine.HTTP11);
 	}
 }
