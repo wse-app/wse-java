@@ -93,6 +93,9 @@ public class IniTokenizer implements HasRowColumn {
 	private void beginLine(IniSection section) throws IOException {
 
 		String key = beginString(key_value_separator);
+		if (key == null)
+			return;
+		
 		String value = beginString((char) 0);
 
 		switch (whitespace_rule) {
@@ -147,6 +150,8 @@ public class IniTokenizer implements HasRowColumn {
 			case 0:
 			case '\n':
 			case '\r':
+				if (sb.length() == 0) return null;
+				
 				if (end == 0)
 					return sb.toString();
 				throw this.syntaxError("Unterminated string");

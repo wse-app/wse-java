@@ -23,11 +23,11 @@ public class WseConfig extends Config {
 
 	private static final Logger log = WSE.getLogger();
 
-	private static final String NS_WSE = "WSE";
-	private static final String NS_WSE_HTTP = "WSE.Http";
-	private static final String NS_WSE_HTTPS = "WSE.Https";
-	private static final String NS_WSE_SHTTP = "WSE.SHttp";
-	private static final String NS_WSE_PUBLICFOLDER = "WSE.PublicFolder";
+	public static final String NS_WSE = "WSE";
+	public static final String NS_WSE_HTTP = "WSE.Http";
+	public static final String NS_WSE_HTTPS = "WSE.Https";
+	public static final String NS_WSE_SHTTP = "WSE.SHttp";
+	public static final String NS_WSE_PUBLICFOLDER = "WSE.PublicFolder";
 
 	/**
 	 * 

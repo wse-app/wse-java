@@ -3,6 +3,7 @@ package wse.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -12,6 +13,7 @@ import java.util.logging.Logger;
 
 import wse.WSE;
 import wse.client.IOConnection;
+import wse.client.PersistantConnection;
 import wse.client.PersistantConnectionStore;
 import wse.client.SocketConnection;
 import wse.client.WrappedConnection;
@@ -132,9 +134,15 @@ public class CallHandler implements HasOptions {
 	public HttpResult call() throws WseException {
 		try {
 			initialize();
-			for (int i = 0; i < 2; i++) {
+			for (int i = 0;; i++) {
 				connect();
-				write();
+				try {
+					write();
+				} catch (WseException we) {
+					if (we.getRootCause() instanceof SocketException)
+						if (connection instanceof PersistantConnection)
+							continue;
+				}
 				read();
 				try {
 					loadResponse();

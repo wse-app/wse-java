@@ -26,7 +26,6 @@ public class PersistantConnectionStore {
 
 			while (connections.size() > 0) {
 				PersistantConnection pc = connections.removeLast();
-
 				try {
 					if (pc.isValid())
 						return pc;

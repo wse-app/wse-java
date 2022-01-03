@@ -196,7 +196,6 @@ public class PublicFolderServlet extends AuthenticationServlet {
 
 	@Override
 	public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
 		{
 			// RFC 7231 page 28, Content-Range is ment for PATCH
 			if (request.getAttribute("Content-Range") != null) {
@@ -209,16 +208,19 @@ public class PublicFolderServlet extends AuthenticationServlet {
 			response.sendError(HttpCodes.FORBIDDEN);
 			return;
 		}
+		
 		File f;
 		if ((f = getValidDestination(request, response)) == null)
 			return;
 
-		if (!f.getParentFile().equals(public_folder)) {
+		File parent = f.getParentFile();
+		if (!parent.exists()) {
 			if (!f.getParentFile().mkdirs()) {
-				response.sendError(HttpCodes.FORBIDDEN, "Destination could not be created");
+				response.sendError(HttpCodes.FORBIDDEN);
 				return;
 			}
 		}
+
 		try (FileOutputStream writeTo = new FileOutputStream(f, false)) {
 			StreamUtils.write(request.getContent(), writeTo, 20000);
 		} catch (Exception e) {
@@ -273,7 +275,8 @@ public class PublicFolderServlet extends AuthenticationServlet {
 
 		File f = null;
 		for (File root : public_folder) {
-			File t = new File(root.getPath() + path);
+			
+			File t = new File(root, path).getCanonicalFile();
 
 			if (!t.exists() || !t.canRead() || t.isHidden() || !t.isFile())
 				continue;
@@ -307,8 +310,11 @@ public class PublicFolderServlet extends AuthenticationServlet {
 		return f;
 	}
 
-	public boolean ensureIsChildOf(File parent, File child, int maxLoops) {
+	public boolean ensureIsChildOf(File parent, File child, int maxLoops) throws IOException {
 
+		parent = parent.getCanonicalFile();
+		child = child.getCanonicalFile();
+		
 		for (int i = 0; i < maxLoops; i++) {
 			child = child.getParentFile();
 			if (child == null)
