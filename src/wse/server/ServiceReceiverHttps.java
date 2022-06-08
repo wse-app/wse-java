@@ -97,7 +97,6 @@ public class ServiceReceiverHttps extends ServiceReceiver {
 
 	@Override
 	public void treatCall(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
 		if (request.getMethod() == HttpMethod.GET && SHttp.INIT_PATH.equals(request.getRequestPath())) {
 
 			if (acceptShttp) {

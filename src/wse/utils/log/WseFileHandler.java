@@ -15,23 +15,31 @@ import wse.utils.exception.WseException;
 
 public class WseFileHandler extends WseStreamHandler {
 
-	private final File logDir;
-
 	private final static SimpleDateFormat SUBDIR_FORMAT = new SimpleDateFormat("yyyy-MM");
 	private final static SimpleDateFormat FILENAME_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+	private final long DAY_MILLIS = 60 * 60 * 24;
+	
+	private final File logDir;
 
 	private final File current;
 	private int lastDayOfYear = -1;
+	
+	private int daysKeep = -1;
 
 	public WseFileHandler(File logDir) throws SecurityException, FileNotFoundException {
-		this(logDir, new WseFormatter());
+		this(logDir, -1);
 	}
 
-	public WseFileHandler(File logDir, Formatter formatter) throws SecurityException, FileNotFoundException {
-		setFormatter(formatter);
-		lastDayOfYear = Calendar.getInstance().get(Calendar.DAY_OF_YEAR);
+	public WseFileHandler(File logDir, int daysKeep) throws SecurityException, FileNotFoundException {
+		this(logDir, daysKeep, new WseFormatter());
+	}
+	
+	public WseFileHandler(File logDir, int daysKeep, Formatter formatter) throws SecurityException, FileNotFoundException {
+		this.lastDayOfYear = Calendar.getInstance().get(Calendar.DAY_OF_YEAR);
 		this.logDir = logDir;
-		current = new File(logDir, "current.log");
+		this.daysKeep = daysKeep;
+		this.current = new File(logDir, "current.log");
+		setFormatter(formatter);
 		init();
 		setCurrentOutput();
 	}
@@ -86,6 +94,7 @@ public class WseFileHandler extends WseStreamHandler {
 	static long start = System.currentTimeMillis();
 
 	private void moveToHistory() throws SecurityException, FileNotFoundException {
+		cleanOld();
 		if (!current.exists())
 			return;
 		close();
@@ -93,6 +102,16 @@ public class WseFileHandler extends WseStreamHandler {
 		File moveTo = history(current.lastModified());
 		current.renameTo(moveTo);
 		setCurrentOutput();
+	}
+	
+	private void cleanOld() {
+		if (daysKeep <= 0)
+			return;
+		
+		File old = history(System.currentTimeMillis() - DAY_MILLIS * daysKeep);
+		if (old.exists()) {
+			old.delete();
+		}
 	}
 
 	private void ensureSubDir(long time) {

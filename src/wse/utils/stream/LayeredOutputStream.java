@@ -32,6 +32,11 @@ public class LayeredOutputStream extends WseOutputStream {
 		first.write(b, off, len);
 	}
 
+	@Override
+	public void disableOutputLogging() {
+		first.disableOutputLogging();
+	}
+
 	public LayeredOutputStream before(WseOutputStream stream) {
 		if (first == writeTo) {
 			first = stream;

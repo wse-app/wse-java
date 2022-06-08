@@ -87,15 +87,27 @@ public final class WSE extends WSEUtils {
 	public static void initFileLogging() throws SecurityException, FileNotFoundException {
 		initFileLogging(WSE.class);
 	}
+	
+	public static void initFileLogging(int daysKeep) throws SecurityException, FileNotFoundException {
+		initFileLogging(WSE.class, daysKeep);
+	}
 
 	public static void initFileLogging(Class<?> clazz) {
 		initFileLogging(new File(ClassUtils.getJarFile(clazz).getParentFile(), "logs"));
 	}
+	
+	public static void initFileLogging(Class<?> clazz, int daysKeep) {
+		initFileLogging(new File(ClassUtils.getJarFile(clazz).getParentFile(), "logs"), daysKeep);
+	}
 
 	public static void initFileLogging(File parentDirectory) {
+		initFileLogging(parentDirectory, -1);
+	}
+	
+	public static void initFileLogging(File parentDirectory, int daysKeep) {
 		Logger log = getLogger();
 		try {
-			log.addHandler(new WseFileHandler(parentDirectory));
+			log.addHandler(new WseFileHandler(parentDirectory, daysKeep));
 		} catch (SecurityException | FileNotFoundException e) {
 			throw new WseException("Failed to enable file logging: " + e.getMessage(), e);
 		}
