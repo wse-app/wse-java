@@ -80,10 +80,6 @@ public class WseConfig extends Config {
 		super(InternalFormat.parse(target, cs));
 	}
 
-	public void init() {
-
-	}
-
 	public void load(WSEServer server, File rootDirectory) {
 		load(server, rootDirectory, this);
 	}

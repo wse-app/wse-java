@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
-Ant-Version: Apache Ant 1.10.11
-Created-By: 12+33 (Oracle Corporation)
+Ant-Version: Apache Ant 1.10.12
+Created-By: 1.8.0_341-b10 (Oracle Corporation)
 Main-Class: server.PublicFolderServer
 Class-Path: .
 
