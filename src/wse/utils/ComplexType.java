@@ -143,6 +143,13 @@ public abstract class ComplexType implements AnyType, Serializable {
 		}
 	}
 
+	// toString
+	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + ": " + String.valueOf(toJSON());
+	}
+	
 	// Generated Code Utils
 	public static <T, F extends AnySimpleType<T>> T parse(String value, String name, Class<F> clazz, boolean mandatory,
 			String default_) {
