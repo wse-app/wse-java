@@ -8,14 +8,17 @@ import java.util.logging.Level;
 import wse.WSE;
 import wse.utils.SerializationWriter;
 import wse.utils.exception.WseException;
+import wse.utils.websocket.WebSocket;
 import wse.utils.websocket.WebSocketCodes;
 
 public class WS13OutputStream extends BufferedOutputStream implements WebSocketCodes {
+	
+	public static boolean LOG_HEX = true;
+	
 	Random random = new Random();
 
 	public WS13OutputStream(OutputStream writeTo, boolean masked) {
-		super(new RecordingOutputStream(writeTo, WSE.getLogger(), Level.FINEST, "WS13 out"), 8192, 14, 0);
-//		super(writeTo, 5, 14, 0);
+		super(new RecordingOutputStream(writeTo, WSE.getLogger(WebSocket.LOG_CHILD_NAME), Level.FINEST, "WS13 OUT", LOG_HEX), 8192, 14, 0);
 		forceBufferSize(true);
 		this.masked = masked;
 	}
@@ -83,35 +86,37 @@ public class WS13OutputStream extends BufferedOutputStream implements WebSocketC
 	private void sendFrame(Content content, boolean lastFrame) throws IOException {
 		byte[] data = content.data;
 		int offset = content.off;
-		int length = content.len;
+		int contentLength = content.len;
 
+		boolean hasMask = masked && contentLength > 0;
+		
 		if (offset < 14)
 			throw new WseException("Output buffer needs at least 14 bytes prefix");
 
-		byte payLen = (byte) ((length > 0xffff) ? 127 : ((length > 125) ? 126 : ((length >= 0) ? length : 0)));
+		byte lengthByte = (byte) ((contentLength > 0xffff) ? 127 : ((contentLength > 125) ? 126 : ((contentLength >= 0) ? contentLength : 0)));
 
-		int header_length = (2 + (masked ? 4 : 0) + ((payLen == 127) ? 8 : ((payLen == 126) ? 2 : 0)));
-		int hoff = offset - header_length;
+		int headerLength = 2 + (hasMask ? 4 : 0) + ((lengthByte == 127) ? 8 : ((lengthByte == 126) ? 2 : 0));
+		int headerOffset = offset - headerLength;
 
-		if (masked) {
+		if (hasMask) {
 			byte[] key = randomKey();
-			xor(data, offset, length, key);
+			xor(data, offset, contentLength, key);
 			data[offset - 4] = key[0];
 			data[offset - 3] = key[1];
 			data[offset - 2] = key[2];
 			data[offset - 1] = key[3];
 		}
 
-		data[hoff++] = (byte) (opcode() | (lastFrame ? (1 << 7) : 0));
-		data[hoff++] = (byte) (payLen | (masked ? (1 << 7) : 0));
+		data[headerOffset++] = (byte) (opcode() | (lastFrame ? (1 << 7) : 0));
+		data[headerOffset++] = (byte) (lengthByte | (hasMask ? (1 << 7) : 0));
 
-		if (payLen == 126) {
-			SerializationWriter.writeBytes(data, hoff, (short) length);
-		} else if (payLen == 127) {
-			SerializationWriter.writeBytes(data, hoff, (long) length);
+		if (lengthByte == 126) {
+			SerializationWriter.writeBytes(data, headerOffset, (short) contentLength);
+		} else if (lengthByte == 127) {
+			SerializationWriter.writeBytes(data, headerOffset, (long) contentLength);
 		}
 
-		writeTo.write(data, offset - header_length, length + header_length);
+		writeTo.write(data, offset - headerLength, contentLength + headerLength);
 		frameCount++;
 	}
 

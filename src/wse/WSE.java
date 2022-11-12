@@ -60,10 +60,14 @@ public final class WSE extends WSEUtils {
 	}
 
 	public static Logger getLogger(Class<?> clazz) {
+		if (clazz == null)
+			return getLogger();
 		return Logger.getLogger(clazz.getName());
 	}
 
 	public static Logger getLogger(String child) {
+		if (child == null)
+			return getLogger();
 		return Logger.getLogger(LOG_FAMILY + "." + child);
 	}
 
@@ -87,7 +91,7 @@ public final class WSE extends WSEUtils {
 	public static void initFileLogging() throws SecurityException, FileNotFoundException {
 		initFileLogging(WSE.class);
 	}
-	
+
 	public static void initFileLogging(int daysKeep) throws SecurityException, FileNotFoundException {
 		initFileLogging(WSE.class, daysKeep);
 	}
@@ -95,7 +99,7 @@ public final class WSE extends WSEUtils {
 	public static void initFileLogging(Class<?> clazz) {
 		initFileLogging(new File(ClassUtils.getJarFile(clazz).getParentFile(), "logs"));
 	}
-	
+
 	public static void initFileLogging(Class<?> clazz, int daysKeep) {
 		initFileLogging(new File(ClassUtils.getJarFile(clazz).getParentFile(), "logs"), daysKeep);
 	}
@@ -103,7 +107,7 @@ public final class WSE extends WSEUtils {
 	public static void initFileLogging(File parentDirectory) {
 		initFileLogging(parentDirectory, -1);
 	}
-	
+
 	public static void initFileLogging(File parentDirectory, int daysKeep) {
 		Logger log = getLogger();
 		try {

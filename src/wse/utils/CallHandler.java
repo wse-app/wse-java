@@ -8,6 +8,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -66,9 +67,11 @@ public class CallHandler implements HasOptions {
 	public static final Option<HttpAttributeList> ADDITIONAL_ATTRIBUTES = new Option<>(CallHandler.class,
 			"ADDITIONAL_ATTRIBUTES");
 
-	private static final Logger LOG = WSE.getLogger();
 
 	private final Timer timer;
+
+	/** Logging */
+	private Logger logger = WSE.getLogger();
 
 	/** Call Info */
 	private String host;
@@ -111,7 +114,12 @@ public class CallHandler implements HasOptions {
 		this.writer = writer;
 		this.auth = auth;
 
-		this.timer = new Timer(LOG, Level.FINER);
+		this.timer = new Timer(logger, Level.FINER);
+	}
+	
+	public void setLogger(Logger logger) {
+		this.logger = Objects.requireNonNull(logger);
+		this.timer.setLogger(logger);
 	}
 
 	public IOptions getOptions() {
@@ -166,15 +174,15 @@ public class CallHandler implements HasOptions {
 	}
 
 	private void initialize() {
-		LOG.fine("Target: " + String.valueOf(withHiddenPassword(uri)));
+		logger.fine("Target: " + String.valueOf(withHiddenPassword(uri)));
 
-		options.log(LOG, Level.FINER, "Options");
+		options.log(logger, Level.FINER, "Options");
 
 		protocol = Protocol.forName(uri.getScheme());
 		if (protocol == null) {
 			throw new WseException("Unknown protocol: " + uri.getScheme());
 		}
-		LOG.finer("Protocol: " + protocol);
+		logger.finer("Protocol: " + protocol);
 
 		host = uri.getHost();
 
@@ -200,9 +208,9 @@ public class CallHandler implements HasOptions {
 			usePort = port;
 		}
 
-		LOG.finest("Fetching connection");
+		logger.finest("Fetching connection");
 		this.connection = getConnection();
-		LOG.finest("Got connection: " + this.connection.getClass().getName());
+		logger.finest("Got connection: " + this.connection.getClass().getName());
 
 		try {
 			if (this.connection.isOpen()) {
@@ -216,7 +224,7 @@ public class CallHandler implements HasOptions {
 			connection.connect();
 			timer.end();
 		} catch (Exception e) {
-			LOG.severe("Failed to connect: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			logger.severe("Failed to connect: " + e.getClass().getSimpleName() + ": " + e.getMessage());
 			throw new WseConnectionException(e.getClass().getSimpleName() + ": " + e.getMessage(), e);
 		}
 	}
@@ -235,11 +243,11 @@ public class CallHandler implements HasOptions {
 				try {
 					InputStream input = connection.getInputStream();
 					if (input.available() == 0) {
-						LOG.fine("Using persistant connection");
+						logger.fine("Using persistant connection");
 						return connection;
 					}
 
-					LOG.finer("Persistant connection available but it has leftover data in input, ignored.");
+					logger.finer("Persistant connection available but it has leftover data in input, ignored.");
 				} catch (Throwable ignore) {
 				}
 			}
@@ -260,7 +268,7 @@ public class CallHandler implements HasOptions {
 	private void shttpSetup() {
 
 		timer.begin("getSHttpKey");
-		skey = SHttpClientSessionStore.getKey(auth, host, port, LOG);
+		skey = SHttpClientSessionStore.getKey(auth, host, port, logger);
 		timer.end();
 
 		if (skey == null) {
@@ -269,7 +277,7 @@ public class CallHandler implements HasOptions {
 
 		this.usePort = skey.getReachPort();
 
-		LOG.fine("New target: " + this.host + ":" + usePort);
+		logger.fine("New target: " + this.host + ":" + usePort);
 	}
 
 	private void write() {
@@ -288,7 +296,7 @@ public class CallHandler implements HasOptions {
 
 				LayeredOutputStream shttpLayeredContent = new LayeredOutputStream(shttpContent);
 
-				shttpLayeredContent.record(LOG, Level.FINEST, "Request:");
+				shttpLayeredContent.record(logger, Level.FINEST, "Request:");
 				shttpLayeredContent.sHttpEncrypt(skey);
 
 				httpHeader.writeToStream(shttpLayeredContent, StandardCharsets.UTF_8);
@@ -308,7 +316,7 @@ public class CallHandler implements HasOptions {
 				shttpHeader.setContentLength(shttpContent.getSize());
 
 				if (SHttp.LOG_ENCRYPTED_DATA)
-					output.record(LOG, Level.FINEST, "SHttp-Encrypted Request:", true);
+					output.record(logger, Level.FINEST, "SHttp-Encrypted Request:", true);
 
 				shttpHeader.writeToStream(output, StandardCharsets.UTF_8);
 				shttpContent.writeToStream(output, StandardCharsets.UTF_8);
@@ -322,10 +330,10 @@ public class CallHandler implements HasOptions {
 						new ProtectedOutputStream(connection.getOutputStream()));
 
 				if (logContent) {
-					output.record(LOG, Level.FINEST, "Request: ");
+					output.record(logger, Level.FINEST, "Request: ");
 					httpHeader.writeToStream(output, StandardCharsets.UTF_8);
 				} else {
-					RecordingOutputStream ros = new RecordingOutputStream(output, LOG, Level.FINEST,
+					RecordingOutputStream ros = new RecordingOutputStream(output, logger, Level.FINEST,
 							"Request Header: ");
 					httpHeader.writeToStream(ros, StandardCharsets.UTF_8);
 					ros.flush();
@@ -369,7 +377,7 @@ public class CallHandler implements HasOptions {
 		if (protocol == Protocol.SHTTP && this.readResult.getHeader() != null) {
 			responseSHttp = this.readResult;
 
-			LOG.finest("SHttp Response Header:\n" + responseSHttp.getHeader().toPrettyString());
+			logger.finest("SHttp Response Header:\n" + responseSHttp.getHeader().toPrettyString());
 
 			if (SHttp.SECURE_HTTP14.equals(this.readResult.getHeader().getStatusLine().getHttpVersion())) {
 				InputStream httpMessage;
@@ -378,7 +386,7 @@ public class CallHandler implements HasOptions {
 				} catch (Exception e) {
 					throw new SHttpException("Failed to decrypt data: " + e.getMessage(), e);
 				} finally {
-					LOG.finest("SHttp InputStream Image:\n" + String.valueOf(responseSHttp.getContent()));
+					logger.finest("SHttp InputStream Image:\n" + String.valueOf(responseSHttp.getContent()));
 				}
 
 				try {
@@ -387,7 +395,7 @@ public class CallHandler implements HasOptions {
 					throw new SHttpException("Failed to read http: " + e.getMessage(), e);
 				}
 			} else {
-				LOG.fine("SHTTP response version was not " + SHttp.SECURE_HTTP14);
+				logger.fine("SHTTP response version was not " + SHttp.SECURE_HTTP14);
 				responseHttp = responseSHttp;
 			}
 		} else {
@@ -404,18 +412,18 @@ public class CallHandler implements HasOptions {
 			}
 		}
 
-		if (LOG.isLoggable(Level.FINE)) {
+		if (logger.isLoggable(Level.FINE)) {
 			HttpHeader header = responseHttp.getHeader();
 			if (header != null) {
-				LOG.fine("Response Header:\n" + header.toPrettyString());
+				logger.fine("Response Header:\n" + header.toPrettyString());
 			} else {
-				LOG.fine("Response Header: null");
+				logger.fine("Response Header: null");
 			}
 		}
 
-		if (LOG.isLoggable(Level.FINEST)) {
+		if (logger.isLoggable(Level.FINEST)) {
 			if (!protocol.isWebSocket()) {
-				responseHttp.wrapLogger("Response: ", LOG, Level.FINEST);
+				responseHttp.wrapLogger("Response: ", logger, Level.FINEST);
 			}
 		}
 	}
@@ -435,7 +443,7 @@ public class CallHandler implements HasOptions {
 		}
 
 		if (!hasContent) {
-			LOG.fine("Storing persistant connection for: " + protocol + "://" + host + ":" + port);
+			logger.fine("Storing persistant connection for: " + protocol + "://" + host + ":" + port);
 			PersistantConnectionStore.storeConnection(protocol, host, port, null, null, connection);
 			return;
 		}
@@ -463,7 +471,7 @@ public class CallHandler implements HasOptions {
 
 		if ((this.protocol.isWebSocket() && line.getStatusCode() == HttpCodes.SWITCHING_PROTOCOLS)) {
 
-			LOG.fine("Upgrading to websocket v13");
+			logger.fine("Upgrading to websocket v13");
 
 		} else if (!line.isSuccessCode()) {
 
@@ -485,7 +493,7 @@ public class CallHandler implements HasOptions {
 			}
 
 			String errMsg = null;
-			if (LOG.isLoggable(Level.SEVERE)) {
+			if (logger.isLoggable(Level.SEVERE)) {
 				if (responseHttp != null) {
 					if (responseHttp.getContent() != null) {
 						try {
@@ -548,7 +556,7 @@ public class CallHandler implements HasOptions {
 		if (uri.getUserInfo() != null) {
 
 			if (!this.protocol.isSecure()) {
-				LOG.warning("Sending credentials in non-secure http is prohibited");
+				logger.warning("Sending credentials in non-secure http is prohibited");
 			}
 			header.setAttribute(HttpUtils.AUTHORIZATION,
 					"Basic " + WSE.printBase64Binary(uri.getUserInfo().getBytes()));
@@ -665,7 +673,7 @@ public class CallHandler implements HasOptions {
 
 			System.out.println("CLEANING INPUT");
 			StreamUtils.clean(readFrom);
-			LOG.fine("Storing persistant connection for: " + protocol + "://" + host + ":" + port);
+			logger.fine("Storing persistant connection for: " + protocol + "://" + host + ":" + port);
 			PersistantConnectionStore.storeConnection(protocol, host, port, null, null, connection);
 		}
 

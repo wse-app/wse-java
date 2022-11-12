@@ -11,4 +11,6 @@ public interface WebSocketListener {
 	public void onMessage(InputStream message) throws IOException;
 
 	public void onClose(boolean controlledShutdown, String shutdownMessage) throws IOException;
+	
+	public void onException(Throwable t);
 }

@@ -1,12 +1,15 @@
 package wse.utils;
 
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import wse.WSE;
+
 public class Timer {
 
-	private final Logger logger;
-	private final Level level;
+	private Logger logger;
+	private Level level;
 
 	private long beginTime;
 	private long endTime;
@@ -16,9 +19,12 @@ public class Timer {
 
 	private long took;
 
+	public Timer() {
+		this(WSE.getLogger(), Level.FINE);
+	}
+	
 	public Timer(Logger logger, Level level) {
-		this.logger = logger;
-		this.level = level;
+		setLogger(logger, level);
 	}
 
 	public void begin(String operation) {
@@ -40,5 +46,14 @@ public class Timer {
 		if (took > shouldTake) {
 			logger.log(level, operation + " took " + took + "ms");
 		}
+	}
+	
+	public void setLogger(Logger logger) {
+		this.logger = Objects.requireNonNull(logger);
+	}
+	
+	public void setLogger(Logger logger, Level level) {
+		setLogger(logger);
+		this.level = Objects.requireNonNull(level);
 	}
 }

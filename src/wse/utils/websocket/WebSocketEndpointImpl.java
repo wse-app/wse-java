@@ -9,7 +9,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
+import wse.WSE;
 import wse.server.servlet.ws.PongListener;
 import wse.utils.SerializationWriter;
 import wse.utils.event.ListenerRegistration;
@@ -17,10 +19,11 @@ import wse.utils.exception.WseException;
 import wse.utils.exception.WebSocketException;
 import wse.utils.http.HttpHeader;
 import wse.utils.stream.WS13OutputStream;
-import wse.utils.websocket.WebSocket.Message;
 import wse.utils.writable.StreamWriter;
 
 public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes {
+
+	private final Logger log = WSE.getLogger(WebSocket.LOG_CHILD_NAME);
 
 	private boolean isCloseRequestedByMe = false;
 	private boolean isCloseRequestedByOther = false;
@@ -32,14 +35,16 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 	private WS13OutputStream output;
 
 	private long ping_time;
-	private List<PongListener> pingListeners = new ArrayList<>();
+	private final List<PongListener> pingListeners = new ArrayList<>();
 
 	private final boolean isClient;
 	private boolean useRandomKey = false;
 
-	private boolean wasTimedOut = false;
+	private static final int TIMEOUT_LIMIT = 2;
+	private int timeoutCounter = 0;
 
 	public WebSocketEndpointImpl(boolean isClient) {
+		log.info("WebSocketEndpointImpl created, isClient: " + isClient);
 		this.isClient = isClient;
 	}
 
@@ -59,25 +64,26 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 	}
 
 	public final void readLoop() throws IOException {
+		log.info("readLoop()");
 		try {
 			while (!this.isClosed) {
 				try {
-					Message message = WebSocket.readNextMessage(this.input, this.isClient);
-					if (message == null)
-						continue;
+					Message message = Message.readNext(this.input, this.isClient);
+					log.fine("Got " + WebSocket.getCodeName(message.getOPCode()));
+					timeoutCounter = 0;
+
 					gotMessage(message);
 				} catch (Exception e) {
 					if (WseException.isCausedBy(e, SocketTimeoutException.class)) {
-
-						if (wasTimedOut) {
-							// Got no response from last ping
+						timeoutCounter++;
+						if (timeoutCounter >= TIMEOUT_LIMIT) {
 							this.forceClose("Connection timed out");
 							break;
-						} else {
-							wasTimedOut = true;
-							pingAsync(null);
 						}
+						log.fine("Sending Ping");
+						pingAsync(null);
 					} else {
+						onException(e);
 						throw e;
 					}
 				}
@@ -109,6 +115,10 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 		}
 	}
 
+	public boolean isOpen() {
+		return !(isClosed || isCloseRequestedByMe || isCloseRequestedByOther);
+	}
+
 	public void pingAsync(PongListener listener) throws IOException {
 		synchronized (pingListeners) {
 			if (listener != null)
@@ -119,14 +129,7 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 			}
 		}
 		ping_time = System.currentTimeMillis();
-		sendMessage(OP_PING, new StreamWriter() {
-
-			@Override
-			public void writeToStream(OutputStream output, Charset charset) throws IOException {
-				output.write("ping".getBytes(charset));
-				output.flush();
-			}
-		});
+		sendMessage(OP_PING, null);
 	}
 
 	private void pong(final byte[] data) throws IOException {
@@ -139,9 +142,7 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 		});
 	}
 
-	private final void gotMessage(Message message) {
-		this.wasTimedOut = false;
-
+	private void gotMessage(Message message) throws IOException {
 		if (!message.isEveryFrameMasked() && !this.isClient) {
 			forceClose("Got request with unmasked frames");
 			return;
@@ -184,22 +185,19 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 		}
 
 		if (message.getOPCode() == OP_PING) {
-			try {
-				pong(message.getFrames().get(0).getPayload());
-			} catch (IOException e) {
-				e.printStackTrace();
-				forceClose(e.getMessage());
-			}
+//			try {
+			pong(message.getFrames().get(0).getPayload());
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//				forceClose(e.getMessage());
+//			}
 			return;
 		}
-		try {
-			onMessage(message);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
+		onMessage(message.inputStream());
 	}
 
-	private List<WebSocketListener> listeners = new ArrayList<>();
+	private final List<WebSocketListener> listeners = new ArrayList<>();
 
 	@Override
 	public ListenerRegistration registerListener(final WebSocketListener listener) {
@@ -215,32 +213,6 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 				}
 			}
 		};
-	}
-
-	public void onInit(HttpHeader request) throws IOException {
-		synchronized (listeners) {
-			for (WebSocketListener l : listeners)
-				l.onInit(request);
-		}
-	}
-
-	public void onMessage(Message message) throws IOException {
-		synchronized (listeners) {
-			for (WebSocketListener l : listeners)
-				l.onMessage(message.inputStream());
-		}
-	}
-
-	public void onClose(boolean controlledShutdown, String shutdownMessage) {
-		synchronized (listeners) {
-			for (WebSocketListener l : listeners) {
-				try {
-					l.onClose(controlledShutdown, shutdownMessage);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 
 	public void close(String shutDownMessage) throws IOException {
@@ -261,7 +233,38 @@ public class WebSocketEndpointImpl implements WebSocketEndpoint, WebSocketCodes 
 		onClose(false, err);
 	}
 
+	public void onClose(boolean controlledShutdown, String shutdownMessage) {
+		synchronized (listeners) {
+			for (WebSocketListener l : listeners) {
+				try {
+					l.onClose(controlledShutdown, shutdownMessage);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	public void onInit(HttpHeader request) throws IOException {
+		synchronized (listeners) {
+			for (WebSocketListener l : listeners)
+				l.onInit(request);
+		}
+	}
+
 	@Override
-	public void onMessage(InputStream message) {
+	public void onMessage(InputStream message) throws IOException {
+		synchronized (listeners) {
+			for (WebSocketListener l : listeners)
+				l.onMessage(message);
+		}
+	}
+
+	@Override
+	public void onException(Throwable t) {
+		synchronized (listeners) {
+			for (WebSocketListener l : listeners)
+				l.onException(t);
+		}
 	}
 }

@@ -12,6 +12,7 @@ public class LoggingOutputStream extends WseOutputStream {
 	 * Maximum number of byte buffers to log. Default value is 4.
 	 */
 	public static int MAX_PARTS = 4;
+	
 	/**
 	 * Byte buffer size. Default value is 8192.
 	 */
