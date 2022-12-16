@@ -23,7 +23,7 @@ public class CountingInputStream extends WseInputStream {
 	}
 	
 	public CountingInputStream(InputStream readFrom, Logger log) {
-		this(readFrom, readFrom.getClass().getName(), WSE.getLogger());
+		this(readFrom, readFrom.getClass().getName(), log);
 	}
 	
 	public CountingInputStream(InputStream readFrom, String name, Logger log) {
