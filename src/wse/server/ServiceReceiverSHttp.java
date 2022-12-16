@@ -10,6 +10,7 @@ import wse.server.shttp.SHttpServerSessionStore;
 import wse.utils.HttpCodes;
 import wse.utils.HttpResult;
 import wse.utils.MimeType;
+import wse.utils.Protocol;
 import wse.utils.SHttp;
 import wse.utils.exception.SHttpException;
 import wse.utils.http.HttpBuilder;
@@ -46,7 +47,7 @@ public class ServiceReceiverSHttp extends ServiceReceiverHttp {
 
 	@Override
 	public String getProtocol() {
-		return "sHttp";
+		return Protocol.SHTTP.toString();
 	}
 
 	@Override
@@ -95,25 +96,25 @@ public class ServiceReceiverSHttp extends ServiceReceiverHttp {
 				decrypted.getContent());
 
 		// Create new response
-		StreamCatcher catcher = new StreamCatcher();
-		LayeredOutputStream output = new LayeredOutputStream(catcher);
-		output.then(new RecordingOutputStream(log, Level.FINEST, "Response Content:"));
-		output.sHttpEncrypt(key);
+		StreamCatcher outputCatcher = new StreamCatcher();
+		LayeredOutputStream outputContent = new LayeredOutputStream(outputCatcher);
+		outputContent.then(new RecordingOutputStream(log, Level.FINEST, "Response Content:"));
+		outputContent.sHttpEncrypt(key);
 		if (SHttp.LOG_ENCRYPTED_DATA)
-			output.record(log, Level.FINEST, "SHttp-Encrypted Response Content:", true);
+			outputContent.record(log, Level.FINEST, "SHttp-Encrypted Response Content:", true);
 
-		HttpServletResponse decryptedResponse = new HttpServletResponse(output);
+		HttpServletResponse decryptedResponse = new HttpServletResponse(outputContent);
 		super.treatCall(decryptedRequest, decryptedResponse);
 
-		output.flush();
-		output.close();
+		outputContent.flush();
+		outputContent.close();
 
 		response.getHttpHeader().setDescriptionLine(SHttp.makeStatusLine(200));
-		response.setContentLength(catcher.getSize());
+		response.setContentLength(outputCatcher.getSize());
 		response.setContentType(MimeType.message.http);
 		response.setAttribute("Prearranged-Key-Info", "outband:" + key.getKeyName());
 
-		StreamUtils.write(catcher.asInputStream(), response, catcher.getSize());
+		StreamUtils.write(outputCatcher.asInputStream(), response, outputCatcher.getSize());
 
 		response.flush();
 		response.close();

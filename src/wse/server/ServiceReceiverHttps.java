@@ -13,6 +13,7 @@ import wse.server.servlet.HttpServletRequest;
 import wse.server.servlet.HttpServletResponse;
 import wse.server.shttp.SHttpServerSessionStore;
 import wse.utils.HttpCodes;
+import wse.utils.Protocol;
 import wse.utils.SHttp;
 import wse.utils.http.HttpMethod;
 import wse.utils.shttp.SKey;
@@ -92,7 +93,7 @@ public class ServiceReceiverHttps extends ServiceReceiver {
 	@Override
 	public String getProtocol() {
 		Restrictions r = getRestrictions();
-		return "Https/" + (r.getNeedClientAuth() ? "cc" : "anon");
+		return Protocol.HTTPS.toString() + "/" + (r.getNeedClientAuth() ? "cc" : "anon");
 	}
 
 	@Override

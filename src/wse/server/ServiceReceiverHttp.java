@@ -5,6 +5,8 @@ import java.net.ServerSocket;
 
 import javax.net.ServerSocketFactory;
 
+import wse.utils.Protocol;
+
 public class ServiceReceiverHttp extends ServiceReceiver {
 
 	private ServerSocketFactory factory;
@@ -31,6 +33,6 @@ public class ServiceReceiverHttp extends ServiceReceiver {
 
 	@Override
 	public String getProtocol() {
-		return "Http";
+		return Protocol.HTTP.toString();
 	}
 }

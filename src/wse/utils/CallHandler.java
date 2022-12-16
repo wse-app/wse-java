@@ -234,11 +234,11 @@ public class CallHandler implements HasOptions {
 		if (connection != null)
 			return connection;
 
-		if (persistant()) {
+		if (getAllowPersistentConnection()) {
 			connection = PersistantConnectionStore.useConnection(protocol, host, usePort);
 
 			if (connection != null) {
-				// TODO If we did not read all input from previous call, we might want to clear
+				// If we did not read all input from previous call, we might want to clear
 				// the input before making another request
 				try {
 					InputStream input = connection.getInputStream();
@@ -367,7 +367,7 @@ public class CallHandler implements HasOptions {
 		// Never null
 		try {
 			InputStream inputStream = this.connection.getInputStream();
-			this.readResult = HttpUtils.read(new CountingInputStream(inputStream), true);
+			this.readResult = HttpUtils.read(new CountingInputStream(inputStream, logger), true);
 		} catch (IOException e) {
 			throw new WseParsingException(e.getMessage(), e);
 		}
@@ -402,7 +402,7 @@ public class CallHandler implements HasOptions {
 			responseHttp = this.readResult;
 		}
 
-		boolean persistant = persistant();
+		boolean persistant = getAllowPersistentConnection();
 		persistant &= responseHttp.getHeader().getConnection(true).contains("keep-alive");
 
 		if (persistant) {
@@ -562,7 +562,7 @@ public class CallHandler implements HasOptions {
 					"Basic " + WSE.printBase64Binary(uri.getUserInfo().getBytes()));
 		}
 
-		if (persistant()) {
+		if (getAllowPersistentConnection()) {
 			header.setConnection("keep-alive");
 		} else {
 			header.setConnection("close");
@@ -644,9 +644,21 @@ public class CallHandler implements HasOptions {
 		}
 	}
 
-	private boolean persistant() {
-		boolean persistant = getOptions().get(CallHandler.PERSISTANT_CONNECTION, true);
-		return persistant && (protocol == Protocol.HTTPS || protocol == Protocol.HTTP);
+	/**
+	 * Checks whether the current connection should be restored as a persistent connection.
+	 * @return
+	 */
+	private boolean getAllowPersistentConnection() {
+		
+		// Disabled?
+		if (!getOptions().get(CallHandler.PERSISTANT_CONNECTION, true))
+			return false;
+
+		// Not supported?
+		if (!protocol.supportPersistentConnection()) 
+			return false;
+		
+		return true;
 	}
 
 	public HttpResult getCallResult() {
