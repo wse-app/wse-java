@@ -5,7 +5,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -18,7 +18,7 @@ import wse.utils.writable.StreamWriter;
 public class HttpURI implements StreamWriter, PrettyPrinter {
 
 	private String path;
-	private Map<String, String> query = new HashMap<String, String>();
+	private Map<String, String> query = new LinkedHashMap<String, String>();
 	private String fragment;
 
 	private HttpURI() {
@@ -78,7 +78,7 @@ public class HttpURI implements StreamWriter, PrettyPrinter {
 	}
 
 	public void setQuery(String name, String value) {
-		if (name.isEmpty() || value.isEmpty())
+		if (name.isEmpty())
 			throw new IllegalArgumentException("Can't have empty names/values in parameters");
 
 		query.put(name, value);
