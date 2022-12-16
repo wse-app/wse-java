@@ -53,6 +53,18 @@ public class Protocol {
 	public boolean isWebSocket() {
 		return this == WEB_SOCKET || this == WEB_SOCKET_SECURE;
 	}
+	
+	/**
+	 * Return true if connections made with this protocol should consider being stored as persistent connections.
+	 * 
+	 * WebSocket connections are not considered persistent in that they are not shared by multiple Calls/WebSockets.
+	 * 
+	 * SHTTP connections Should NOT be persistent, because this would be against the nature of the protocol.
+	 * @return
+	 */
+	public boolean supportPersistentConnection() {
+		return this == HTTPS || this == HTTP;
+	}
 
 	public boolean isSecure() {
 		return secure;
