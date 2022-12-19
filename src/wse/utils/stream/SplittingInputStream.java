@@ -76,4 +76,14 @@ public class SplittingInputStream extends WseInputStream {
 
 		return b.toString();
 	}
+	
+	@Override
+	public void disableInputLogging() {
+		super.disableInputLogging();
+		
+		for (OutputStream output : writeTo) {
+			WseOutputStream.disableOutputLogging(output);
+		}
+		
+	}
 }

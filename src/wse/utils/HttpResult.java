@@ -11,6 +11,7 @@ import wse.utils.http.TransferEncoding;
 import wse.utils.stream.ChunkedInputStream;
 import wse.utils.stream.LimitedInputStream;
 import wse.utils.stream.RecordingInputStream;
+import wse.utils.stream.WseInputStream;
 
 public class HttpResult {
 
@@ -77,6 +78,10 @@ public class HttpResult {
 
 	public InputStream getContentRaw() {
 		return content_raw;
+	}
+	
+	public void disableContentLogging() {
+		WseInputStream.disableInputLogging(content);
 	}
 
 	public void closeInput() {

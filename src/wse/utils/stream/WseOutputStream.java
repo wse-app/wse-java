@@ -92,4 +92,9 @@ public abstract class WseOutputStream extends OutputStream {
 		if (writeTo instanceof WseOutputStream)
 			((WseOutputStream) writeTo).disableOutputLogging();
 	}
+	
+	public static void disableOutputLogging(OutputStream output) {
+		if (output instanceof WseOutputStream)
+			((WseOutputStream) output).disableOutputLogging();
+	}
 }

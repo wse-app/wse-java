@@ -147,9 +147,11 @@ public class CallHandler implements HasOptions {
 				try {
 					write();
 				} catch (WseException we) {
-					if (we.getRootCause() instanceof SocketException)
+					if (we.getRootCause() instanceof SocketException) {
 						if (connection instanceof PersistantConnection)
 							continue;
+					}
+					throw we;
 				}
 				read();
 				try {

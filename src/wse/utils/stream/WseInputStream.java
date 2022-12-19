@@ -82,4 +82,14 @@ public abstract class WseInputStream extends InputStream implements IsInputStrea
 	public InputStream asInputStream() {
 		return this;
 	}
+	
+	public void disableInputLogging() {
+		if (readFrom instanceof WseInputStream)
+			((WseInputStream) readFrom).disableInputLogging();
+	}
+	
+	public static void disableInputLogging(InputStream input) {
+		if (input instanceof WseInputStream)
+			((WseInputStream) input).disableInputLogging();
+	}
 }

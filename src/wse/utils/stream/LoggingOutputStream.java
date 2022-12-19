@@ -138,7 +138,7 @@ public class LoggingOutputStream extends WseOutputStream {
 
 	@Override
 	public void disableOutputLogging() {
-		this.disabled = true;
 		super.disableOutputLogging();
+		this.disabled = true;
 	}
 }

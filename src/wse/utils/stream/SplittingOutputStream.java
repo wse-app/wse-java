@@ -21,23 +21,23 @@ public class SplittingOutputStream extends WseOutputStream {
 
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
+		super.write(b, off, len);
 		for (OutputStream os : copyTo)
 			os.write(b, off, len);
-		super.write(b, off, len);
 	}
 
 	@Override
 	public void close() throws IOException {
+		super.close();
 		for (OutputStream os : copyTo)
 			os.close();
-		super.close();
 	}
 
 	@Override
 	public void flush() throws IOException {
+		super.flush();
 		for (OutputStream os : copyTo)
 			os.flush();
-		super.flush();
 	}
 
 	public String layerInfo(int level) {
