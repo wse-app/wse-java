@@ -48,7 +48,8 @@
 	<target name="dist" depends="compile">
 
 		<!-- Delete third party classes folder -->
-		<delete dir="bin/android" />
+		<delete dir="${bin}/android" />
+		<delete dir="${bin}/wsemcplugin" />
 
 		<!-- Copy non-java files into the bin folder -->
 		<copy todir="${bin}">

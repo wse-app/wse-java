@@ -2,6 +2,7 @@ package wse.utils.source;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -17,7 +18,7 @@ public final class Source {
 		return StreamUtils.readAll(new FileInputStream(file));
 	}
 
-	public final static String getContainingText(File file) {
+	public final static String getContainingText(File file) throws FileNotFoundException, IOException {
 		LinkedByteArray lba = toByteArray(file);
 		if (lba == null)
 			return null;
@@ -31,12 +32,9 @@ public final class Source {
 		return lba.toString();
 	}
 
-	public final static LinkedByteArray toByteArray(File file) {
+	public final static LinkedByteArray toByteArray(File file) throws FileNotFoundException, IOException {
 		try (InputStream stream = new FileInputStream(file)) {
 			return toByteArray(stream);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
 		}
 	}
 
