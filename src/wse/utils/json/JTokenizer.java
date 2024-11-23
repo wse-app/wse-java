@@ -30,15 +30,15 @@ public class JTokenizer {
 		return (T) tokenizer.beginValue();
 	}
 
-	protected JTokenizer(InputStream input, Charset cs) {
+	public JTokenizer(InputStream input, Charset cs) {
 		this(new InputStreamReader(input, cs));
 	}
 
-	protected JTokenizer(Reader reader) {
+	public JTokenizer(Reader reader) {
 		this.reader = new PushableReader(reader);
 	}
 
-	private Object beginValue() throws IOException {
+	public Object beginValue() throws IOException {
 		char c = nextSkipWS();
 
 		switch (c) {

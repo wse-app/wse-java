@@ -22,7 +22,17 @@ public class JUtils {
 			return null;
 		raw = raw.replace("\\", "\\\\").replace("\b", "\\b").replace("\f", "\\f").replace("\n", "\\n")
 				.replace("\r", "\\r").replace("\t", "\\t").replace("\"", "\\\"");
-		return raw;
+
+		StringBuilder builder = new StringBuilder();
+		for(char ch: raw.toCharArray()) {
+		    if(ch >= 0x20 && ch <= 0x7E) {
+		        builder.append(ch);
+		    } else {
+		        builder.append(String.format("\\u%04X", (int)ch));
+		    }
+		}
+
+		return builder.toString();
 	}
 
 	public static String quoted(String key) {
