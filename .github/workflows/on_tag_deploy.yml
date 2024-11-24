@@ -40,5 +40,5 @@ jobs:
     - name: Upload changelog
       uses: actions/upload-artifact@v4
       with:
-        name: 'wse-app:wse-java:${{ github.ref_name }}'
+        name: '${{ github.ref_name }}'
         path: ./wse-app:wse-java:${{ github.ref_name }}.jar
