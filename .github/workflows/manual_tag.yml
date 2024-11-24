@@ -25,8 +25,11 @@ jobs:
 
       - name: Print
         run: |
+          git branch
           tag=$(cat version.txt)
           echo $tag
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
           git tag -a "$tag"
           git push origin tag $tag
 
