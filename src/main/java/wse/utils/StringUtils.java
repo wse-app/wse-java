@@ -412,16 +412,16 @@ public final class StringUtils {
 		/**
 		 * Group one or more string prefixes/suffixes
 		 * 
-		 * Example: new PrefixGroup("<", ">", "(", "), "[", "]"); As seen in the
+		 * Example: new PrefixGroup("&lt;", "&gt;", "(", ")", "[", "]"); As seen in the
 		 * example, the format should be: start, end, start, end etc.
 		 * 
 		 * @param groups
 		 */
-		public PrefixGroup(String... strings) {
-			if (strings.length % 2 != 0)
+		public PrefixGroup(String... groups) {
+			if (groups.length % 2 != 0)
 				throw new IllegalArgumentException(
 						"Can't initialize a prefixgroup with different amout of prefix/suffix");
-			String[][] s = StringUtils.splitEvery(strings, 2);
+			String[][] s = StringUtils.splitEvery(groups, 2);
 			startDef = s[0];
 			endDef = s[1];
 			start = new String[startDef.length];

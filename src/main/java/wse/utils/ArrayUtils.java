@@ -153,7 +153,7 @@ public final class ArrayUtils {
 	}
 
 	/**
-	 * Returns an array of type Class<?> containing the class types of each Object
+	 * Returns an array of type Class containing the class types of each Object
 	 * 
 	 * @param objects
 	 * @return

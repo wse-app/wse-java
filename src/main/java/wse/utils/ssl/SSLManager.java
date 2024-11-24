@@ -39,8 +39,7 @@ public class SSLManager {
 	 * 
 	 * Set the default SSLAuth for all services using WSE. This does not have any
 	 * effect on a server.
-	 * 
-	 * @param service The service to bind.
+	 *
 	 * @param store   The SSLStore to bind to.
 	 */
 	public static void bindDefault(SSLAuth store) {

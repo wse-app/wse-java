@@ -31,8 +31,8 @@ public abstract class AbstractHttpServlet implements HttpCallTreatment {
 	 *                 response.
 	 * @throws IOException
 	 * 
-	 * @see {@link #doGet(HttpServletRequest, HttpServletResponse)}
-	 * @see {@link wse.utils.http.HttpMethod}
+	 * @see #doGet(HttpServletRequest, HttpServletResponse)
+	 * @see wse.utils.http.HttpMethod
 	 */
 	public void doAny(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		HttpMethod method = request.getMethod();
@@ -76,7 +76,7 @@ public abstract class AbstractHttpServlet implements HttpCallTreatment {
 	 * @param response The response object. Contains logic for making the http
 	 *                 response.
 	 * @throws IOException
-	 * @see {@link #doAny(HttpServletRequest, HttpServletResponse)}
+	 * @see #doAny(HttpServletRequest, HttpServletResponse)
 	 */
 	public abstract void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException;
 

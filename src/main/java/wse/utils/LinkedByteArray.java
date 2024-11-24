@@ -233,7 +233,7 @@ public class LinkedByteArray implements Iterable<LBAE>, StreamWriter {
 		/**
 		 * next is moved to a new LBAE which is then returned
 		 * 
-		 * @param index
+		 * @param last_keep_index
 		 * @return next if last_keep_index == size()-1; a copy of this with modified
 		 *         start index and containing trail.
 		 * 

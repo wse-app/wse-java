@@ -746,7 +746,7 @@ public class MimeType {
 	 * Returns the full name of this MimeType
 	 * 
 	 * @return the result of {@link MimeType#getFullName()}
-	 * @see {@link MimeType#getFullName()}
+	 * @see MimeType#getFullName()
 	 */
 	@Override
 	public String toString() {

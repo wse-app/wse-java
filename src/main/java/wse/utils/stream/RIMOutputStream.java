@@ -39,8 +39,7 @@ public class RIMOutputStream extends WseOutputStream {
 	 * injectionSize)
 	 * 
 	 * i = y * blockSize + x + injectionSize
-	 * 
-	 * @param writeTo
+	 *
 	 * @param blockSize
 	 * @param injectionSize
 	 */

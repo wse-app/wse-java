@@ -14,7 +14,7 @@ public class IniOptions {
 		OVERRIDE,
 		/** Append the new value to the existing one */
 		APPEND,
-		/** Combine the values into a LinkedList&ltString&gt */
+		/** Combine the values into a LinkedList&lt;String&gt; */
 		ARRAY
 	}
 
