@@ -30,7 +30,7 @@ jobs:
           echo $tag
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git tag -a "$tag"
+          git tag -a "$tag" -m "new version tag"
           git push origin tag $tag
 
     #      - name: Upload changelog
