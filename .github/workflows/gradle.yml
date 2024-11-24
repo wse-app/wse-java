@@ -58,8 +58,9 @@ jobs:
         uses: orhun/git-cliff-action@v3
         with:
           config: cliff.toml
-          args: --bumped-version
+          args: --bump
         env:
+          OUTPUT: CHANGELOG.md
           GITHUB_REPO: ${{ github.repository }}
 
       - name: Print
