@@ -58,13 +58,13 @@ jobs:
         uses: orhun/git-cliff-action@v3
         with:
           config: cliff.toml
-          args: --bump auto 2>stderr.out
+          args: --bump auto
         env:
           OUTPUT: CHANGELOG.md
           GITHUB_REPO: ${{ github.repository }}
 
       - name: Print
-        run: cat stderr.out
+        run: ls
 
 #      - name: Upload changelog
 #        uses: actions/upload-artifact@v4
