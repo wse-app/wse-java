@@ -58,16 +58,19 @@ jobs:
         uses: orhun/git-cliff-action@v3
         with:
           config: cliff.toml
-          args: --verbose
+          args: --bump auto 2>stderr.out
         env:
           OUTPUT: CHANGELOG.md
           GITHUB_REPO: ${{ github.repository }}
 
-      - name: Upload changelog
-        uses: actions/upload-artifact@v4
-        with:
-          name: changelog
-          path: ./CHANGELOG.md
+      - name: Print
+        run: cat stderr.out
+
+#      - name: Upload changelog
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: changelog
+#          path: ./CHANGELOG.md
 
     # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
     # If your project does not have the Gradle Wrapper configured, you can use the following configuration to run Gradle with a specified version.
