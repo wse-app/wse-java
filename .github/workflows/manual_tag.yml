@@ -25,7 +25,7 @@ jobs:
 
       - name: Print
         run: |
-          tag = cat version.txt
+          tag=$(cat version.txt)
           echo $tag
 #          git tag -a "$tag"
 #          git push origin tag $tag
