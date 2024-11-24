@@ -34,11 +34,11 @@ jobs:
     - name: Create jar
       run: |
         ./gradlew jar
-        mv build/libs/wse-java.jar wse-app:wse-java:${{ github.ref_name }}.jar
+        mv build/libs/wse-java.jar wse-java-${{ github.ref_name }}.jar
         ls
 
     - name: Upload changelog
       uses: actions/upload-artifact@v4
       with:
         name: '${{ github.ref_name }}'
-        path: ./wse-app:wse-java:${{ github.ref_name }}.jar
+        path: ./wse-java-${{ github.ref_name }}.jar
