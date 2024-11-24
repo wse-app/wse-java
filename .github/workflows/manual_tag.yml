@@ -27,8 +27,8 @@ jobs:
         run: |
           tag=$(cat version.txt)
           echo $tag
-#          git tag -a "$tag"
-#          git push origin tag $tag
+          git tag -a "$tag"
+          git push origin tag $tag
 
     #      - name: Upload changelog
     #        uses: actions/upload-artifact@v4
