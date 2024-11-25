@@ -8,8 +8,8 @@ group = "com.javxa.wse-app"
 version = System.getenv()["VERSION"] ?: "0.0.1"
 
 java {
-//    withJavadocJar()
-//    withSourcesJar()
+    withJavadocJar()
+    withSourcesJar()
 }
 
 repositories {
@@ -29,29 +29,49 @@ tasks.test {
 // https://central.sonatype.com/publishing
 
 publishing {
-    publications {
-
-
-        create<MavenPublication>("WseApp") {
-            from(components["java"])
-        }
-    }
-
     repositories {
         maven {
             name = "Custom"
             url = uri(layout.buildDirectory.dir("custom-maven"))
         }
     }
+
+    publications {
+        create<MavenPublication>("WseApp") {
+            from(components["java"])
+
+            pom {
+                url = "https://wse.app"
+                description = "Code dependency for java code generated from wse.app"
+
+                scm {
+                    url = "https://github.com/wse-app/wse-java"
+                    connection = "scm:git:git://github.com/wse-app/wse-java.git"
+                    developerConnection = "scm:git:ssh://git@github.com:wse-app/wse-java.git"
+                }
+
+                developers {
+                    developer {
+                        name = "Carl Caesar"
+                        organization = "Web Service Engine Sweden AB"
+                        email = "carljfcaesar@gmail.com"
+                        roles.add("Lead Software Developer")
+                        timezone = "CEST"
+                    }
+                }
+
+                licenses {
+                    license {
+                        name = "Web Service Engine - Software License"
+                        url = "https://wse.app/Web%20Service%20Engine%20-%20Software%20License.pdf"
+                        distribution = "global"
+                    }
+                }
+            }
+        }
+    }
 }
 
-//Javadocs must be provided but not found in entries
-//Missing signature for file: wse-java-0.0.1.jar
-//Missing signature for file: wse-java-0.0.1.module
-//Missing signature for file: wse-java-0.0.1.pom
-//Sources must be provided but not found in entries
-//Developers information is missing
-//License information is missing
-//Project URL is not defined
-//Project description is missing
-//SCM URL is not defined
+signing {
+    sign(publishing.publications["WseApp"])
+}
