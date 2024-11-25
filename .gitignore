@@ -43,6 +43,9 @@ bin/
 
 ### Custom ###
 
+gradle.properties
+
+/gpg/
 /bin/
 /desktop.ini
 /wse.ini
